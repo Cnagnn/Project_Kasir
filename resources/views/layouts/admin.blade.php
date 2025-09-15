@@ -35,6 +35,7 @@
         }
     </style>
     <link rel="shortcut icon" href="{{ asset('admin/images/favicon.png') }}" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
   </head>
   <body class="with-welcome-text">
     <div class="container-scroller">

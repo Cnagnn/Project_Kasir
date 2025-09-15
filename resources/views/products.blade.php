@@ -90,9 +90,14 @@
                                                 data-sell-price="{{ $product->ProductStockBatches->last()->sell_price ?? 0 }}">
                                             <i class="mdi mdi-pencil"></i> Edit
                                         </button>
-                                        <button type="button" class="btn btn-danger btn-sm" data-id="{{ $product->id }}" data-name="{{ $product->name }}">
-                                            <i class="mdi mdi-delete"></i> Delete
-                                        </button>
+                                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            
+                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
+                                                <i class="mdi mdi-delete"></i> Delete
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             @empty
@@ -102,6 +107,7 @@
                             @endforelse
                         </tbody>
                       </table>
+                        
                     </div>
                   </div>
                 </div>
@@ -387,6 +393,44 @@
                             const form = document.getElementById('updateProductForm');
                             const baseAction = "{{ url('/product-update') }}";
                             form.action = baseAction + '/' + productId;
+                        });
+                    });
+                });
+
+                // === HANDLE DELETE BUTTON CLICK ===
+                // Pastikan CDN SweetAlert sudah dimuat
+                document.addEventListener('DOMContentLoaded', function () {
+                    
+                    // Cari SEMUA form yang punya class .form-delete
+                    const deleteForms = document.querySelectorAll('.form-delete');
+                    
+                    deleteForms.forEach(form => {
+                        // Kita "dengarkan" saat form ini akan di-submit
+                        form.addEventListener('submit', function (event) {
+                            
+                            // 1. HENTIKAN PENGIRIMAN FORM (JANGAN RELOAD DULU)
+                            event.preventDefault(); 
+                            
+                            // Ambil nama dari tombol di dalam form ini
+                            const button = form.querySelector('button[type="submit"]');
+                            const productName = button.dataset.name;
+
+                            // 2. Tampilkan Pop-up Konfirmasi
+                            Swal.fire({
+                                title: 'Apakah Anda yakin?',
+                                text: `Anda akan menghapus "${productName}".`,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'Ya, hapus!',
+                                cancelButtonText: 'Batal'
+                            }).then((result) => {
+                                // 3. JIKA PENGGUNA KLIK "YA"
+                                if (result.isConfirmed) {
+                                    // Lanjutkan proses submit form (SEKARANG HALAMAN AKAN RELOAD)
+                                    form.submit(); 
+                                }
+                            });
                         });
                     });
                 });

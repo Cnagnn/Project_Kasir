@@ -168,14 +168,13 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        // Temukan produk, atau gagal (error 404) jika tidak ada
         $product = Product::findOrFail($id);
-        
-        // Perintah ini sekarang akan menjalankan SOFT DELETE, bukan HARD DELETE
-        $product->delete();
+        $productName = $product->name;
+        $product->delete(); // Ini menjalankan Soft Delete
 
-        // Kembalikan ke halaman index dengan pesan sukses
+        // Controller mengirim redirect biasa, halaman akan refresh
+        // dan menampilkan pesan sukses ini.
         return redirect()->route('products.index')
-            ->with('product_delete_success', 'Produk telah berhasil dipindahkan ke keranjang sampah.');
+            ->with('product_delete_success', 'Produk "' . $productName . '" berhasil dihapus!.');
     }
 }
