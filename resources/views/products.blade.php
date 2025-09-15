@@ -80,7 +80,7 @@
                                         Rp {{ number_format($product->ProductStockBatches->last()->sell_price ?? 0, 0, ',', '.') }}
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#updateProductModal" 
+                                        <button type="button" class="btn btn-warning btn-sm me-1" data-toggle="modal" data-target="#updateProductModal" 
                                                 data-id="{{ $product->id }}"
                                                 data-name="{{ $product->name }}"
                                                 data-category-id="{{ $product->category_id }}"
@@ -89,6 +89,9 @@
                                                 data-buy-price="{{ $product->ProductStockBatches->last()->buy_price ?? 0 }}"
                                                 data-sell-price="{{ $product->ProductStockBatches->last()->sell_price ?? 0 }}">
                                             <i class="mdi mdi-pencil"></i> Edit
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-sm" data-id="{{ $product->id }}" data-name="{{ $product->name }}">
+                                            <i class="mdi mdi-delete"></i> Delete
                                         </button>
                                     </td>
                                 </tr>
