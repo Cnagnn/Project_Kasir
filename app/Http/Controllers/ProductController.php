@@ -160,7 +160,7 @@ class ProductController extends Controller
         }
 
         // Redirect to index with success message
-        return redirect()->route('products.index')->with(['success' => 'Data Berhasil Diupdate!']);
+        return redirect()->route('products.index')->with(['product_update_success' => 'Data Berhasil Diupdate!']);
     }
 
     /**
@@ -168,6 +168,14 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        // Temukan produk, atau gagal (error 404) jika tidak ada
+        $product = Product::findOrFail($id);
+        
+        // Perintah ini sekarang akan menjalankan SOFT DELETE, bukan HARD DELETE
+        $product->delete();
+
+        // Kembalikan ke halaman index dengan pesan sukses
+        return redirect()->route('products.index')
+            ->with('product_delete_success', 'Produk telah berhasil dipindahkan ke keranjang sampah.');
     }
 }

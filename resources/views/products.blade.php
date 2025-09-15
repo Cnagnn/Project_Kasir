@@ -2,7 +2,42 @@
 
             @section('content')
             
-
+            @if(session()->has('product_add_success'))
+                <script>
+                    Swal.fire({
+                        title: "BERHASIL",
+                        text: "{{ session('product_add_success') }}",
+                        icon: "success"
+                    });
+                </script>    
+            @endif
+            @if(session()->has('category_add_success'))
+                <script>
+                    Swal.fire({
+                        title: "BERHASIL",
+                        text: "{{ session('category_add_success') }}",
+                        icon: "success"
+                    });
+                </script>    
+            @endif
+            @if(session()->has('product_update_success'))
+                <script>
+                    Swal.fire({
+                        title: "BERHASIL",
+                        text: "{{ session('product_update_success') }}",
+                        icon: "success"
+                    });
+                </script>    
+            @endif
+            @if(session()->has('product_delete_success'))
+                <script>
+                    Swal.fire({
+                        title: "BERHASIL",
+                        text: "{{ session('product_update_success') }}",
+                        icon: "success"
+                    });
+                </script>    
+            @endif
             
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
