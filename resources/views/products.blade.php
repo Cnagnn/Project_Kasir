@@ -86,6 +86,7 @@
                                         <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
                                             @csrf
                                             @method('DELETE')
+                                            
                                             <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
                                                 <i class="mdi mdi-delete"></i> Delete
                                             </button>
