@@ -17,8 +17,9 @@ class ProductController extends Controller
     public function index()
     {
         // mengambil data dari table product
-    	$products = Product::with('category', 'ProductStockBatches')->latest()->get();
+    	$products = Product::with('category', 'stockBatches')->get();
         $categories = Categories::all();
+        // dd($products);
     	// mengirim data product ke view 
     	return view('products',[
             'products' => $products,
@@ -70,7 +71,7 @@ class ProductController extends Controller
                 'updated_at' => now(),
             ]);
 
-            $product->ProductStockBatches()->create([
+            $product->stockBatches()->create([
                 'initial_stock' => $request->stock,
                 'remaining_stock' => $request->stock,
                 'buy_price' => $request->buy_price,
@@ -80,7 +81,7 @@ class ProductController extends Controller
             ]);
         }
         else{
-            ProductStockBatches::create([
+            stockBatches::create([
                 'product_id' => $product->id,
                 'initial_stock' => $request->stock,
                 'remaining_stock' => $request->stock,
@@ -92,7 +93,7 @@ class ProductController extends Controller
         }
 
         //redirect to index
-        return redirect()->route('products.index')->with(['success' => 'Data Berhasil Disimpan!']);
+        return redirect()->route('product.index')->with(['success' => 'Data Berhasil Disimpan!']);
     }
 
     /**
@@ -108,7 +109,22 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        // Cari data produk berdasarkan id
+        $product = Product::findOrFail($id); 
+
+        // Menggabung tabel product dengan tabel stockBatches untuk merelasi semua batch yang dimiliki oleh produk
+        $product->load(['stockBatches' => function ($query) {
+            $query->orderBy('created_at', 'desc'); // Urutkan berdasarkan tanggal dibuat (terbaru dulu)
+        }]);
+
+        // Ambil semua kategori untuk dropdown
+        $categories = Categories::all();
+
+        // Kirim data ke view baru
+        return view('batch', [
+            'product' => $product,
+            'categories' => $categories,
+        ]);
     }
 
     /**
@@ -116,51 +132,28 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Validate form
-        $validated = $request->validate([
-            'name' => 'required',
-            'category_id' => 'required',
-            'stock' => 'required',
-            'buy_price' => 'required',
-            'sell_price' => 'required',
+        // 1. Validasi semua data yang masuk dari form
+        $request->validate([
+            'product_name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
         ]);
 
-        // Find the product
+
+        // dd($request->name);
         $product = Product::findOrFail($id);
-        
-        // Update product basic info
+        // dd($product);
+
+        // 2. Lakukan update pada model Product
         $product->update([
-            'name' => $request->name,
+            'name' => $request->product_name,
             'category_id' => $request->category_id,
-            'updated_at' => now(),
         ]);
 
-        // Get the latest stock batch for this product
-        $latestBatch = $product->ProductStockBatches()->latest()->first();
+        // 3. Kembalikan ke halaman edit dengan pesan sukses
+        // Pastikan nama route 'product.edit' ini sesuai dengan nama di file web.php Anda
+        return redirect()->route('product.edit', $product->id)
+                         ->with('product_edit_success', 'Data produk berhasil diperbarui.');
         
-        if ($latestBatch) {
-            // Update the latest batch
-            $latestBatch->update([
-                'initial_stock' => $request->stock,
-                'remaining_stock' => $request->stock,
-                'buy_price' => $request->buy_price,
-                'sell_price' => $request->sell_price,
-                'updated_at' => now(),
-            ]);
-        } else {
-            // Create new batch if none exists
-            $product->ProductStockBatches()->create([
-                'initial_stock' => $request->stock,
-                'remaining_stock' => $request->stock,
-                'buy_price' => $request->buy_price,
-                'sell_price' => $request->sell_price,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        // Redirect to index with success message
-        return redirect()->route('products.index')->with(['product_update_success' => 'Data Berhasil Diupdate!']);
     }
 
     /**
@@ -174,7 +167,7 @@ class ProductController extends Controller
 
         // Controller mengirim redirect biasa, halaman akan refresh
         // dan menampilkan pesan sukses ini.
-        return redirect()->route('products.index')
+        return redirect()->route('product.index')
             ->with('product_delete_success', 'Produk "' . $productName . '" berhasil dihapus!.');
     }
 }
