@@ -7,7 +7,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{ route('products.index') }}">
+              <a class="nav-link" href="{{ route('product.index') }}">
                 <i class="mdi mdi-package-variant menu-icon"></i>
                 <span class="menu-title">Products</span>
               </a>

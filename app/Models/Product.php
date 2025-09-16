@@ -24,12 +24,12 @@ class Product extends Model
     	return $this->BelongsTo(Categories::class);
     }
 
-    public function ProductStockBatches()
+    public function stockBatches()
     {
     	return $this->HasMany(ProductStockBatches::class);
     }
 
-    public function TransactionDetail()
+    public function transactionDetails()
     {
     	return $this->HasMany(TransactionDetails::class);
     }

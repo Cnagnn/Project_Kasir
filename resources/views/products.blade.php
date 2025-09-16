@@ -74,19 +74,18 @@
                                         {{ $product->category->name ?? 'Tidak ada kategori' }}
                                     </td>
                                     <td>
-                                        {{ $product->ProductStockBatches->sum('remaining_stock') }}
+                                        {{ $product->stockBatches->sum('remaining_stock') }}
                                     </td>
                                     <td>
-                                        Rp {{ number_format($product->ProductStockBatches->last()->sell_price ?? 0, 0, ',', '.') }}
+                                        Rp {{ number_format($product->stockBatches->last()->sell_price ?? 0, 0, ',', '.') }}
                                     </td>
                                     <td>
-                                        <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm me-1">
+                                        <a href="{{ route('product.edit', $product->id) }}" class="btn btn-warning btn-sm me-1">
                                             <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
                                         </a>
-                                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
+                                        <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            
                                             <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
                                                 <i class="mdi mdi-delete"></i> Delete
                                             </button>
@@ -107,7 +106,7 @@
               </div>
 
 
-              {{-- MODAL TAMBAH PRODUK --}}
+            {{-- MODAL TAMBAH PRODUK --}}
 
             <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
     
@@ -185,6 +184,7 @@
                 </div>
             </div>
 
+
             {{-- MODAL TAMBAH KATEGORI --}}
 
             <div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
@@ -219,86 +219,41 @@
                 </div>
             </div>
 
+
             {{-- MODAL UPDATE PRODUK --}}
 
-            <div class="modal fade" id="updateProductModal" tabindex="-1" role="dialog" aria-labelledby="updateProductModalLabel" aria-hidden="true">
+            {{-- <div class="modal fade" id="updateProductModal" tabindex="-1" role="dialog" aria-labelledby="updateProductModalLabel" aria-hidden="true">
     
-                <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                     
                     <div class="modal-content">
-
-                        <form action="" method="POST" class="forms-sample material-form" id="updateProductForm">
-                            @csrf
-                            @method('PUT')
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="updateProductModalLabel">Update Produk</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-
-                            <div class="modal-body">
-                                <p class="card-description">Update detail produk di bawah ini.</p>
-
-                                <input type="hidden" id="update_product_id" name="product_id">
-
-                                <div class="form-group">
-                                    <input type="text" class="form-control" id="update_name" name="name" required="required" />
-                                    <label for="update_name" class="control-label">Nama Produk</label><i class="bar"></i>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Kategori</label>
-                                    
-                                    <input type="hidden" name="category_id" id="update_selected_category_id" required>
-
-                                    <div class="btn-group d-block">
-                                        <button type="button" class="btn btn-outline-primary" id="update_category_dropdown_button">
-                                            -- Pilih Kategori --
-                                        </button>
-                                        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <span class="visually-hidden">Toggle Dropdown</span>
-                                        </button>
-                                        
-                                        <ul class="dropdown-menu" id="update_category_options">
-                                            {{-- Loop untuk menampilkan semua kategori yang tersedia --}}
-                                            @foreach ($categories as $category)
-                                                <li>
-                                                    <a class="dropdown-item" href="#" data-id="{{ $category->id }}" data-name="{{ $category->name }}">
-                                                        {{ $category->name }}
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                    <small class="form-text text-muted">Klik panah untuk memilih kategori.</small>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="number" class="form-control" id="update_stock" name="stock" required="required" />
-                                    <label for="update_stock" class="control-label">Stok</label><i class="bar"></i>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="number" class="form-control" id="update_buy_price" name="buy_price" required="required" />
-                                    <label for="update_buy_price" class="control-label">Harga Beli</label><i class="bar"></i>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="number" class="form-control" id="update_sell_price" name="sell_price" required="required" />
-                                    <label for="update_sell_price" class="control-label">Harga Jual</label><i class="bar"></i>
-                                </div>
-                            </div>
-
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                                <button type="submit" class="button btn btn-warning"><span>Update</span></button>
-                            </div>
-                        </form>
-
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>SKU</th>
+                                        <th>Harga Modal</th>
+                                        <th>Harga Jual</th>
+                                        <th>Stok</th>
+                                        <th>Tanggal Update</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockBatchesTable">
+                                    <!-- Data akan diisi melalui JavaScript -->
+                                    <tr id="noDataRow">
+                                        <td colspan="7" class="text-center">Tidak ada data stock batch.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
+
+
 
             {{-- DOM TOMBOL KATEGORI --}}
 
