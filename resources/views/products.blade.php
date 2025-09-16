@@ -80,16 +80,9 @@
                                         Rp {{ number_format($product->ProductStockBatches->last()->sell_price ?? 0, 0, ',', '.') }}
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-warning btn-sm me-1" data-toggle="modal" data-target="#updateProductModal" 
-                                                data-id="{{ $product->id }}"
-                                                data-name="{{ $product->name }}"
-                                                data-category-id="{{ $product->category_id }}"
-                                                data-category-name="{{ $product->category->name ?? '' }}"
-                                                data-stock="{{ $product->ProductStockBatches->sum('remaining_stock') }}"
-                                                data-buy-price="{{ $product->ProductStockBatches->last()->buy_price ?? 0 }}"
-                                                data-sell-price="{{ $product->ProductStockBatches->last()->sell_price ?? 0 }}">
-                                            <i class="mdi mdi-pencil"></i> Edit
-                                        </button>
+                                        <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm me-1">
+                                            <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
+                                        </a>
                                         <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
                                             @csrf
                                             @method('DELETE')
