@@ -2,11 +2,11 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="row">
+    {{--<div class="row">
         <div class="col-12">
             <h4 class="page-title">Edit Produk: {{ $product->name }}</h4>
         </div>
-    </div>
+    </div>--}}
 
     @if(session()->has('product_edit_success'))
         <script>
@@ -51,10 +51,9 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Data Utama Produk</h5>
-                    <hr>
+                    <h5 class="card-title">Info Produk</h5>
                     {{-- Form ini akan mengarah ke ProductController@update --}}
-                    <form action="{{ route('product.update', $product->id) }}" method="POST">
+                    <form id="product-form" action="{{ route('product.update', $product->id) }}" method="POST" class="material-form">
                         @csrf
                         @method('PUT')
                         
@@ -62,10 +61,10 @@
                             <input type="hidden" name="id" value="{{ $product->id }}">
                         </div>
 
-                        <div class="mb-3">
-                            <label for="product_name" class="form-label">Nama Produk</label>
+                        <div class="form-group">
                             <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                                   id="product_name" name="product_name" value="{{ old('name', $product->name) }}" required>
+                                   id="product_name" name="product_name" value="{{ old('name', $product->name) }}" required />
+                            <label for="product_name" class="control-label">Nama Produk</label><i class="bar"></i>
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -88,7 +87,7 @@
 
                             <div class="btn-group d-block">
                                 {{-- Tombol untuk menampilkan nama kategori terpilih --}}
-                                <button type="button" class="btn btn-outline-primary" id="category_dropdown_button">
+                                <button type="button" class="btn btn-primary" id="category_dropdown_button">
                                     {{ $selectedName }}
                                 </button>
                                 {{-- Tombol panah dropdown --}}
@@ -116,23 +115,23 @@
                             @enderror
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Update Data Produk</button>
-                        <a href="{{ route('product.index') }}" class="btn btn-secondary">Kembali</a>
                     </form>
 
+                    {{-- PAGE BREAK --}}
+                    <div class="page-break"></div>
 
                     {{-- TABEL BATCH PRODUK --}}
 
-                    <div class="d-flex justify-content-between align-items-center mb-3" style="margin-top: 10%">
-                        <h5 class="card-title m-0">Daftar Batch Stok</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title m-0">Batch Stok</h5>
                         {{-- TOMBOL UNTUK MODAL "TAMBAH BATCH BARU" --}}
-                        <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addBatchModal">
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#addBatchModal">
                             <i class="mdi mdi-plus"></i> Tambah Batch Baru
                         </button>
                     </div>
                     
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover table-bordered">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -159,7 +158,7 @@
                                         <td>Rp {{ number_format($batch->sell_price, 0, ',', '.') }}</td>
                                         <td>
                                             {{-- TOMBOL INI AKAN MEMBUKA MODAL EDIT BATCH --}}
-                                            <button type="button" class="btn btn-warning btn-sm btn-edit-batch" 
+                                            <button type="button" class="btn btn-icon-only btn-edit btn-sm me-1 btn-edit-batch" 
                                                     data-toggle="modal" 
                                                     data-target="#editBatchModal"
                                                     data-batch-id="{{ $batch->id }}"
@@ -168,7 +167,7 @@
                                                     data-buy-price="{{ $batch->buy_price }}"
                                                     data-sell-price="{{ $batch->sell_price }}"
                                                     data-update-url="{{ route('stock_batches.update', $batch->id) }}"
-                                                    > 
+                                                    title="Edit Batch"> 
                                                 <i class="mdi mdi-pencil"></i>
                                             </button>
                                             
@@ -178,7 +177,7 @@
                                                 method="POST" class="form-delete d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                <button type="submit" class="btn btn-icon-only btn-delete btn-sm" title="Delete">
                                                     <i class="mdi mdi-delete"></i>
                                                 </button>
                                             </form>
@@ -191,6 +190,15 @@
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
+
+                    {{-- PAGE BREAK --}}
+                    <div class="page-break"></div>
+
+                    {{-- TOMBOL ACTION --}}
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ route('product.index') }}" class="btn btn-outline-primary me-2">Batal</a>
+                        <button type="submit" form="product-form" class="btn btn-primary">Simpan</button>
                     </div>
                 </div>
             </div>
@@ -248,7 +256,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             {{-- Action form akan di-set oleh JavaScript --}}
-            <form action="" method="POST"> 
+            <form action="" method="POST" class="material-form"> 
                 @csrf
                 @method('PUT')
                 <div class="modal-header">
@@ -258,21 +266,21 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="edit_initial_stock" class="form-label">Stok Awal</label>
-                        <input type="number" class="form-control" id="edit_initial_stock" name="initial_stock" required>
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="edit_initial_stock" name="initial_stock" required />
+                        <label for="edit_initial_stock" class="control-label">Stok Awal</label><i class="bar"></i>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit_remaining_stock" class="form-label">Stok Tersisa</label>
-                        <input type="number" class="form-control" id="edit_remaining_stock" name="remaining_stock" required>
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="edit_remaining_stock" name="remaining_stock" required />
+                        <label for="edit_remaining_stock" class="control-label">Stok Tersisa</label><i class="bar"></i>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit_buy_price" class="form-label">Harga Beli</label>
-                        <input type="number" class="form-control" id="edit_buy_price" name="buy_price" required>
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="edit_buy_price" name="buy_price" required />
+                        <label for="edit_buy_price" class="control-label">Harga Beli</label><i class="bar"></i>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit_sell_price" class="form-label">Harga Jual</label>
-                        <input type="number" class="form-control" id="edit_sell_price" name="sell_price" required>
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="edit_sell_price" name="sell_price" required />
+                        <label for="edit_sell_price" class="control-label">Harga Jual</label><i class="bar"></i>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -328,10 +336,10 @@
             modal.find('form').attr('action', updateUrl);
             
             // Isi nilai form di dalam modal
-            modal.find('#edit_initial_stock').val(initialStock);
-            modal.find('#edit_remaining_stock').val(remainingStock);
-            modal.find('#edit_buy_price').val(buyPrice);
-            modal.find('#edit_sell_price').val(sellPrice);
+            modal.find('#edit_initial_stock').val(initialStock).addClass('has-value');
+            modal.find('#edit_remaining_stock').val(remainingStock).addClass('has-value');
+            modal.find('#edit_buy_price').val(buyPrice).addClass('has-value');
+            modal.find('#edit_sell_price').val(sellPrice).addClass('has-value');
         });
     });
 
@@ -373,5 +381,142 @@
         var nilaiSumber = document.getElementById('initial_stock').value;
         document.getElementById('remaining_stock').value = nilaiSumber;
     }
+
+    // Material form functionality
+    $(document).ready(function() {
+        // Check if input has value and add has-value class
+        $('.material-form .form-control').each(function() {
+            if ($(this).val() !== '') {
+                $(this).addClass('has-value');
+            }
+        });
+
+        // Add has-value class on input change
+        $('.material-form .form-control').on('input', function() {
+            if ($(this).val() !== '') {
+                $(this).addClass('has-value');
+            } else {
+                $(this).removeClass('has-value');
+            }
+        });
+
+        // Handle modal show event for edit batch
+        $('#editBatchModal').on('shown.bs.modal', function() {
+            $(this).find('.material-form .form-control').each(function() {
+                if ($(this).val() !== '') {
+                    $(this).addClass('has-value');
+                }
+            });
+        });
+    });
 </script>
+
+<style>
+    /* Icon-only button styles */
+    .btn-icon-only {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #dee2e6;
+        background-color: white;
+        border-radius: 4px;
+    }
+
+    .btn-icon-only i {
+        color: #333;
+        font-size: 16px;
+        transition: color 0.2s ease-in-out;
+    }
+
+    /* Edit button hover - yellow */
+    .btn-edit:hover {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+
+    .btn-edit:hover i {
+        color: #ffc107;
+    }
+
+    /* Delete button hover - red */
+    .btn-delete:hover {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    .btn-delete:hover i {
+        color: #dc3545;
+    }
+
+    /* Focus states */
+    .btn-icon-only:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Page break styling */
+    .page-break {
+        margin: 3rem 0;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    /* Custom button styling */
+    .btn-outline-primary {
+        color: #333 !important;
+        border-color: #007bff;
+    }
+
+    .btn-outline-primary:hover {
+        color: #fff !important;
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    @media print {
+        .page-break {
+            page-break-before: always;
+            border: none;
+        }
+    }
+
+    /* Custom table-bordered - horizontal borders only + left/right edges */
+    .table-bordered {
+        border-left: 1px solid #dee2e6 !important;
+        border-right: 1px solid #dee2e6 !important;
+        border-top: 1px solid #dee2e6 !important;
+        border-bottom: 1px solid #dee2e6 !important;
+    }
+
+    .table-bordered th,
+    .table-bordered td {
+        border-left: none !important;
+        border-right: none !important;
+        border-top: none !important;
+        border-bottom: 1px solid #dee2e6 !important;
+    }
+
+    /* First column - add left border */
+    .table-bordered th:first-child,
+    .table-bordered td:first-child {
+        border-left: none !important;
+    }
+
+    /* Last column - add right border */
+    .table-bordered th:last-child,
+    .table-bordered td:last-child {
+        border-right: none !important;
+    }
+
+    /* Header row - add top border */
+    .table-bordered thead th {
+        border-top: none !important;
+    }
+
+    /* Remove bottom border from last row */
+    .table-bordered tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+</style>
+
 @endpush

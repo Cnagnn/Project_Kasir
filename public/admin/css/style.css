@@ -9103,8 +9103,8 @@ progress {
   --bs-gutter-x: 1.5rem;
   --bs-gutter-y: 0;
   width: 100%;
-  padding-right: calc(var(--bs-gutter-x) * 0.5);
-  padding-left: calc(var(--bs-gutter-x) * 0.5);
+  /* padding-right: calc(var(--bs-gutter-x) * 0.5);
+  padding-left: calc(var(--bs-gutter-x) * 0.5); */
   margin-right: auto;
   margin-left: auto;
 }
@@ -9156,8 +9156,8 @@ progress {
   flex-shrink: 0;
   width: 100%;
   max-width: 100%;
-  padding-right: calc(var(--bs-gutter-x) * 0.5);
-  padding-left: calc(var(--bs-gutter-x) * 0.5);
+  /* padding-right: calc(var(--bs-gutter-x) * 0.5);
+  padding-left: calc(var(--bs-gutter-x) * 0.5); */
   margin-top: var(--bs-gutter-y);
 }
 
@@ -28443,16 +28443,25 @@ dl li {
   -webkit-flex-direction: column;
   flex-direction: column;
 }
+
+/* Remove padding left & right for specific elements inside main-panel */
+.main-panel .container-fluid,
+.main-panel .col,
+.main-panel .col-md-12 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
 @media (max-width: 991px) {
   .main-panel {
-    margin-left: 0;
+    margin-left: 34,992;
     width: 100%;
   }
 }
 
 .content-wrapper {
   background: #F4F5F7;
-  padding: 1.5rem 2.187rem 1.5rem 3.5rem;
+  padding: 1.5rem 2.222rem 1.5rem 2.222rem;
   width: 100%;
   -webkit-flex-grow: 1;
   flex-grow: 1;

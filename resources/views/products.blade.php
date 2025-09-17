@@ -39,30 +39,82 @@
                 </script>    
             @endif
             
+            {{-- SEARCH AND FILTER SECTION --}}
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label for="searchProduct">Cari Produk</label>
+                                <input type="text" class="form-control" id="searchProduct" placeholder="Nama Produk">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                
+                                <input type="hidden" name="filter_category_id" id="filter_selected_category_id" value="">
+
+                                <div class="btn-group d-block">
+                                    {{-- Tombol untuk menampilkan nama kategori terpilih --}}
+                                    <button type="button" class="btn btn-primary" id="filter_category_dropdown_button">
+                                        Semua Kategori
+                                    </button>
+                                    {{-- Tombol panah dropdown --}}
+                                    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" 
+                                            data-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
+                                    
+                                    {{-- Daftar pilihan kategori --}}
+                                    <ul class="dropdown-menu" id="filter_category_options">
+                                        <li>
+                                            <a class="dropdown-item active" href="#" data-id="" data-name="Semua Kategori">
+                                                Semua Kategori
+                                            </a>
+                                        </li>
+                                        @foreach ($categories as $category)
+                                            <li>
+                                                <a class="dropdown-item" href="#" data-id="{{ $category->id }}" data-name="{{ $category->name }}">
+                                                    {{ $category->name }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+
+            {{-- MAIN PRODUCTS TABLE SECTION --}}
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Products</h4>
                         <div class="btn-wrapper">
-                            <button type="button" class="btn btn-otline-dark align-items-center" data-toggle="modal" data-target="#addCategoryModal">
-                                <i class="mdi mdi-tag-plus"></i> Add Category
+                            <button type="button" class="btn btn-outline-primary align-items-center" data-toggle="modal" data-target="#addCategoryModal">
+                                <i class="mdi mdi-tag-plus"></i> Kategori Baru
                             </button>
                             <button type="button" class="btn btn-primary text-white me-0" data-toggle="modal" data-target="#addProductModal">
-                                <i class="mdi mdi-plus"></i> Add Product
+                                <i class="mdi mdi-plus"></i> Buat Produk Baru
                             </button>
                         </div>
                     </div>
                     <div class="table-responsive">
-                      <table class="table table-hover">
+                      <table class="table table-bordered">
                         <thead>
                           <tr>
                             <th>No</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Stock</th>
-                            <th>Price</th>
-                            <th>Action</th>
+                            <th>Nama Produk</th>
+                            <th>Kategori</th>
+                            <th>Stok Tersisa</th>
+                            <th>Harga Jual</th>
+                            <th>Aksi</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -80,15 +132,15 @@
                                         Rp {{ number_format($product->stockBatches->last()->sell_price ?? 0, 0, ',', '.') }}
                                     </td>
                                     <td>
-                                        <a href="{{ route('product.edit', $product->id) }}" class="btn btn-warning btn-sm me-1">
-                                            <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
+                                        <a href="{{ route('product.edit', $product->id) }}" class="btn btn-icon-only btn-edit btn-sm me-1" title="Edit / Lihat Batch">
+                                            <i class="mdi mdi-pencil"></i>
                                         </a>
                                         <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
                                             @csrf
                                             @method('DELETE')
                                             
-                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
-                                                <i class="mdi mdi-delete"></i> Delete
+                                            <button type="submit" class="btn btn-icon-only btn-delete btn-sm" data-name="{{ $product->name }}" title="Delete">
+                                                <i class="mdi mdi-delete"></i>
                                             </button>
                                         </form>
                                     </td>
@@ -382,8 +434,181 @@
                             });
                         });
                     });
+
+                    // === SEARCH FUNCTIONALITY ===
+                    const searchInput = document.getElementById('searchProduct');
+                    
+                    // Search functionality placeholder
+                    if (searchInput) {
+                        searchInput.addEventListener('input', function() {
+                            const searchTerm = this.value.toLowerCase();
+                            // TODO: Implement search logic
+                            console.log('Searching for:', searchTerm);
+                        });
+                    }
+
+                    // === FILTER CATEGORY DROPDOWN (SAME AS BATCH.BLADE.PHP) ===
+                    $('#filter_category_options .dropdown-item').on('click', function(event) {
+                        event.preventDefault(); // Mencegah link # beraksi
+                        var selectedId = $(this).data('id');
+                        var selectedName = $(this).data('name');
+                        $('#filter_selected_category_id').val(selectedId);
+                        $('#filter_category_dropdown_button').text(selectedName);
+                        $('#filter_category_options .dropdown-item').removeClass('active');
+                        $(this).addClass('active');
+                        
+                        // TODO: Implement filter logic
+                        console.log('Filter by category:', selectedId, selectedName);
+                    });
                 });
             </script>
+
+            <style>
+                /* Button icon-only styles */
+                .btn-icon-only {
+                    background: transparent;
+                    border: none;
+                    padding: 0.375rem;
+                    border-radius: 0.375rem;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s ease-in-out;
+                    min-width: 32px;
+                    height: 32px;
+                }
+
+                .btn-icon-only i {
+                    color: #333;
+                    font-size: 16px;
+                    transition: color 0.2s ease-in-out;
+                }
+
+                /* Edit button hover - yellow */
+                .btn-edit:hover {
+                    background-color: rgba(255, 193, 7, 0.1);
+                }
+
+                .btn-edit:hover i {
+                    color: #ffc107;
+                }
+
+                /* Delete button hover - red */
+                .btn-delete:hover {
+                    background-color: rgba(220, 53, 69, 0.1);
+                }
+
+                .btn-delete:hover i {
+                    color: #dc3545;
+                }
+
+                /* Focus states */
+                .btn-icon-only:focus {
+                    outline: none;
+                    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+                }
+
+                /* Custom button styling */
+                .btn-outline-primary {
+                    color: #333 !important;
+                    border-color: #007bff;
+                }
+
+                .btn-outline-primary:hover {
+                    color: #fff !important;
+                    background-color: #007bff;
+                    border-color: #007bff;
+                }
+
+                /* Custom table-bordered - horizontal borders only + left/right edges */
+                .table-bordered {
+                    border-left: 1px solid #dee2e6 !important;
+                    border-right: 1px solid #dee2e6 !important;
+                    border-top: 1px solid #dee2e6 !important;
+                    border-bottom: 1px solid #dee2e6 !important;
+                }
+
+                .table-bordered th,
+                .table-bordered td {
+                    border-left: none !important;
+                    border-right: none !important;
+                    border-top: none !important;
+                    border-bottom: 1px solid #dee2e6 !important;
+                }
+
+                /* First column - add left border */
+                .table-bordered th:first-child,
+                .table-bordered td:first-child {
+                    border-left: none !important;
+                }
+
+                /* Last column - add right border */
+                .table-bordered th:last-child,
+                .table-bordered td:last-child {
+                    border-right: none !important;
+                }
+
+                /* Header row - add top border */
+                .table-bordered thead th {
+                    border-top: none !important;
+                }
+
+                /* Remove bottom border from last row */
+                .table-bordered tbody tr:last-child td {
+                    border-bottom: none !important;
+                }
+
+                /* Search and Filter Section Styling */
+                .card-body.border-bottom {
+                    border-bottom: 1px solid #edf2f7 !important;
+                    background: #f8f9fa;
+                    padding: 1.5rem;
+                }
+
+                .input-group-text {
+                    border: 1px solid #ced4da;
+                    background-color: #007bff;
+                    color: white;
+                    font-size: 14px;
+                    min-width: 45px;
+                    justify-content: center;
+                }
+
+                .input-group .form-control {
+                    border-left: none;
+                    font-size: 14px;
+                    height: 44px;
+                }
+
+                .input-group .form-control:focus {
+                    border-color: #007bff;
+                    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+                }
+
+                .form-control {
+                    height: 44px;
+                    font-size: 14px;
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                }
+
+                .form-control:focus {
+                    border-color: #007bff;
+                    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+                }
+
+                /* Form group spacing */
+                .form-group {
+                    margin-bottom: 0;
+                }
+
+                /* Responsive adjustments */
+                @media (max-width: 768px) {
+                    .card-body.border-bottom {
+                        padding: 1rem;
+                    }
+                }
+            </style>
 
             @endsection
 
