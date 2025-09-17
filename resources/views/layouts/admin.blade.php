@@ -23,6 +23,7 @@
     <!-- inject:css -->
     <link rel="stylesheet" href="{{ asset('admin/css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- endinject -->
     <style>
         .navbar {
@@ -250,10 +251,11 @@
     <script src="{{ asset('admin/js/todolist.js') }}"></script>
     <!-- endinject -->
     <!-- Custom js for this page-->
+    @stack('scripts')
     <script src="{{ asset('admin/js/jquery.cookie.js') }}" type="text/javascript"></script>
     <script src="{{ asset('admin/js/dashboard.js') }}"></script>
     <!-- <script src="assets/js/Chart.roundedBarCharts.js"></script> -->
     <!-- End custom js for this page-->
-     @stack('scripts')
+  
   </body>
 </html>

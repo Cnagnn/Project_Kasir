@@ -39,7 +39,28 @@
                 </script>    
             @endif
             
+            {{-- SEARCH AND FILTER SECTION --}}
             <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label for="searchProduct">Cari Produk</label>
+                                <input type="text" class="form-control" id="searchProduct" placeholder="Nama Produk">
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+
+            {{-- WADAH UNTUK HASIL PENCARIAN AJAX --}}
+            <div class="col-lg-12" id="searchResultsContainer">
+                {{-- Hasil pencarian akan ditampilkan di sini oleh JavaScript --}}
+            </div>
+
+            <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
                 <div class="card">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -254,10 +275,10 @@
                 </div>
             </div> --}}
 
-
+            @endsection
 
             {{-- DOM TOMBOL KATEGORI --}}
-
+            @push('scripts')
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
                     // === ADD PRODUCT MODAL ===
@@ -383,8 +404,135 @@
                         });
                     });
                 });
-            </script>
 
-            @endsection
+                document.addEventListener('DOMContentLoaded', function() {
+    
+                    // === SEARCH FUNCTIONALITY ===
+                    const searchInput = document.getElementById('searchProduct');
+                    const resultsContainer = document.getElementById('searchResultsContainer');
+                    const mainProductTable = document.getElementById('mainProductTable');
+
+                    // Pastikan semua elemen ada sebelum menambahkan event listener
+                    if (searchInput && resultsContainer && mainProductTable) {
+                        
+                        searchInput.addEventListener('input', function() {
+                            const searchTerm = this.value.trim();
+                            console.log(searchTerm);
+
+                            if (searchTerm === '') {
+                                resultsContainer.innerHTML = '';
+                                resultsContainer.style.display = 'none';
+                                mainProductTable.style.display = 'block';
+                                return;
+                            }
+
+                            resultsContainer.style.display = 'block';
+                            mainProductTable.style.display = 'none';
+
+                            fetch(`/product/search?query=${encodeURIComponent(searchTerm)}`)
+                                // 1. Kembali menggunakan .json() karena menerima data
+                                .then(response => response.json())
+                                .then(data => {
+                                    resultsContainer.innerHTML = ''; // Kosongkan hasil lama
+
+                                    // 2. Buat struktur card dan tabel secara dinamis
+                                    const resultsCard = document.createElement('div');
+                                    resultsCard.className = 'card';
+
+                                    let cardContent = `
+                                        <div class="card-body">
+                                            <h4 class="card-title mb-4">Hasil Pencarian untuk "${searchTerm}"</h4>
+                                            <div class="table-responsive">
+                                                <table class="table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>No</th>
+                                                            <th>Name</th>
+                                                            <th>Category</th>
+                                                            <th>Stock</th>
+                                                            <th>Price</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                    `;
+
+                                    // 3. Cek jika ada hasil
+                                    if (data.length > 0) {
+                                        // 4. Loop setiap produk dan buat baris tabel (<tr>)
+                                        data.forEach((product, index) => {
+                                            const categoryName = product.category ? product.category.name : 'Tidak ada kategori';
+                                            const totalStock = product.stock_batches.reduce((sum, batch) => sum + batch.remaining_stock, 0);
+                                            const lastBatch = product.stock_batches[product.stock_batches.length - 1];
+                                            const sellPrice = lastBatch ? lastBatch.sell_price : 0;
+                                            
+                                            // Format harga ke Rupiah
+                                            const formattedPrice = new Intl.NumberFormat('id-ID', {
+                                                style: 'currency',
+                                                currency: 'IDR',
+                                                minimumFractionDigits: 0
+                                            }).format(sellPrice);
+
+                                            // Buat URL untuk action edit dan delete
+                                            const editUrl = `{{ url('product') }}/${product.id}/edit`;
+                                            const deleteUrl = `{{ url('product') }}/${product.id}`;
+
+                                            cardContent += `
+                                                <tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>${product.name}</td>
+                                                    <td>${categoryName}</td>
+                                                    <td>${totalStock}</td>
+                                                    <td>${formattedPrice}</td>
+                                                    <td>
+                                                        <a href="${editUrl}" class="btn btn-warning btn-sm me-1">
+                                                            <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
+                                                        </a>
+                                                        <form action="${deleteUrl}" method="POST" class="form-delete d-inline" onsubmit="handleDelete(event)">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger btn-sm" data-name="${product.name}">
+                                                                <i class="mdi mdi-delete"></i> Delete
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        });
+                                    } else {
+                                        // Jika tidak ada hasil
+                                        cardContent += `
+                                            <tr>
+                                                <td colspan="6" class="text-center">Produk tidak ditemukan.</td>
+                                            </tr>
+                                        `;
+                                    }
+
+                                    // 5. Tutup tag html
+                                    cardContent += `
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    `;
+
+                                    // 6. Masukkan semua HTML yang sudah jadi ke dalam card dan tampilkan
+                                    resultsCard.innerHTML = cardContent;
+                                    resultsContainer.appendChild(resultsCard);
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching search results:', error);
+                                });
+                        });
+
+                    } else {
+                        // Jika salah satu elemen tidak ditemukan, log error ke console
+                        console.error('Satu atau lebih elemen untuk fungsionalitas pencarian tidak ditemukan!');
+                    }
+
+                });
+
+            </script>
+            @endpush
 
             

@@ -170,4 +170,20 @@ class ProductController extends Controller
         return redirect()->route('product.index')
             ->with('product_delete_success', 'Produk "' . $productName . '" berhasil dihapus!.');
     }
+
+    public function search(Request $request)
+    {
+        // Ambil keyword pencarian dari query string (?query=...)
+        $query = $request->input('query');
+
+        // Lakukan pencarian di database
+        $products = Product::where('name', 'LIKE', "%{$query}%")
+            ->with('category', 'stockBatches') // Eager load category untuk efisiensi
+            ->take(10) // Batasi hasil agar tidak terlalu banyak
+            ->get();
+
+            // dd($products);
+        // Kembalikan hasil dalam format JSON
+        return response()->json($products);
+    }
 }

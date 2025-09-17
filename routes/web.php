@@ -10,11 +10,13 @@ Route::get('/', function () {
 })->name('dashboard');
 
 // Route::resource('/dashboard', ProductController::class);
-Route::get('/product', [ProductController::class, "index"])->name('product.index');
+Route::get('/products', [ProductController::class, "index"])->name('product.index');
 Route::post('/product-add', [ProductController::class, "store"])->name('product.store');
 Route::get('/product/{id}/edit', [ProductController::class, 'edit'])->name('product.edit');
 Route::put('/product/{id}/update', [ProductController::class, "update"])->name('product.update');
 Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
+
+Route::get('/product/search', [ProductController::class, 'search'])->name('product.search');
 
 Route::post('/batch-add', [StockBatchController::class, "store"])->name('stock_batches.store');
 Route::put('/batch/{id}/update', [StockBatchController::class, "edit"])->name('stock_batches.update');
