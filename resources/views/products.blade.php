@@ -2,6 +2,8 @@
 
             @section('content')
             
+            {{-- SWEATALERT --}}
+
             @if(session()->has('product_add_success'))
                 <script>
                     Swal.fire({
@@ -38,8 +40,11 @@
                     });
                 </script>    
             @endif
+
+            {{-- END SWEATALERT --}}
             
             {{-- SEARCH AND FILTER SECTION --}}
+
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
@@ -55,11 +60,18 @@
                 </div>
             </div>
 
-            {{-- WADAH UNTUK HASIL PENCARIAN AJAX --}}
+            {{-- END SEARCH AND FILTER SECTION --}}
+
+            {{-- SEARCH PRODUCT BOX --}}
+
             <div class="col-lg-12" id="searchResultsContainer">
-                {{-- Hasil pencarian akan ditampilkan di sini oleh JavaScript --}}
+                {{-- Search results will be displayed here by JavaScript --}}
             </div>
 
+            {{-- END SEARCH PRODUCT BOX --}}
+
+            {{-- MAIN TABLE / PRODUCT LIST --}}
+            
             <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
                 <div class="card">
                   <div class="card-body">
@@ -121,14 +133,15 @@
                             @endforelse
                         </tbody>
                       </table>
-                        
                     </div>
                   </div>
                 </div>
-              </div>
+            </div>
+
+            {{-- MAIN TABLE / PRODUCT LIST --}}
 
 
-            {{-- MODAL TAMBAH PRODUK --}}
+            {{-- MODAL ADD PRODUCT --}}
 
             <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
     
@@ -206,10 +219,10 @@
                 </div>
             </div>
 
-            {{-- END MODAL TAMBAH PRODUK --}}
+            {{-- END MODAL ADD PRODUCT --}}
 
 
-            {{-- MODAL TAMBAH KATEGORI --}}
+            {{-- MODAL ADD CATEGORY --}}
 
             <div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
     
@@ -243,7 +256,7 @@
                 </div>
             </div>
 
-            {{-- END MODAL TAMBAH KATEGORI --}}
+            {{-- END MODAL ADD CATEGORY --}}
 
             @endsection
 
