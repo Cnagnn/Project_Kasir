@@ -83,7 +83,7 @@
                             <th>Category</th>
                             <th>Stock</th>
                             <th>Price</th>
-                            <th>Action</th>
+                            <th class="text-center">Action</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -206,6 +206,8 @@
                 </div>
             </div>
 
+            {{-- END MODAL TAMBAH PRODUK --}}
+
 
             {{-- MODAL TAMBAH KATEGORI --}}
 
@@ -241,47 +243,16 @@
                 </div>
             </div>
 
-
-            {{-- MODAL UPDATE PRODUK --}}
-
-            {{-- <div class="modal fade" id="updateProductModal" tabindex="-1" role="dialog" aria-labelledby="updateProductModalLabel" aria-hidden="true">
-    
-                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                    
-                    <div class="modal-content">
-                        
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>SKU</th>
-                                        <th>Harga Modal</th>
-                                        <th>Harga Jual</th>
-                                        <th>Stok</th>
-                                        <th>Tanggal Update</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="stockBatchesTable">
-                                    <!-- Data akan diisi melalui JavaScript -->
-                                    <tr id="noDataRow">
-                                        <td colspan="7" class="text-center">Tidak ada data stock batch.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div> --}}
+            {{-- END MODAL TAMBAH KATEGORI --}}
 
             @endsection
 
-            {{-- DOM TOMBOL KATEGORI --}}
+            
             @push('scripts')
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
-                    // === ADD PRODUCT MODAL ===
+
+                    // {{-- DOM TOMBOL KATEGORI --}}
                     // Cari semua item kategori di dalam dropdown add product
                     const categoryItems = document.querySelectorAll('#category_options .dropdown-item');
                     
@@ -307,6 +278,8 @@
                         });
                     });
 
+                    // {{-- END DOM TOMBOL KATEGORI --}}
+
                     // === UPDATE PRODUCT MODAL ===
                     // Cari semua item kategori di dalam dropdown update product
                     const updateCategoryItems = document.querySelectorAll('#update_category_options .dropdown-item');
@@ -330,39 +303,6 @@
                             
                             // Simpan ID kategori ke input tersembunyi (ini yang akan dikirim ke server)
                             updateHiddenInput.value = selectedId;
-                        });
-                    });
-
-                    // === HANDLE UPDATE BUTTON CLICK ===
-                    // Handle ketika tombol edit diklik untuk mengisi data ke modal
-                    const updateButtons = document.querySelectorAll('[data-target="#updateProductModal"]');
-                    
-                    updateButtons.forEach(button => {
-                        button.addEventListener('click', function () {
-                            // Ambil data dari atribut data-*
-                            const productId = this.getAttribute('data-id');
-                            const productName = this.getAttribute('data-name');
-                            const categoryId = this.getAttribute('data-category-id');
-                            const categoryName = this.getAttribute('data-category-name');
-                            const stock = this.getAttribute('data-stock');
-                            const buyPrice = this.getAttribute('data-buy-price');
-                            const sellPrice = this.getAttribute('data-sell-price');
-                            
-                            // Isi form update dengan data produk
-                            document.getElementById('update_product_id').value = productId;
-                            document.getElementById('update_name').value = productName;
-                            document.getElementById('update_stock').value = stock;
-                            document.getElementById('update_buy_price').value = buyPrice;
-                            document.getElementById('update_sell_price').value = sellPrice;
-                            
-                            // Set kategori yang terpilih
-                            document.getElementById('update_selected_category_id').value = categoryId;
-                            document.getElementById('update_category_dropdown_button').textContent = categoryName || '-- Pilih Kategori --';
-                            
-                            // Update action form dengan ID produk
-                            const form = document.getElementById('updateProductForm');
-                            const baseAction = "{{ url('/product-update') }}";
-                            form.action = baseAction + '/' + productId;
                         });
                     });
                 });

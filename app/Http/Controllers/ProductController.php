@@ -151,8 +151,9 @@ class ProductController extends Controller
 
         // 3. Kembalikan ke halaman edit dengan pesan sukses
         // Pastikan nama route 'product.edit' ini sesuai dengan nama di file web.php Anda
-        return redirect()->route('product.edit', $product->id)
-                         ->with('product_edit_success', 'Data produk berhasil diperbarui.');
+        return redirect()->back()
+                         ->with('product_edit_success', 'Data produk berhasil diperbarui.')
+                         ->withInput();
         
     }
 
