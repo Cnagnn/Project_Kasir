@@ -151,6 +151,7 @@
 
                         <form action="{{ route('product.store') }}" method="POST" class="forms-sample material-form">
                             @csrf
+                            <input type="hidden" value="product_page" name="page">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="addProductModalLabel">Tambah Produk Baru</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -232,6 +233,7 @@
 
                         <form action="{{ route('category.store') }}" method="POST" class="forms-sample material-form">
                             @csrf
+                            <input type="hidden" value="product_page" name="page">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="addProductModalLabel">Tambah Kategori Baru</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">

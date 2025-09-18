@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\ProductStockBatches;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Redirect;
 
 class ProductController extends Controller
 {
@@ -20,20 +21,15 @@ class ProductController extends Controller
     	$products = Product::with('category', 'stockBatches')->get();
         $categories = Categories::all();
         // dd($products);
+
+        // $page = $request->query('from');
+
     	// mengirim data product ke view 
-    	return view('products',[
+    	return view('product',[
             'products' => $products,
             'categories' => $categories,
         ]);
 
-        // foreach (Products::all() as $product) {
-        //     $product_name = $product->name;
-        //     $product_category_id = $product->category_id;
-        //     $product_category = $product->categories()->name;
-        //     echo "<p>Nama Produk = $product_name</p>";
-
-        //     echo "<p>Kategori Produk = $product_category</p>";
-        // }
     }
 
     /**
@@ -49,7 +45,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->name);
+        // dd($request);
         //validate form
         $validated = $request->validate([
             'name' => 'required',
@@ -92,8 +88,10 @@ class ProductController extends Controller
             ]);
         }
 
-        //redirect to index
-        return redirect()->route('product.index')->with(['success' => 'Data Berhasil Disimpan!']);
+        $page = $request->input('page');
+
+        return Redirect::back()->with(['product_add_success' => 'Data Product Berhasil Disimpan!']);
+    
     }
 
     /**
@@ -121,7 +119,7 @@ class ProductController extends Controller
         $categories = Categories::all();
 
         // Kirim data ke view baru
-        return view('batch', [
+        return view('product_batch', [
             'product' => $product,
             'categories' => $categories,
         ]);
@@ -150,10 +148,7 @@ class ProductController extends Controller
         ]);
 
         // 3. Kembalikan ke halaman edit dengan pesan sukses
-        // Pastikan nama route 'product.edit' ini sesuai dengan nama di file web.php Anda
-        return redirect()->back()
-                         ->with('product_edit_success', 'Data produk berhasil diperbarui.')
-                         ->withInput();
+        return Redirect::back()->with('product_edit_success', 'Data produk berhasil diperbarui.')->withInput();
         
     }
 
@@ -187,4 +182,5 @@ class ProductController extends Controller
         // Kembalikan hasil dalam format JSON
         return response()->json($products);
     }
+
 }

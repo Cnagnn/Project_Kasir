@@ -4,11 +4,11 @@
             
             {{-- SWEATALERT --}}
 
-            @if(session()->has('product_add_success'))
+            @if(session()->has('category_add_success'))
                 <script>
                     Swal.fire({
                         title: "BERHASIL",
-                        text: "{{ session('product_add_success') }}",
+                        text: "{{ session('category_add_success') }}",
                         icon: "success"
                     });
                 </script>    
@@ -51,8 +51,8 @@
                     <div class="row">
                         <div class="col-md-9">
                             <div class="form-group">
-                                <label for="searchProduct">Cari Produk</label>
-                                <input type="text" class="form-control" id="searchProduct" placeholder="Nama Produk">
+                                <label for="searchProduct">Cari Kategori</label>
+                                <input type="text" class="form-control" id="searchProduct" placeholder="Nama Kategori">
                             </div>
                         </div>
                     </div>
@@ -76,14 +76,14 @@
                 <div class="card">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">Products</h4>
+                        <h4 class="card-title mb-0">Categories</h4>
                         <div class="btn-wrapper">
                             <button type="button" class="btn btn-otline-dark align-items-center" data-toggle="modal" data-target="#addCategoryModal">
                                 <i class="mdi mdi-tag-plus"></i> Add Category
                             </button>
-                            <button type="button" class="btn btn-primary text-white me-0" data-toggle="modal" data-target="#addProductModal">
+                            {{-- <button type="button" class="btn btn-primary text-white me-0" data-toggle="modal" data-target="#addProductModal">
                                 <i class="mdi mdi-plus"></i> Add Product
-                            </button>
+                            </button> --}}
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -92,35 +92,23 @@
                           <tr>
                             <th>No</th>
                             <th>Name</th>
-                            <th>Category</th>
-                            <th>Stock</th>
-                            <th>Price</th>
                             <th class="text-center">Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                            @forelse ($products as $product)
+                            @forelse ($categories as $category)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $product->name }}</td>
+                                    <td>{{ $category->name }}</td>
                                     <td>
-                                        {{ $product->category->name ?? 'Tidak ada kategori' }}
-                                    </td>
-                                    <td>
-                                        {{ $product->stockBatches->sum('remaining_stock') }}
-                                    </td>
-                                    <td>
-                                        Rp {{ number_format($product->stockBatches->last()->sell_price ?? 0, 0, ',', '.') }}
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('product.edit', $product->id) }}" class="btn btn-warning btn-sm me-1">
-                                            <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
+                                        <a href="{{ route('category.detail', $category->id) }}" class="btn btn-warning btn-sm me-1">
+                                            <i class="mdi mdi-pencil"></i> Edit / Detail Kategori
                                         </a>
-                                        <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
+                                        <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="form-delete d-inline">
                                             @csrf
                                             @method('DELETE')
                                             
-                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $category->name }}">
                                                 <i class="mdi mdi-delete"></i> Delete
                                             </button>
                                         </form>
@@ -141,87 +129,6 @@
             {{-- MAIN TABLE / PRODUCT LIST --}}
 
 
-            {{-- MODAL ADD PRODUCT --}}
-
-            <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
-    
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    
-                    <div class="modal-content">
-
-                        <form action="{{ route('product.store') }}" method="POST" class="forms-sample material-form">
-                            @csrf
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="addProductModalLabel">Tambah Produk Baru</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-
-                            <div class="modal-body">
-                                <p class="card-description">Isi detail produk di bawah ini.</p>
-
-                                <div class="form-group">
-                                    <input type="text" class="form-control" id="name" name="name" required="required" />
-                                    <label for="name" class="control-label">Nama Produk</label><i class="bar"></i>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Kategori</label>
-                                    
-                                    <input type="hidden" name="category_id" id="selected_category_id" required>
-
-                                    <div class="btn-group d-block">
-                                        <button type="button" class="btn btn-outline-primary" id="category_dropdown_button">
-                                            -- Pilih Kategori --
-                                        </button>
-                                        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <span class="visually-hidden">Toggle Dropdown</span>
-                                        </button>
-                                        
-                                        <ul class="dropdown-menu" id="category_options">
-                                            {{-- Loop untuk menampilkan semua kategori yang tersedia --}}
-                                            @foreach ($categories as $category)
-                                                <li>
-                                                    <a class="dropdown-item" href="#" data-id="{{ $category->id }}" data-name="{{ $category->name }}">
-                                                        {{ $category->name }}
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                    <small class="form-text text-muted">Klik panah untuk memilih kategori.</small>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="number" class="form-control" id="stock" name="stock" required="required" />
-                                    <label for="stock" class="control-label">Stok</label><i class="bar"></i>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="number" class="form-control" id="buy_price" name="buy_price" required="required" />
-                                    <label for="price" class="control-label">Harga Beli</label><i class="bar"></i>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="number" class="form-control" id="sell_price" name="sell_price" required="required" />
-                                    <label for="price" class="control-label">Harga Jual</label><i class="bar"></i>
-                                </div>
-                            </div>
-
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                                <button type="submit" class="button btn btn-primary"><span>Simpan</span></button>
-                            </div>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
-
-            {{-- END MODAL ADD PRODUCT --}}
-
-
             {{-- MODAL ADD CATEGORY --}}
 
             <div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
@@ -232,6 +139,7 @@
 
                         <form action="{{ route('category.store') }}" method="POST" class="forms-sample material-form">
                             @csrf
+                            <input type="hidden" value="category_page" name="page">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="addProductModalLabel">Tambah Kategori Baru</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -382,7 +290,7 @@
                             resultsContainer.style.display = 'block';
                             mainProductTable.style.display = 'none';
 
-                            fetch(`/product/search?query=${encodeURIComponent(searchTerm)}`)
+                            fetch(`/category/search?query=${encodeURIComponent(searchTerm)}`)
                                 // 1. Kembali menggunakan .json() karena menerima data
                                 .then(response => response.json())
                                 .then(data => {
@@ -401,9 +309,6 @@
                                                         <tr>
                                                             <th>No</th>
                                                             <th>Name</th>
-                                                            <th>Category</th>
-                                                            <th>Stock</th>
-                                                            <th>Price</th>
                                                             <th>Action</th>
                                                         </tr>
                                                     </thead>
@@ -413,30 +318,16 @@
                                     // 3. Cek jika ada hasil
                                     if (data.length > 0) {
                                         // 4. Loop setiap produk dan buat baris tabel (<tr>)
-                                        data.forEach((product, index) => {
-                                            const categoryName = product.category ? product.category.name : 'Tidak ada kategori';
-                                            const totalStock = product.stock_batches.reduce((sum, batch) => sum + batch.remaining_stock, 0);
-                                            const lastBatch = product.stock_batches[product.stock_batches.length - 1];
-                                            const sellPrice = lastBatch ? lastBatch.sell_price : 0;
-                                            
-                                            // Format harga ke Rupiah
-                                            const formattedPrice = new Intl.NumberFormat('id-ID', {
-                                                style: 'currency',
-                                                currency: 'IDR',
-                                                minimumFractionDigits: 0
-                                            }).format(sellPrice);
+                                        data.forEach((category, index) => {
 
                                             // Buat URL untuk action edit dan delete
-                                            const editUrl = `{{ url('product') }}/${product.id}/edit`;
-                                            const deleteUrl = `{{ url('product') }}/${product.id}`;
+                                            const editUrl = `{{ url('product') }}/${category.id}/edit`;
+                                            const deleteUrl = `{{ url('product') }}/${category.id}`;
 
                                             cardContent += `
                                                 <tr>
                                                     <td>${index + 1}</td>
-                                                    <td>${product.name}</td>
-                                                    <td>${categoryName}</td>
-                                                    <td>${totalStock}</td>
-                                                    <td>${formattedPrice}</td>
+                                                    <td>${category.name}</td>
                                                     <td>
                                                         <a href="${editUrl}" class="btn btn-warning btn-sm me-1">
                                                             <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
@@ -444,7 +335,7 @@
                                                         <form action="${deleteUrl}" method="POST" class="form-delete d-inline" onsubmit="handleDelete(event)">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm" data-name="${product.name}">
+                                                            <button type="submit" class="btn btn-danger btn-sm" data-name="${category.name}">
                                                                 <i class="mdi mdi-delete"></i> Delete
                                                             </button>
                                                         </form>

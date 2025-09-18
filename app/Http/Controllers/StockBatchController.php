@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ProductStockBatches;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Redirect;
 
 class StockBatchController extends Controller
 {
@@ -50,7 +51,7 @@ class StockBatchController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->back()->with('batch_add_success', 'Data Batch Berhasil Ditambah.');
+        return Redirect::back()->with('batch_add_success', 'Data Batch Berhasil Ditambah.');
     }
 
     /**
@@ -90,7 +91,7 @@ class StockBatchController extends Controller
         ]);
 
         // Kembali ke halaman sebelumnya dengan pesan sukses
-        return redirect()->back()->with('batch_update_success', 'Data Batch Berhasil Diperbarui.');
+        return Redirect::back()->with('batch_update_success', 'Data Batch Berhasil Diperbarui.');
     }
 
     /**
