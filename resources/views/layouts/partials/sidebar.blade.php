@@ -6,11 +6,19 @@
                 <span class="menu-title">Dashboard</span>
               </a>
             </li>
+            <li class="nav-item nav-category">Kelola Produk</li>
             <li class="nav-item">
-              <a class="nav-link" href="{{ route('product.index') }}">
-                <i class="mdi mdi-package-variant menu-icon"></i>
-                <span class="menu-title">Products</span>
+              <a class="nav-link" data-bs-toggle="collapse" href="#products" aria-expanded="false" aria-controls="ui-basic">
+                <i class="menu-icon mdi mdi-package-variant"></i>
+                <span class="menu-title">Produk</span>
+                <i class="menu-arrow"></i>
               </a>
+              <div class="collapse" id="products">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="{{ route('product.index') }}">Daftar Produk</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="pages/ui-features/dropdowns.html">Kategori</a></li>
+                </ul>
+              </div>
             </li>
             <li class="nav-item nav-category">UI Elements</li>
             <li class="nav-item">
