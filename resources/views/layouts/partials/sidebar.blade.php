@@ -16,7 +16,7 @@
               <div class="collapse" id="products">
                 <ul class="nav flex-column sub-menu">
                   <li class="nav-item"> <a class="nav-link" href="{{ route('product.index') }}">Daftar Produk</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="pages/ui-features/dropdowns.html">Kategori</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="{{ route('category.index') }}">Kategori</a></li>
                 </ul>
               </div>
             </li>

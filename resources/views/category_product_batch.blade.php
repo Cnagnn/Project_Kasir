@@ -116,8 +116,12 @@
                             @enderror
                         </div>
 
+                        {{-- {{ dd($category->id) }} --}}
+
                         <button type="submit" class="btn btn-primary">Update Data Produk</button>
-                        <a href="{{ route('product.index') }}" class="btn btn-secondary">Kembali</a>
+                        <a href="{{ route('category.detail', $product_category) }}" class="btn btn-secondary">
+                            Kembali 
+                        </a>
                     </form>
 
 
