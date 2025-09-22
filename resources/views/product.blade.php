@@ -121,6 +121,16 @@
                                                 <i class="mdi mdi-delete"></i> Delete
                                             </button>
                                         </form>
+                                        <form action="{{ route('cart.addToCart', $product->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            
+                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
+                                                <i class="mdi mdi-cart"></i> Tambah Ke Keranjang
+                                            </button>
+                                        </form>
+                                        {{-- <a href="{{ route('product.addToCart', $product->id) }}" class="btn btn-warning btn-sm me-1">
+                                            <i class="mdi mdi-pencil"></i> Tambah Ke Keranjang
+                                        </a> --}}
                                     </td>
                                 </tr>
                             @empty

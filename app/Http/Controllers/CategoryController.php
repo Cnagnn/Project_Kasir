@@ -96,6 +96,18 @@ class CategoryController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        // dd("Halo");
+        // dd($id);
+        // dd($request->product_name);
+
+        $category = Categories::where('id', $id)->first();
+        
+        $category->update([
+            'name' => $request->product_name,
+        ]);
+
+        return redirect()->back()->with('category_update_success', 'Data Kategori berhasil Di Update');
+
     }
 
     /**

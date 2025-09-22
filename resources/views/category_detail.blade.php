@@ -40,6 +40,15 @@
                     });
                 </script>    
             @endif
+            @if(session()->has('category_update_success'))
+                <script>
+                    Swal.fire({
+                        title: "BERHASIL",
+                        text: "{{ session('category_update_success') }}",
+                        icon: "success"
+                    });
+                </script>    
+            @endif
 
             {{-- END SWEATALERT --}}
             
@@ -47,16 +56,27 @@
 
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
-                  <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-9">
-                            <div class="form-group">
-                                <label for="searchProduct">Cari Produk</label>
-                                <input type="text" class="form-control" id="searchProduct" placeholder="Nama Produk">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Info Kategori</h4>
+                        {{-- Form ini akan mengarah ke ProductController@update --}}
+                        <form id="category-form" action="{{ route('category.update', $categoryId) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            
+                            <div>
+                                <input type="hidden" name="id" value="{{ $categoryId }}">
                             </div>
-                        </div>
+
+                            <div class="mb-3">
+                                <label for="product_name" class="form-label">Nama Kategori</label>
+                                <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                                    id="product_name" name="product_name" value="{{ old('name', $categoryName) }}" required>
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </form>
                     </div>
-                  </div>
                 </div>
             </div>
 
@@ -76,7 +96,13 @@
                 <div class="card">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">List Products of Category : {{ $categoryName }}</h4>
+                        {{-- <h4 class="card-title mb-0">List Products of Category : {{ $categoryName }}</h4> --}}
+                        <div class="col-md-7">
+                            <div class="form-group">
+                                <label for="searchProduct">Cari Produk</label>
+                                <input type="text" class="form-control" id="searchProduct" placeholder="Nama Produk">
+                            </div>
+                        </div>
                         <div class="btn-wrapper">
                             <button type="button" class="btn btn-primary text-white me-0" data-toggle="modal" data-target="#addProductModal">
                                 <i class="mdi mdi-plus"></i> Add Product
@@ -137,6 +163,16 @@
 
             {{-- MAIN TABLE / PRODUCT LIST --}}
 
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body text-end">
+                        <a href="{{ route('category.index') }}" class="btn btn-danger me-2">
+                            Kembali
+                        </a>
+                        <button type="submit" form="category-form" class="btn btn-primary">Update Data Produk</button>
+                    </div>
+                </div>
+            </div>
 
             {{-- MODAL ADD PRODUCT --}}
 
