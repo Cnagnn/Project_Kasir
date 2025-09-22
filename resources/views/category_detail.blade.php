@@ -84,15 +84,15 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                      <table class="table table-hover">
+                      <table class="table table-bordered table-hover">
                         <thead>
                           <tr>
                             <th>No</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Stock</th>
-                            <th>Price</th>
-                            <th class="text-center">Action</th>
+                            <th>Produk</th>
+                            <th>Kategori</th>
+                            <th>Stok</th>
+                            <th>Harga</th>
+                            <th class="text-center">Aksi</th>
                           </tr>
                         </thead>
                         <tbody>
