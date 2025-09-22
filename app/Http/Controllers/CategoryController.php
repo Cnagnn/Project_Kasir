@@ -44,24 +44,33 @@ class CategoryController extends Controller
             'name' => 'required',
         ]);
 
-        $page = $request->input('page');
-        // dd($page);
+        $category = Categories::withTrashed()->where('name', $request->name)->first();
+        // dd($category);
 
-        $category = Categories::where('name', $request->name)->first();
+        if ($category && $category->trashed()) {
+            // Jika produk ditemukan dan statusnya terhapus (trashed)
+            $category->restore(); // Pulihkan datanya
+            
+            // Beri pesan bahwa data lama dipulihkan
+            $message = 'Category yang sebelumnya dihapus telah berhasil dipulihkan.';
 
-        if(is_null($category)){
-            Categories::create([
-                'name' => $request->name,
-            ]);
         }
+        else if ($category) {
+            // Jika produk ditemukan tapi TIDAK terhapus (sudah aktif)
+            // Ini berarti ada duplikasi data aktif, kembalikan error.
+            return back()->with('failed', 'Category dengan nama ini sudah ada.')->withInput();
         
-        // if ($page === "product_page") {
-        //     return redirect()->route('product.index')->with(['category_add_success' => 'Data Kategori Berhasil Disimpan!']);
-        // }
-        // else{
-        //      return redirect()->route('category.index')->with(['category_add_success' => 'Data Kategori Berhasil Disimpan!']);
-        // }
-        return Redirect::back()->with(['category_add_success' => 'Data Kategori Berhasil Disimpan!']);
+        } 
+        else {
+            // Jika produk sama sekali tidak ditemukan, buat baris baru
+            Categories::create($validated);
+            
+            // Beri pesan bahwa data baru berhasil dibuat
+            $message = 'Category baru berhasil ditambahkan.';
+        }
+
+        // 4. Redirect kembali dengan pesan sukses
+        return redirect()->route('category.index')->with('success', $message);
     
     }
 
@@ -95,6 +104,20 @@ class CategoryController extends Controller
     public function destroy(string $id)
     {
         //
+        // dd($id);
+        $category = Categories::where('id', $id)->first();
+        // dd($category);
+
+        $products = Product::where('category_id', $id)->get();
+        // dd($products);
+
+        if($products->isNotEmpty()){
+            return redirect()->back()->with('category_destroy_failed', 'Masih Terdapat Produk Di Category Ini !');
+        }
+        else{
+            $category->delete();
+            return redirect()->back()->with('category_destroy_success', 'Data Category Berhasil Dihapus.');
+        }
     }
 
     public function search(Request $request)
