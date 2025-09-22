@@ -49,7 +49,7 @@
                 <div class="card">
                   <div class="card-body">
                     <div class="row">
-                        <div class="col-md-9">
+                        <div class="col-md-12">
                             <div class="form-group">
                                 <label for="searchProduct">Cari Produk</label>
                                 <input type="text" class="form-control" id="searchProduct" placeholder="Nama Produk">
@@ -76,26 +76,23 @@
                 <div class="card">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">Products</h4>
+                        <h4 class="card-title mb-0">Daftar Produk</h4>
                         <div class="btn-wrapper">
-                            <button type="button" class="btn btn-otline-dark align-items-center" data-toggle="modal" data-target="#addCategoryModal">
-                                <i class="mdi mdi-tag-plus"></i> Add Category
-                            </button>
-                            <button type="button" class="btn btn-primary text-white me-0" data-toggle="modal" data-target="#addProductModal">
-                                <i class="mdi mdi-plus"></i> Add Product
+                            <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addProductModal">
+                                <i class="mdi mdi-plus"></i> Tambah Product
                             </button>
                         </div>
                     </div>
                     <div class="table-responsive">
-                      <table class="table table-hover">
+                      <table class="table table-bordered table-hover">
                         <thead>
                           <tr>
                             <th>No</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Stock</th>
-                            <th>Price</th>
-                            <th class="text-center">Action</th>
+                            <th>Produk</th>
+                            <th>Kategori</th>
+                            <th>Stok</th>
+                            <th>Harga</th>
+                            <th class="text-center">Aksi</th>
                           </tr>
                         </thead>
                         <tbody>

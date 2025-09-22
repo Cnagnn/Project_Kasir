@@ -27086,6 +27086,20 @@ dl li {
 .table.table-bordered {
   border-top: 1px solid #dee2e6;
 }
+
+/* Custom table-bordered styling - consistent border colors */
+.table.table-bordered,
+.table.table-bordered > :not(caption) > * > * {
+  border-color: #dee2e6 !important;
+}
+
+.table.table-bordered tbody tr {
+  border-bottom: 1px solid #dee2e6 !important;
+}
+
+.table.table-bordered thead th {
+  border-bottom: 1px solid #dee2e6 !important;
+}
 .table.select-table tr td:first-child {
   padding-right: 10px;
 }
