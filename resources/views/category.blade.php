@@ -13,15 +13,6 @@
                     });
                 </script>    
             @endif
-            @if(session()->has('category_add_success'))
-                <script>
-                    Swal.fire({
-                        title: "BERHASIL",
-                        text: "{{ session('category_add_success') }}",
-                        icon: "success"
-                    });
-                </script>    
-            @endif
             @if(session()->has('product_update_success'))
                 <script>
                     Swal.fire({
@@ -37,6 +28,42 @@
                         title: "BERHASIL",
                         text: "{{ session('product_update_success') }}",
                         icon: "success"
+                    });
+                </script>    
+            @endif
+            @if(session()->has('category_destroy_success'))
+                <script>
+                    Swal.fire({
+                        title: "BERHASIL",
+                        text: "{{ session('category_destroy_success') }}",
+                        icon: "success"
+                    });
+                </script>    
+            @endif
+            @if(session()->has('category_destroy_failed'))
+                <script>
+                    Swal.fire({
+                        title: "GAGAL",
+                        text: "{{ session('category_destroy_failed') }}",
+                        icon: "error"
+                    });
+                </script>    
+            @endif
+            @if(session()->has('success'))
+                <script>
+                    Swal.fire({
+                        title: "BERHASIL",
+                        text: "{{ session('success') }}",
+                        icon: "success"
+                    });
+                </script>    
+            @endif
+            @if(session()->has('failed'))
+                <script>
+                    Swal.fire({
+                        title: "GAGAL",
+                        text: "{{ session('failed') }}",
+                        icon: "error"
                     });
                 </script>    
             @endif
