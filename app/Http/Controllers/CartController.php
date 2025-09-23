@@ -15,10 +15,10 @@ class CartController extends Controller
     public function index()
     {
         //
-        $cart = session()->get('cart');
-        dd($cart);
+        $carts = session()->get('cart');
+        // dd($carts);
         return view('cart', [
-
+            'carts' => $carts,
         ]);
     }
 
@@ -79,18 +79,16 @@ class CartController extends Controller
         return redirect()->back();
     }
 
-    public function addToCart(Request $request, $id){
+    public function addToCart(Request $request){
+
+        $id = $request->input('product_id'); 
         // dd($id);
-        $product = Product::findOrFail($id);
-        $batch = ProductStockBatches::where('product_id', $id)->first();
-        $batches = ProductStockBatches::where('product_id', $id)->get();
-        $total_stock = 0;
-        
-        foreach($batches as $item){
-            $total_stock += $item->initial_stock;
-        }
+        $product = Product::with('category', 'stockBatches')->findOrFail($id);
 
         // dd($total_stock);
+        // dd($product->stockBatches->pluck('sell_price'));
+        // dd($product->stockBatches->pluck('sell_price')->sum());
+        // dd($product->category->name);
 
         $cart = session()->get('cart', []);
 
@@ -99,14 +97,85 @@ class CartController extends Controller
         }
         else{
             $cart[$id] = [
+                'id' => $product->id,
                 'name' => $product->name,
-                'stock' => $total_stock,
-                'sell_price' => $batch->sell_price,
+                'category' => $product->category->name,
+                'stock' => $product->stockBatches->pluck('remaining_stock')->sum(),
+                'sell_price' => $product->stockBatches->first()->sell_price,
                 'quantity' => 1
             ];
         }
 
+        $qty = $cart[$id]['quantity'];
+
         session()->put('cart', $cart);
-        return redirect()->back()->with('add_to_cart_success', "Product Berhasil Ditambahkan Ke Keranjang!");
+        // return redirect()->back()->with('add_to_cart_success', "Product Berhasil Ditambahkan Ke Keranjang!");
+        return response()->json([
+            'success' => true,
+            'message' => "Product Berhasil Ditambahkan Ke Keranjang!",
+            'cart_count' => count($cart), // Kirim jumlah item di keranjang
+            'qty' => $qty,
+        ]);
+    }
+
+    public function increaseQtyCart(Request $request){
+
+        $id = $request->input('product_id');
+        $cart = session()->get('cart', []);
+        $newQuantity = 0;
+        
+        foreach ($cart as &$item) {
+            if ($item['id'] == $id) {
+                $item['quantity']++;
+                $newQuantity = $item['quantity']; // Simpan kuantitas baru
+                break;
+            }
+        }
+
+        session()->put('cart', $cart);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil Menambahkan Kuantitas!",
+            'new_quantity' => $newQuantity // Kirim jumlah item di keranjang
+        ]);
+    }
+
+    public function decreaseQtyCart(Request $request){
+
+        $id = $request->input('product_id');
+        $cart = session()->get('cart', []);
+        $newQuantity = 0;
+        $itemRemoved = false;
+        
+        foreach ($cart as &$item) {
+            if ($item['id'] == $id) {
+                $item['quantity']--;
+                $newQuantity = $item['quantity']; // Simpan kuantitas baru
+                if ($item['quantity'] <= 0) {
+                    unset($cart[$id]);
+                    $itemRemoved = true;
+                }
+                break;
+            }
+        }
+
+        session()->put('cart', $cart);
+
+         // Jika item dihapus, kirim respons khusus untuk penghapusan
+        if ($itemRemoved) {
+            return response()->json([
+                'success' => true,
+                'message' => "Produk berhasil dihapus dari keranjang!",
+                'unset_item' => true,
+            ]);
+        }
+
+        // Jika hanya mengurangi kuantitas, kirim respons update
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil mengurangi kuantitas!",
+            'new_quantity' => $newQuantity,
+        ]);
     }
 }

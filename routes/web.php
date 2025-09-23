@@ -34,4 +34,6 @@ Route::get('/category/product/{id}/edit', [CategoryController::class, 'categoryP
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::get('/cart/remove_cart', [CartController::class, 'destroy'])->name('cart.destroy');
-Route::post('/product/{id}/add-to-cart', [CartController::class, 'addToCart'])->name('cart.addToCart');
+Route::post('/product/add-to-cart', [CartController::class, 'addToCart'])->name('cart.addToCart');
+Route::post('/product/increase-qty-cart', [CartController::class, 'increaseQtyCart'])->name('cart.increaseQtyCart');
+Route::post('/product/decrease-qty-cart', [CartController::class, 'decreaseQtyCart'])->name('cart.decreaseQtyCart');

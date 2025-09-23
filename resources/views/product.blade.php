@@ -121,13 +121,9 @@
                                                 <i class="mdi mdi-delete"></i> Delete
                                             </button>
                                         </form>
-                                        <form action="{{ route('cart.addToCart', $product->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            
-                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
-                                                <i class="mdi mdi-cart"></i> Tambah Ke Keranjang
-                                            </button>
-                                        </form>
+                                        <button class="btn btn-primary btn-add-to-cart" data-id="{{ $product->id }}">
+                                            <i class="fas fa-shopping-cart"></i> Tambah
+                                        </button>
                                         {{-- <a href="{{ route('product.addToCart', $product->id) }}" class="btn btn-warning btn-sm me-1">
                                             <i class="mdi mdi-pencil"></i> Tambah Ke Keranjang
                                         </a> --}}
@@ -491,8 +487,62 @@
                         // Jika salah satu elemen tidak ditemukan, log error ke console
                         console.error('Satu atau lebih elemen untuk fungsionalitas pencarian tidak ditemukan!');
                     }
-
                 });
+
+
+                $(function(){
+                     $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    }); 
+                    // Gunakan event delegation agar tombol yang baru dimuat (misal via live search) tetap berfungsi
+                    $(document).on('click', '.btn-add-to-cart', function(e) {
+                        console.log('Tombol .btn-add-to-cart berhasil diklik!');    
+                        e.preventDefault(); // Mencegah aksi default dari tombol
+
+                        var productId = $(this).data('id'); // Ambil product_id dari atribut data-id
+                        var button = $(this); // Simpan referensi tombol
+                        console.log(productId);
+                        // Kirim request AJAX ke server
+                        $.ajax({
+                            url: "{{ route('cart.addToCart') }}", // URL ke controller
+                            method: "POST",
+                            data: {
+                                product_id: productId
+                            },
+                            // Aksi jika request berhasil
+                            success: function(response) {
+                                console.log(response); // Untuk debug
+
+                                // Beri feedback ke user (contoh menggunakan SweetAlert atau Toastr)
+                                // alert(response.message);
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: response.message,
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                });
+
+                                // Opsional: Update angka di ikon keranjang
+                                // Misal Anda punya <span id="cart-count">0</span> di navbar
+                                $('#cart-count').text(response.cart_count);
+                            },
+                            // Aksi jika request gagal
+                            error: function(xhr, status, error) {
+                                console.error("Terjadi kesalahan: " + error);
+                                // Tampilkan pesan error ke user
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: 'Gagal menambahkan produk!',
+                                });
+                            }
+                        });
+                    });
+                })
+                
 
             </script>
             @endpush
