@@ -121,8 +121,8 @@
                                                 <i class="mdi mdi-delete"></i> Delete
                                             </button>
                                         </form>
-                                        <button class="btn btn-primary btn-add-to-cart" data-id="{{ $product->id }}">
-                                            <i class="fas fa-shopping-cart"></i> Tambah
+                                        <button class="btn btn-primary btn-add-to-cart btn-sm" data-id="{{ $product->id }}">
+                                            <i class="mdi mdi-cart-plus"></i> Tambah
                                         </button>
                                         {{-- <a href="{{ route('product.addToCart', $product->id) }}" class="btn btn-warning btn-sm me-1">
                                             <i class="mdi mdi-pencil"></i> Tambah Ke Keranjang

@@ -23,7 +23,7 @@
             <li class="nav-item nav-category">Keranjang</li>
             <li class="nav-item">
               <a class="nav-link" href="{{ route('cart.index') }}">
-                <i class="mdi mdi-view-dashboard menu-icon"></i>
+                <i class="mdi mdi-cart menu-icon"></i>
                 <span class="menu-title">Keranjang</span>
               </a>
             </li>
