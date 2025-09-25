@@ -60,7 +60,7 @@
                 <th>Kategori</th>
                 <th>Stok</th>
                 <th>Harga</th>
-                <th>kuantitas</th>
+                <th>Kuantitas</th>
                 <th class="text-center">Aksi</th>
                 </tr>
             </thead>
@@ -76,11 +76,11 @@
                             <td>{{ $item['sell_price'] }}</td>
                             <td id="quantity-{{ $item['id'] }}">{{ $item['quantity'] }}</td>
                             <td>
-                                <button class="btn btn-primary btn-increase-qty" data-id="{{ $item['id'] }}">
-                                    <i class="fas fa-shopping-cart"></i> Tambah
+                                <button class="btn btn-primary btn-increase-qty btn-sm" data-id="{{ $item['id'] }}">
+                                    <i class="mdi mdi-plus"></i> Tambah
                                 </button>
-                                <button class="btn btn-primary btn-decrease-qty" data-id="{{ $item['id'] }}">
-                                    <i class="fas fa-shopping-cart"></i> Kurangi
+                                <button class="btn btn-primary btn-decrease-qty btn-sm" data-id="{{ $item['id'] }}">
+                                    <i class=" mdi mdi-minus"></i> Kurangi
                                 </button>
                             </td>
                         </tr>
