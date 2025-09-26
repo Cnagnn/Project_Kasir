@@ -43,8 +43,9 @@
     <div class="col-lg-12 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
-                    <h4 class="card-title mb-4">Info Produk</h4>
-                    {{-- Form ini akan mengarah ke ProductController@update --}}
+                <h4 class="card-title mb-4">Info Produk</h4>
+                {{-- Form ini akan mengarah ke ProductController@update --}}
+                @if (Auth::user()->role->name != "Cashier")
                     <form id="product-form" action="{{ route('product.update', $product->id) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -56,7 +57,7 @@
                         <div class="mb-3">
                             <label for="product_name" class="form-label">Nama Produk</label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                                   id="product_name" name="product_name" value="{{ old('name', $product->name) }}" required>
+                                id="product_name" name="product_name" value="{{ old('name', $product->name) }}" required>
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -108,8 +109,25 @@
                         </div>
 
                     </form>
+                @else
+                    <div class="mb-3">
+                        <label for="product_name" class="form-label">Nama Produk</label>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                            id="product_name" name="product_name" value="{{ old('name', $product->name) }}" disabled>
+                        @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
 
-
+                    <div class="mb-3">
+                        <label for="category_name" class="form-label">Kategori Produk</label>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                            id="category_name" name="category_name" value="{{ old('name', $product->category->name) }}" disabled>
+                        @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -121,9 +139,11 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Batch Produk</h4>
                         {{-- TOMBOL UNTUK MODAL "TAMBAH BATCH BARU" --}}
-                        <button type="button" class="btn btn-outline-primary btn-md" data-toggle="modal" data-target="#addBatchModal">
-                            <i class="mdi mdi-plus"></i> Tambah Batch
-                        </button>
+                        @if (Auth::user()->role->name != "Cashier")
+                            <button type="button" class="btn btn-outline-primary btn-md" data-toggle="modal" data-target="#addBatchModal">
+                                <i class="mdi mdi-plus"></i> Tambah Batch
+                            </button>
+                        @endif
                     </div>
                     
                     <div class="table-responsive">
@@ -137,7 +157,9 @@
                                     <th>Stok Tersisa</th>
                                     <th>Harga Beli</th>
                                     <th>Harga Jual</th>
-                                    <th>Aksi</th>
+                                    @if (Auth::user()->role->name != "Cashier")
+                                        <th>Aksi</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -152,32 +174,34 @@
                                         <td>{{ $batch->remaining_stock }}</td>
                                         <td>Rp {{ number_format($batch->buy_price, 0, ',', '.') }}</td>
                                         <td>Rp {{ number_format($batch->sell_price, 0, ',', '.') }}</td>
-                                        <td>
-                                            {{-- TOMBOL INI AKAN MEMBUKA MODAL EDIT BATCH --}}
-                                            <button type="button" class="btn btn-warning btn-sm btn-edit-batch" 
-                                                    data-toggle="modal" 
-                                                    data-target="#editBatchModal"
-                                                    data-batch-id="{{ $batch->id }}"
-                                                    data-initial-stock="{{ $batch->initial_stock ?? 0 }}"
-                                                    data-remaining-stock="{{ $batch->remaining_stock }}"
-                                                    data-buy-price="{{ $batch->buy_price }}"
-                                                    data-sell-price="{{ $batch->sell_price }}"
-                                                    data-update-url="{{ route('stock_batches.update', $batch->id) }}"
-                                                    > 
-                                                <i class="mdi mdi-pencil"></i>
-                                            </button>
-                                            
-                                            {{-- Form delete batch (jika diperlukan) --}}
-                                            <form 
-                                                action="{{ route('stock_batches.destroy', $batch->id) }}" 
-                                                method="POST" class="form-delete d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="mdi mdi-delete"></i>
+                                        @if (Auth::user()->role->name != "Cashier")
+                                            <td>
+                                                {{-- TOMBOL INI AKAN MEMBUKA MODAL EDIT BATCH --}}
+                                                <button type="button" class="btn btn-warning btn-sm btn-edit-batch" 
+                                                        data-toggle="modal" 
+                                                        data-target="#editBatchModal"
+                                                        data-batch-id="{{ $batch->id }}"
+                                                        data-initial-stock="{{ $batch->initial_stock ?? 0 }}"
+                                                        data-remaining-stock="{{ $batch->remaining_stock }}"
+                                                        data-buy-price="{{ $batch->buy_price }}"
+                                                        data-sell-price="{{ $batch->sell_price }}"
+                                                        data-update-url="{{ route('stock_batches.update', $batch->id) }}"
+                                                        > 
+                                                    <i class="mdi mdi-pencil"></i>
                                                 </button>
-                                            </form>
-                                        </td>
+                                                
+                                                {{-- Form delete batch (jika diperlukan) --}}
+                                                <form 
+                                                    action="{{ route('stock_batches.destroy', $batch->id) }}" 
+                                                    method="POST" class="form-delete d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        @endif
                                     </tr>
                                 @empty
                                     <tr>

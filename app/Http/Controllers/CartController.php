@@ -122,23 +122,65 @@ class CartController extends Controller
 
         $id = $request->input('product_id');
         $cart = session()->get('cart', []);
-        $newQuantity = 0;
-        
+        $itemFound = false;
+
         foreach ($cart as &$item) {
             if ($item['id'] == $id) {
+                $itemFound = true;
+                
+                $product = Product::with('stockBatches')->find($id);
+
+                if (!$product) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Produk tidak ditemukan.",
+                    ], 404);
+                }
+
+                $totalStock = $product->stockBatches->sum('remaining_stock');
+
+                if ($item['quantity'] >= $totalStock) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Stok tidak mencukupi! Sisa stok: " . $totalStock,
+                        'total_stock' => $totalStock
+                    ]);
+                }
+
+                // 4. Jika stok masih tersedia, tambahkan kuantitas
                 $item['quantity']++;
-                $newQuantity = $item['quantity']; // Simpan kuantitas baru
-                break;
+                $newQuantity = $item['quantity'];
+
+                $price = $item['quantity'] * $item['sell_price'];
+
+                // Simpan kembali cart ke session
+                session()->put('cart', $cart);
+
+                $updatedCart = session()->get('cart', []);
+                $totalPrice = 0;
+
+                foreach ($cart as &$item){
+                    $totalPrice = $totalPrice + ($item['quantity'] * $item['sell_price']);
+                }
+
+                // Kirim response 'sukses'
+                return response()->json([
+                    'success' => true,
+                    'message' => "Berhasil Menambahkan Kuantitas!",
+                    'new_quantity' => $newQuantity,
+                    'total_product_price' => $price,
+                    'total_transaction_price' => $totalPrice
+                ]);
             }
         }
-
-        session()->put('cart', $cart);
-
-        return response()->json([
-            'success' => true,
-            'message' => "Berhasil Menambahkan Kuantitas!",
-            'new_quantity' => $newQuantity // Kirim jumlah item di keranjang
-        ]);
+        
+        // Jika item tidak ditemukan dalam keranjang sama sekali
+        if (!$itemFound) {
+            return response()->json([
+                'success' => false,
+                'message' => "Item tidak ditemukan di keranjang.",
+            ], 404);
+        }
     }
 
     public function decreaseQtyCart(Request $request){
@@ -147,6 +189,7 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
         $newQuantity = 0;
         $itemRemoved = false;
+        $totalPrice = 0;
         
         foreach ($cart as &$item) {
             if ($item['id'] == $id) {
@@ -156,11 +199,17 @@ class CartController extends Controller
                     unset($cart[$id]);
                     $itemRemoved = true;
                 }
-                break;
+                session()->put('cart', $cart);
+                $updatedCart = session()->get('cart', []);
+                
+                foreach ($cart as &$item){
+                    $totalPrice = $totalPrice + ($item['quantity'] * $item['sell_price']);
+                }
             }
+            
         }
 
-        session()->put('cart', $cart);
+        
 
          // Jika item dihapus, kirim respons khusus untuk penghapusan
         if ($itemRemoved) {
@@ -171,11 +220,14 @@ class CartController extends Controller
             ]);
         }
 
+
         // Jika hanya mengurangi kuantitas, kirim respons update
         return response()->json([
             'success' => true,
             'message' => "Berhasil mengurangi kuantitas!",
             'new_quantity' => $newQuantity,
+            // 'total_product_price' => $price,
+            'total_transaction_price' => $totalPrice
         ]);
     }
 }

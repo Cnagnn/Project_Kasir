@@ -66,15 +66,25 @@
                             <div>
                                 <input type="hidden" name="id" value="{{ $categoryId }}">
                             </div>
-
-                            <div class="mb-3">
-                                <label for="product_name" class="form-label">Nama Kategori</label>
-                                <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                                    id="product_name" name="product_name" value="{{ old('name', $categoryName) }}" required>
-                                @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            @if (Auth::user()->role->name != "Cashier")
+                                <div class="mb-3">
+                                    <label for="product_name" class="form-label">Nama Kategori</label>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                                        id="product_name" name="product_name" value="{{ old('name', $categoryName) }}" required>
+                                    @error('name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @else
+                                <div class="mb-3">
+                                    <label for="product_name" class="form-label">Nama Kategori</label>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                                        id="product_name" name="product_name" value="{{ old('name', $categoryName) }}" disabled>
+                                    @error('name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @endif
                         </form>
                     </div>
                 </div>
@@ -82,17 +92,11 @@
 
             {{-- END SEARCH AND FILTER SECTION --}}
 
-            {{-- SEARCH PRODUCT BOX --}}
-
-            <div class="col-lg-12" id="searchResultsContainer">
-                {{-- Search results will be displayed here by JavaScript --}}
-            </div>
-
-            {{-- END SEARCH PRODUCT BOX --}}
+            
 
             {{-- MAIN TABLE / PRODUCT LIST --}}
             
-            <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
+            <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -103,13 +107,22 @@
                                 <input type="text" class="form-control" id="searchProduct" placeholder="Nama Produk">
                             </div>
                         </div>
-                        <div class="btn-wrapper">
-                            <button type="button" class="btn btn-primary text-white me-0" data-toggle="modal" data-target="#addProductModal">
-                                <i class="mdi mdi-plus"></i> Add Product
-                            </button>
-                        </div>
+                        @if (Auth::user()->role->name != "Cashier")
+                            <div class="btn-wrapper">
+                                <button type="button" class="btn btn-primary text-white me-0" data-toggle="modal" data-target="#addProductModal">
+                                    <i class="mdi mdi-plus"></i> Add Product
+                                </button>
+                            </div>
+                        @endif
                     </div>
-                    <div class="table-responsive">
+                    {{-- SEARCH PRODUCT BOX --}}
+            
+                    <div class="col-lg-12" id="searchResultsContainer">
+                        {{-- Search results will be displayed here by JavaScript --}}
+                    </div>
+
+                    {{-- END SEARCH PRODUCT BOX --}}
+                    <div class="table-responsive" id="mainProductTable">
                       <table class="table table-bordered table-hover">
                         <thead>
                           <tr>
@@ -139,14 +152,16 @@
                                         <a href="{{ route('category.productDetail', $product->id) }}" class="btn btn-warning btn-sm me-1">
                                             <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
                                         </a>
-                                        <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            
-                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
-                                                <i class="mdi mdi-delete"></i> Delete
-                                            </button>
-                                        </form>
+                                        @if (Auth::user()->role->name != "Cashier")
+                                            <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                
+                                                <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
+                                                    <i class="mdi mdi-delete"></i> Delete
+                                                </button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
@@ -169,7 +184,9 @@
                         <a href="{{ route('category.index') }}" class="btn btn-danger me-2">
                             Kembali
                         </a>
-                        <button type="submit" form="category-form" class="btn btn-primary">Update Data Produk</button>
+                        @if (Auth::user()->role->name != "Cashier")
+                            <button type="submit" form="category-form" class="btn btn-primary">Update Data Produk</button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -478,14 +495,16 @@
                                                         <a href="${editUrl}" class="btn btn-warning btn-sm me-1">
                                                             <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
                                                         </a>
-                                                        <form action="${deleteUrl}" method="POST" class="form-delete d-inline" onsubmit="handleDelete(event)">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm" data-name="${product.name}">
-                                                                <i class="mdi mdi-delete"></i> Delete
-                                                            </button>
-                                                        </form>
-                                                    </td>
+                                                        @if (Auth::user()->role->name != "Cashier")
+                                                            <form action="${deleteUrl}" method="POST" class="form-delete d-inline" onsubmit="handleDelete(event)">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-danger btn-sm" data-name="${product.name}">
+                                                                    <i class="mdi mdi-delete"></i> Delete
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </td>   
                                                 </tr>
                                             `;
                                         });

@@ -17,10 +17,10 @@ return new class extends Migration
             $table->char("email");
             $table->char("phone");
             $table->char("password");
-            $table->unsignedBigInteger("roles_id");
+            $table->unsignedBigInteger("role_id");
             $table->timestamps();
 
-            $table->foreign('roles_id')->references('id')->on('roles')->onDelete('cascade');
+            $table->foreign('role_id')->references('id')->on('role')->onDelete('cascade');
 
         });
     }
