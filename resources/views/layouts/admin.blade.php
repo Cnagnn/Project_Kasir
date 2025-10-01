@@ -53,7 +53,13 @@
             </a>
           </div>
         </div>
-        <div class="navbar-menu-wrapper d-flex">
+        <div class="navbar-menu-wrapper d-flex align-items-bottom mt-3">
+          <ul class="navbar-nav">
+            <li class="nav-item fw-semibold d-none d-lg-block ms-0">
+              <h1 class="welcome-text">Good Morning, <span class="text-black fw-bold">{{ Auth::user()->name }}</span></h1>
+              <h3 class="welcome-sub-text">{{ Auth::user()->role->name }}</h3>
+            </li>
+          </ul>
           <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="offcanvas">
             <span class="mdi mdi-menu"></span>
           </button>

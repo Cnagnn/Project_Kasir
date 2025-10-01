@@ -2,6 +2,12 @@
 
 @section('content')
 
+@php
+    $cart = Session::get('cart');
+    // dd($cart);
+    $total_payment = 0;
+@endphp
+
 {{-- SWEATALERT --}}
 
 @if(session()->has('product_add_success'))
@@ -75,6 +81,9 @@
                             <td>{{ $item['stock'] }}</td>
                             <td>{{ $item['sell_price'] }}</td>
                             <td id="quantity-{{ $item['id'] }}">{{ $item['quantity'] }}</td>
+                            @php
+                                $total_payment = $total_payment + ($item['sell_price'] * $item['quantity']);
+                            @endphp
                             <td>
                                 <button class="btn btn-primary btn-increase-qty btn-sm" data-id="{{ $item['id'] }}">
                                     <i class="mdi mdi-plus"></i> Tambah
@@ -92,12 +101,80 @@
                 @endif
             </tbody>
             </table>
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body text-end">
+                        @if (session('cart'))
+                            <button class="btn btn-danger me-2" data-toggle="modal" data-target="#btnCheckout">
+                                Checkout
+                            </button>
+                        @endif
+                        
+                        {{-- <button type="submit" form="product-form" class="btn btn-primary">Update Data Produk</button> --}}
+                    </div>
+                </div>
+            </div>
         </div>
         </div>
     </div>
 </div>
 
 {{-- MAIN TABLE / PRODUCT LIST --}}
+
+<div class="modal fade" id="btnCheckout" tabindex="-1" role="dialog" aria-labelledby="btnCheckoutLabel" aria-hidden="true">
+        
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        
+        <div class="modal-content">
+
+            <form action="{{ route('product.store') }}" method="POST" class="forms-sample material-form">
+                @csrf
+                <input type="hidden" value="product_page" name="page">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="btnCheckoutLabel">Checkout</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    {{-- <p class="card-description">Isi detail produk di bawah ini.</p> --}}
+                    
+                    @php
+                        
+                    @endphp
+
+                    <div class="form-group">
+                        <strong id="totalPrice" data-total="{{ $total_payment }}">
+                            Rp {{ number_format($total_payment, 0, ',', '.') }}
+                        </strong>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="stock" name="stock" required="required" />
+                        <label for="stock" class="control-label">Stok</label><i class="bar"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="buy_price" name="buy_price" required="required" />
+                        <label for="price" class="control-label">Harga Beli</label><i class="bar"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="sell_price" name="sell_price" required="required" />
+                        <label for="price" class="control-label">Harga Jual</label><i class="bar"></i>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="button btn btn-primary"><span>Simpan</span></button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -132,12 +209,14 @@
                     // Jika request berhasil, update tampilan kuantitas
                     if (response.success) {
                         $('#quantity-' + productId).text(response.new_quantity);
+                        $('#totalPrice').text(response.total_transaction_price);
                     }
 
                 },
                 // Aksi jika request gagal
                 error: function(xhr, status, error) {
                     console.error("Terjadi kesalahan: " + error);
+                    console.error(response);
                     // Tampilkan pesan error ke user
                     Swal.fire({
                         icon: 'error',
@@ -177,6 +256,7 @@
                     // Jika request berhasil, update tampilan kuantitas
                     if (response.success) {
                         $('#quantity-' + productId).text(response.new_quantity);
+                        $('#totalPrice').text(response.total_transaction_price);
                     }
                     if (response.unset_item){
                         $('#cart-row-' + productId).fadeOut(300, function() {

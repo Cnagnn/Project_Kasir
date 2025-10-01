@@ -78,9 +78,14 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Daftar Produk</h4>
                         <div class="btn-wrapper">
-                            <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addProductModal">
-                                <i class="mdi mdi-plus"></i> Tambah Product
-                            </button>
+                            @if (Auth::user()->role->name != "Cashier")
+                                <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addCategoryModal">
+                                    <i class="mdi mdi-plus"></i> Tambah Kategori
+                                </button>    
+                                <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addProductModal">
+                                    <i class="mdi mdi-plus"></i> Tambah Product
+                                </button>
+                            @endif
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -110,17 +115,19 @@
                                         Rp {{ number_format($product->stockBatches->last()->sell_price ?? 0, 0, ',', '.') }}
                                     </td>
                                     <td>
-                                        <a href="{{ route('product.edit', $product->id) }}" class="btn btn-warning btn-sm me-1">
-                                            <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
-                                        </a>
-                                        <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            
-                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
-                                                <i class="mdi mdi-delete"></i> Delete
-                                            </button>
-                                        </form>
+                                        @if (Auth::user()->role->name != "Cashier")
+                                            <a href="{{ route('product.edit', $product->id) }}" class="btn btn-warning btn-sm me-1">
+                                                <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
+                                            </a>
+                                            <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                
+                                                <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
+                                                    <i class="mdi mdi-delete"></i> Delete
+                                                </button>
+                                            </form>
+                                        @endif
                                         <button class="btn btn-primary btn-add-to-cart btn-sm" data-id="{{ $product->id }}">
                                             <i class="mdi mdi-cart-plus"></i> Tambah
                                         </button>
@@ -145,121 +152,122 @@
 
 
             {{-- MODAL ADD PRODUCT --}}
+            @if (Auth::user()->role->name != "Cashier")
+                <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        
+                        <div class="modal-content">
 
-            <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
-    
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    
-                    <div class="modal-content">
-
-                        <form action="{{ route('product.store') }}" method="POST" class="forms-sample material-form">
-                            @csrf
-                            <input type="hidden" value="product_page" name="page">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="addProductModalLabel">Tambah Produk Baru</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-
-                            <div class="modal-body">
-                                <p class="card-description">Isi detail produk di bawah ini.</p>
-
-                                <div class="form-group">
-                                    <input type="text" class="form-control" id="name" name="name" required="required" />
-                                    <label for="name" class="control-label">Nama Produk</label><i class="bar"></i>
+                            <form action="{{ route('product.store') }}" method="POST" class="forms-sample material-form">
+                                @csrf
+                                <input type="hidden" value="product_page" name="page">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addProductModalLabel">Tambah Produk Baru</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
                                 </div>
 
-                                <div class="form-group">
-                                    <label>Kategori</label>
-                                    
-                                    <input type="hidden" name="category_id" id="selected_category_id" required>
+                                <div class="modal-body">
+                                    <p class="card-description">Isi detail produk di bawah ini.</p>
 
-                                    <div class="btn-group d-block">
-                                        <button type="button" class="btn btn-outline-primary" id="category_dropdown_button">
-                                            -- Pilih Kategori --
-                                        </button>
-                                        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <span class="visually-hidden">Toggle Dropdown</span>
-                                        </button>
-                                        
-                                        <ul class="dropdown-menu" id="category_options">
-                                            {{-- Loop untuk menampilkan semua kategori yang tersedia --}}
-                                            @foreach ($categories as $category)
-                                                <li>
-                                                    <a class="dropdown-item" href="#" data-id="{{ $category->id }}" data-name="{{ $category->name }}">
-                                                        {{ $category->name }}
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="name" name="name" required="required" />
+                                        <label for="name" class="control-label">Nama Produk</label><i class="bar"></i>
                                     </div>
-                                    <small class="form-text text-muted">Klik panah untuk memilih kategori.</small>
+
+                                    <div class="form-group">
+                                        <label>Kategori</label>
+                                        
+                                        <input type="hidden" name="category_id" id="selected_category_id" required>
+
+                                        <div class="btn-group d-block">
+                                            <button type="button" class="btn btn-outline-primary" id="category_dropdown_button">
+                                                -- Pilih Kategori --
+                                            </button>
+                                            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <span class="visually-hidden">Toggle Dropdown</span>
+                                            </button>
+                                            
+                                            <ul class="dropdown-menu" id="category_options">
+                                                {{-- Loop untuk menampilkan semua kategori yang tersedia --}}
+                                                @foreach ($categories as $category)
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" data-id="{{ $category->id }}" data-name="{{ $category->name }}">
+                                                            {{ $category->name }}
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                        <small class="form-text text-muted">Klik panah untuk memilih kategori.</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="number" class="form-control" id="stock" name="stock" required="required" />
+                                        <label for="stock" class="control-label">Stok</label><i class="bar"></i>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="number" class="form-control" id="buy_price" name="buy_price" required="required" />
+                                        <label for="price" class="control-label">Harga Beli</label><i class="bar"></i>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="number" class="form-control" id="sell_price" name="sell_price" required="required" />
+                                        <label for="price" class="control-label">Harga Jual</label><i class="bar"></i>
+                                    </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <input type="number" class="form-control" id="stock" name="stock" required="required" />
-                                    <label for="stock" class="control-label">Stok</label><i class="bar"></i>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                                    <button type="submit" class="button btn btn-primary"><span>Simpan</span></button>
                                 </div>
+                            </form>
 
-                                <div class="form-group">
-                                    <input type="number" class="form-control" id="buy_price" name="buy_price" required="required" />
-                                    <label for="price" class="control-label">Harga Beli</label><i class="bar"></i>
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="number" class="form-control" id="sell_price" name="sell_price" required="required" />
-                                    <label for="price" class="control-label">Harga Jual</label><i class="bar"></i>
-                                </div>
-                            </div>
-
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                                <button type="submit" class="button btn btn-primary"><span>Simpan</span></button>
-                            </div>
-                        </form>
-
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {{-- END MODAL ADD PRODUCT --}}
+                {{-- END MODAL ADD PRODUCT --}}
 
 
-            {{-- MODAL ADD CATEGORY --}}
+                {{-- MODAL ADD CATEGORY --}}
 
-            <div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
-    
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    
-                    <div class="modal-content">
+                <div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        
+                        <div class="modal-content">
 
-                        <form action="{{ route('category.store') }}" method="POST" class="forms-sample material-form">
-                            @csrf
-                            <input type="hidden" value="product_page" name="page">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="addProductModalLabel">Tambah Kategori Baru</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" id="name" name="name" required="required" />
-                                    <label for="name" class="control-label">Nama Kategori</label><i class="bar"></i>
+                            <form action="{{ route('category.store') }}" method="POST" class="forms-sample material-form">
+                                @csrf
+                                <input type="hidden" value="product_page" name="page">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addProductModalLabel">Tambah Kategori Baru</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
                                 </div>
-                            </div>
 
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                                <button type="submit" class="button btn btn-primary"><span>Simpan</span></button>
-                            </div>
-                        </form>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="name" name="name" required="required" />
+                                        <label for="name" class="control-label">Nama Kategori</label><i class="bar"></i>
+                                    </div>
+                                </div>
 
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                                    <button type="submit" class="button btn btn-primary"><span>Simpan</span></button>
+                                </div>
+                            </form>
+
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
 
             {{-- END MODAL ADD CATEGORY --}}
 

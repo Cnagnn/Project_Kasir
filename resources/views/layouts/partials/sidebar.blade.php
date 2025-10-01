@@ -27,5 +27,12 @@
                 <span class="menu-title">Keranjang</span>
               </a>
             </li>
+            <li class="nav-item nav-category">Kelola Pegawai</li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ route('employee.index') }}">
+                <i class="mdi mdi-account menu-icon"></i>
+                <span class="menu-title">Pegawai</span>
+              </a>
+            </li>
           </ul>
         </nav>

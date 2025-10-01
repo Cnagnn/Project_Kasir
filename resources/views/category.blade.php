@@ -105,12 +105,11 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Kategori</h4>
                         <div class="btn-wrapper">
-                            <button type="button" class="btn btn-primary align-items-center" data-toggle="modal" data-target="#addCategoryModal">
-                                <i class="mdi mdi-tag-plus"></i> Kategori Baru
-                            </button>
-                            {{-- <button type="button" class="btn btn-primary text-white me-0" data-toggle="modal" data-target="#addProductModal">
-                                <i class="mdi mdi-plus"></i> Add Product
-                            </button> --}}
+                            @if (Auth::user()->role->name != "Cashier")
+                                <button type="button" class="btn btn-primary align-items-center" data-toggle="modal" data-target="#addCategoryModal">
+                                    <i class="mdi mdi-tag-plus"></i> Kategori Baru
+                                </button>
+                            @endif
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -131,14 +130,16 @@
                                         <a href="{{ route('category.detail', $category->id) }}" class="btn btn-warning btn-sm me-1">
                                             <i class="mdi mdi-pencil"></i> Edit / Detail Kategori
                                         </a>
-                                        <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="form-delete d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            
-                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $category->name }}">
-                                                <i class="mdi mdi-delete"></i> Delete
-                                            </button>
-                                        </form>
+                                        @if (Auth::user()->role->name != "Cashier")
+                                            <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="form-delete d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                
+                                                <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $category->name }}">
+                                                    <i class="mdi mdi-delete"></i> Delete
+                                                </button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
