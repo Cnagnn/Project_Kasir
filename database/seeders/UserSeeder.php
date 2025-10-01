@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
             'email' => "yogapratama@gmail.com",
             'phone' => '08123456789',
             'password' => bcrypt('230304'),
-            'roles_id' => 1,
+            'role_id' => 1,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
             'email' => "aryafauzan191003@gmail.com",
             'phone' => '082264698950',
             'password' => bcrypt('191003'),
-            'roles_id' => 2,
+            'role_id' => 2,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

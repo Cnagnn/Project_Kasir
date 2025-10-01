@@ -79,6 +79,9 @@
                         <h4 class="card-title mb-0">Daftar Produk</h4>
                         <div class="btn-wrapper">
                             @if (Auth::user()->role->name != "Cashier")
+                                <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addCategoryModal">
+                                    <i class="mdi mdi-plus"></i> Tambah Kategori
+                                </button>    
                                 <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addProductModal">
                                     <i class="mdi mdi-plus"></i> Tambah Product
                                 </button>
