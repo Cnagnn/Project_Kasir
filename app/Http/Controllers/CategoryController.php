@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Categories;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Redirect;
@@ -18,7 +18,7 @@ class CategoryController extends Controller
         // mengambil data dari table categories
     	// $products = Product::with('category', 'stockBatches')->get();
         // $categories = Categories::with('product')->get();
-        $categories = Categories::all();
+        $categories = Category::all();
         // dd($products);
     	// mengirim data categories ke view 
     	return view('category',[
@@ -44,7 +44,7 @@ class CategoryController extends Controller
             'name' => 'required',
         ]);
 
-        $category = Categories::withTrashed()->where('name', $request->name)->first();
+        $category = Category::withTrashed()->where('name', $request->name)->first();
         // dd($category);
 
         if ($category && $category->trashed()) {
@@ -63,7 +63,7 @@ class CategoryController extends Controller
         } 
         else {
             // Jika produk sama sekali tidak ditemukan, buat baris baru
-            Categories::create($validated);
+            Category::create($validated);
             
             // Beri pesan bahwa data baru berhasil dibuat
             $message = 'Category baru berhasil ditambahkan.';
@@ -93,20 +93,18 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
         //
-        // dd("Halo");
-        // dd($id);
-        // dd($request->product_name);
+        $id = $request->id;
 
-        $category = Categories::where('id', $id)->first();
+        $category = Category::where('id', $id)->first();
         
         $category->update([
-            'name' => $request->product_name,
+            'name' => $request->name,
         ]);
 
-        return redirect()->back()->with('category_update_success', 'Data Kategori berhasil Di Update');
+        return back()->with('success', "Data Kategori Berhasil Diubah");
 
     }
 
@@ -117,7 +115,7 @@ class CategoryController extends Controller
     {
         //
         // dd($id);
-        $category = Categories::where('id', $id)->first();
+        $category = Category::where('id', $id)->first();
         // dd($category);
 
         $products = Product::where('category_id', $id)->get();
@@ -138,7 +136,7 @@ class CategoryController extends Controller
         $query = $request->input('query');
 
         // Lakukan pencarian di database
-        $categories = Categories::where('name', 'LIKE', "%{$query}%")
+        $categories = Category::where('name', 'LIKE', "%{$query}%")
             // ->with('category', 'stockBatches') // Eager load category untuk efisiensi
             ->take(10) // Batasi hasil agar tidak terlalu banyak
             ->get();
@@ -152,12 +150,12 @@ class CategoryController extends Controller
     {
         
         $products = Product::where('category_id', '=', $id)
-                            ->with('stockBatches')
+                            ->with('stock')
                             ->get(); 
         // dd($products);
-        $category = Categories::where('id', '=', $id)->first();
+        $category = Category::where('id', '=', $id)->first();
         // dd($categoryName->name);
-        $categories = Categories::all();
+        $categories = Category::all();
 
         return view('category_detail',[
             'categoryName' => $category->name,
@@ -174,12 +172,12 @@ class CategoryController extends Controller
         $product = Product::findOrFail($id); 
 
         // Menggabung tabel product dengan tabel stockBatches untuk merelasi semua batch yang dimiliki oleh produk
-        $product->load(['stockBatches' => function ($query) {
+        $product->load(['stock' => function ($query) {
             $query->orderBy('created_at', 'desc'); // Urutkan berdasarkan tanggal dibuat (terbaru dulu)
         }]);
 
         // Ambil semua kategori untuk dropdown
-        $categories = Categories::all();
+        $categories = Category::all();
 
         $product_category = $product->category_id;
         // dd($product->category_id);

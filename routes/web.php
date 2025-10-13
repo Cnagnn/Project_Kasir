@@ -5,9 +5,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\PurchasingController;
 use App\Http\Controllers\StockBatchController;
 
 Route::get('/dashboard', function () {
@@ -30,6 +32,9 @@ Route::middleware(['auth', 'checkrole:Manager,Cashier'])->group(function () {
     Route::get('/category/{id}/detail', [CategoryController::class, 'productsByCategory'])->name('category.detail');
     Route::get('/category/product/{id}/detail', [CategoryController::class, 'categoryProductDetail'])->name('category.productDetail');
 
+    Route::get('/item-stock', [StockController::class, 'index'])->name('stock.index');
+    Route::get('/item-stock/detail/{id}', [StockController::class, 'detail'])->name('stock.detail');
+
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::get('/cart/remove_cart', [CartController::class, 'destroy'])->name('cart.destroy');
     Route::post('/product/add-to-cart', [CartController::class, 'addToCart'])->name('cart.addToCart');
@@ -42,18 +47,28 @@ Route::middleware(['auth', 'checkrole:Manager'])->group(function () {
     // Route::get('/products', [ProductController::class, "index"])->name('product.index');
     Route::post('/product-add', [ProductController::class, "store"])->name('product.store');
     Route::get('/product/{id}/edit', [ProductController::class, 'edit'])->name('product.edit');
-    Route::put('/product/{id}/update', [ProductController::class, "update"])->name('product.update');
+    Route::post('/product/update', [ProductController::class, "update"])->name('product.update');
     Route::delete('/product/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
     // Route::get('/product/search', [ProductController::class, 'search'])->name('product.search');
+
+
+
+    Route::get('/purchasing', [PurchasingController::class, 'index'])->name('purchasing.index');
+    Route::get('/purchasing/stock/in', [PurchasingController::class, 'create'])->name('purchasing.create');
+    Route::get('/purchasing/stock/products/search', [PurchasingController::class, 'search'])->name('purchasing.products.search');
+    Route::post('/purchasing/stock/in/add', [PurchasingController::class, 'add'])->name('purchasing.stock.in.add');
+    Route::post('/purchasing/stock/in/process', [PurchasingController::class, 'process'])->name('purchasing.stock.in.process'); // Untuk menyimpan semua ke DB
 
     Route::post('/batch-add', [StockBatchController::class, "store"])->name('stock_batches.store');
     Route::put('/batch/{id}/update', [StockBatchController::class, "edit"])->name('stock_batches.update');
     Route::delete('/batch/{id}', [StockBatchController::class, "destroy"])->name('stock_batches.destroy');
 
+    // Route::get('/purchasing', [PurchasingController::class, "index"])->name('purchasing.index');
+
     // Route::get('/categories', [CategoryController::class, "index"])->name('category.index');
     Route::post('/category-add', [CategoryController::class, "store"])->name('category.store');
     Route::get('/category/{id}/edit', [CategoryController::class, 'edit'])->name('category.edit');
-    Route::put('/category/{id}/update', [CategoryController::class, "update"])->name('category.update');
+    Route::post('/category/update', [CategoryController::class, "update"])->name('category.update');
     Route::delete('/category/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
     // Route::get('/category/search', [CategoryController::class, 'search'])->name('category.search');
 

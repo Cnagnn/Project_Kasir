@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\Stock;
 use App\Models\Product;
-use App\Models\Categories;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\ProductStockBatches;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Redirect;
 
@@ -17,9 +18,10 @@ class ProductController extends Controller
      */
     public function index()
     {
+        
         // mengambil data dari table product
-    	$products = Product::with('category', 'stockBatches')->get();
-        $categories = Categories::all();
+    	$products = Product::with('category', 'stock')->get();
+        $categories = Category::all();
         // dd($products);
 
         // $page = $request->query('from');
@@ -50,9 +52,9 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required',
             'category_id' => 'required',
-            'stock' => 'required',
-            'buy_price' => 'required',
-            'sell_price' => 'required',
+            // 'stock' => 'required',
+            // 'buy_price' => 'required',
+            // 'sell_price' => 'required',
         ]);
 
         $product = Product::where('name', $request->name)->first();
@@ -66,29 +68,10 @@ class ProductController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-
-            $product->stockBatches()->create([
-                'initial_stock' => $request->stock,
-                'remaining_stock' => $request->stock,
-                'buy_price' => $request->buy_price,
-                'sell_price' => $request->sell_price,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
         }
         else{
-            stockBatches::create([
-                'product_id' => $product->id,
-                'initial_stock' => $request->stock,
-                'remaining_stock' => $request->stock,
-                'buy_price' => $request->buy_price,
-                'sell_price' => $request->sell_price,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            return back()->with('failed', "Data Produk Sudah Ada");
         }
-
-        $page = $request->input('page');
 
         return Redirect::back()->with(['product_add_success' => 'Data Product Berhasil Disimpan!']);
     
@@ -111,15 +94,15 @@ class ProductController extends Controller
         $product = Product::findOrFail($id); 
 
         // Menggabung tabel product dengan tabel stockBatches untuk merelasi semua batch yang dimiliki oleh produk
-        $product->load(['stockBatches' => function ($query) {
+        $product->load(['stock' => function ($query) {
             $query->orderBy('created_at', 'desc'); // Urutkan berdasarkan tanggal dibuat (terbaru dulu)
         }]);
 
         // Ambil semua kategori untuk dropdown
-        $categories = Categories::all();
-
+        $categories = Category::all();
+        // dd($product);
         // Kirim data ke view baru
-        return view('product_batch', [
+        return view('product_stock', [
             'product' => $product,
             'categories' => $categories,
         ]);
@@ -128,17 +111,23 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
         // 1. Validasi semua data yang masuk dari form
         $request->validate([
+            'product_id' => 'required|string|max:255',
             'product_name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
         ]);
 
 
-        // dd($request->name);
-        $product = Product::findOrFail($id);
+        // dd(
+        //     $request->product_id,
+        //     $request->product_name,
+        //     $request->category_id
+        // );
+        $product_id = $request->product_id;
+        $product = Product::findOrFail($product_id);
         // dd($product);
 
         // 2. Lakukan update pada model Product
@@ -148,7 +137,7 @@ class ProductController extends Controller
         ]);
 
         // 3. Kembalikan ke halaman edit dengan pesan sukses
-        return Redirect::back()->with('product_edit_success', 'Data produk berhasil diperbarui.')->withInput();
+        return back()->with('success', 'Data produk berhasil diperbarui.')->withInput();
         
     }
 
@@ -174,7 +163,7 @@ class ProductController extends Controller
 
         // Lakukan pencarian di database
         $products = Product::where('name', 'LIKE', "%{$query}%")
-            ->with('category', 'stockBatches') // Eager load category untuk efisiensi
+            ->with('category', 'stock') // Eager load category untuk efisiensi
             ->take(10) // Batasi hasil agar tidak terlalu banyak
             ->get();
 

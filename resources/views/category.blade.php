@@ -123,13 +123,16 @@
                         </thead>
                         <tbody>
                             @forelse ($categories as $category)
-                                <tr>
+                                <tr id="category-row-{{ $category->id }}">
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $category->name }}</td>
+                                    <td class="category-name">{{ $category->name }}</td>
                                     <td>
-                                        <a href="{{ route('category.detail', $category->id) }}" class="btn btn-warning btn-sm me-1">
-                                            <i class="mdi mdi-pencil"></i> Edit / Detail Kategori
-                                        </a>
+                                        <button class="btn btn-warning btn-sm me-1 edit-category-btn"
+                                        data-name="{{ $category->name }}" 
+                                        data-id="{{ $category->id }}"
+                                        data-url="{{ route('category.update', $category->id) }}">
+                                            <i class="mdi mdi-pencil"></i> Edit Kategori
+                                        </button>
                                         @if (Auth::user()->role->name != "Cashier")
                                             <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="form-delete d-inline">
                                                 @csrf
@@ -193,6 +196,46 @@
             </div>
 
             {{-- END MODAL ADD CATEGORY --}}
+
+            {{-- MODAL EDIT CATEGORY --}}
+
+                <div class="modal fade" id="editCategoryModal" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel" aria-hidden="true">
+        
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        
+                        <div class="modal-content">
+
+                            <form action="{{ route('category.update') }}" method="POST" id="editCategoryForm">
+                                @csrf
+                                {{-- @method('PUT') --}}
+                                <input type="hidden" id="category_id" name="id">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addProductModalLabel">Edit Kategori</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="category_name" name="name" required="required" />
+                                        <label for="name" class="control-label">Nama Kategori</label><i class="bar"></i>
+                                        
+                                        <div id="name_error" class="text-danger small mt-1"></div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                                    <button type="submit" class="button btn btn-primary"><span>Simpan</span></button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+            {{-- END MODAL EDIT CATEGORY --}}
 
             @endsection
 
@@ -401,6 +444,34 @@
                         // Jika salah satu elemen tidak ditemukan, log error ke console
                         console.error('Satu atau lebih elemen untuk fungsionalitas pencarian tidak ditemukan!');
                     }
+
+                });
+
+                $(document).ready(function () {
+
+                    // 1. Menangani event klik pada tombol edit
+                    $('.edit-category-btn').on('click', function () {
+                        // Ambil data dari tombol yang di-klik
+                        let id = $(this).data('id');
+                        let name = $(this).data('name');
+                        let url = $(this).data('url');
+
+                        // Set action form di modal sesuai dengan URL update
+                        $('#editCategoryForm').attr('action', url);
+                        // Isi value input nama kategori dengan nama yang sekarang
+                        $('#editCategoryForm #category_id').val(id);
+                        $('#editCategoryForm #category_name').val(name);
+                        console.log(name);
+                        console.log(id);
+                        console.log(url);
+                        // Hapus pesan error sebelumnya (jika ada)
+                        $('#editCategoryForm #category_name').removeClass('is-invalid');
+                        $('#editCategoryForm #name_error').text('');
+
+                        // [INI KUNCINYA] Tampilkan modal via JavaScript
+                        $('#editCategoryModal').modal('show');
+
+                    });
 
                 });
 

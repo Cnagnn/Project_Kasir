@@ -6,7 +6,6 @@
             <div class="card-body">
                 <form action="{{ route('employee.update', $user->id) }}" method="POST">
                     @csrf
-                    {{-- $product tersedia karena kita berada di edit.blade.php --}}
                     <input type="hidden" name="user_id" value="{{ $user->id }}">
                     
                     <div class="modal-header mb-3">
@@ -15,12 +14,12 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="name" class="form-label">Nama</label>
-                            <input type="text" class="form-control" id="name" name="name" value="{{ $user->name }}" required>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ $user->name }}" disabled>
                         </div>
                         <div class="form-group">
                             <label>Peran</label>
                             
-                            <input type="hidden" name="role_id" id="selected_role_id" value="{{ $user->role->id }}" required>
+                            <input type="hidden" name="role_id" id="selected_role_id" value="{{ $user->role->id }}" disabled>
 
                             <div class="btn-group d-block">
                                 <button type="button" class="btn btn-outline-primary" id="role_dropdown_button" value="{{ $user->role->id }}">
@@ -45,16 +44,20 @@
                         </div>
                         <div class="mb-3">
                             <label for="phone" class="form-label">No. Telp</label>
-                            <input type="number" class="form-control" name="phone" value="{{ $user->phone }}" required>
+                            <input type="number" class="form-control" name="phone" value="{{ $user->phone }}" disabled>
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input type="text" class="form-control" name="email" value="{{ $user->email }}" required>
+                            <input type="text" class="form-control" name="email" value="{{ $user->email }}" disabled>
                         </div>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer" id="submit" style="display: none">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <button type="submit" class="btn btn-primary" id="save-btn">Simpan</button>
+                    </div>
+                    <div class="modal-footer" id="edit">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="cancel-edit-btn">Kembali</button>
+                        <button type="button" class="btn btn-primary" id="edit-btn">Edit</button>
                     </div>
                 </form>
             </div>
@@ -89,6 +92,24 @@
                     // Simpan ID kategori ke input tersembunyi (ini yang akan dikirim ke server)
                     hiddenInput.value = selectedId;
                 });
+            });
+        });
+        // {{-- END DOM TOMBOL KATEGORI --}}
+
+        // {{-- DOM TOMBOL KATEGORI --}}
+        document.addEventListener('DOMContentLoaded', function () {
+            const editBtn = document.getElementById('edit-btn');
+            const saveBtn = document.getElementById('save-btn');
+            const cancelEditBtn = document.getElementById('cancel-edit-btn');
+            const editBtnComponent = document.getElementById('edit');
+            const submitBtnComponent = document.getElementById('submit');
+
+            editBtn.addEventListener('click', () => {
+                submitBtnComponent.style.display = 'block';
+            });
+
+            cancelEditBtn.addEventListener('click', () => {
+                submitBtnComponent.style.display = 'none';
             });
         });
         // {{-- END DOM TOMBOL KATEGORI --}}

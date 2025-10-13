@@ -21,7 +21,7 @@ class ProductSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        DB::table('product_stock_batches')->insert([
+        DB::table('stocks')->insert([
             'product_id' => 1,
             'initial_stock' => 10,
             'remaining_stock' => 10,
@@ -31,7 +31,7 @@ class ProductSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        DB::table('product_stock_batches')->insert([
+        DB::table('stocks')->insert([
             'product_id' => 1,
             'initial_stock' => 10,
             'remaining_stock' => 10,
@@ -49,7 +49,7 @@ class ProductSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        DB::table('product_stock_batches')->insert([
+        DB::table('stocks')->insert([
             'product_id' => 2,
             'initial_stock' => 10,
             'remaining_stock' => 10,

@@ -97,9 +97,7 @@
                             <th>Kategori</th>
                             {{-- <th>Stok</th>
                             <th>Harga</th> --}}
-                            @if (Auth::user()->role->name != "Cashier")
-                                <th class="text-center">Aksi</th>
-                            @endif
+                            <th class="text-center">Aksi</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -116,25 +114,26 @@
                                     <td>
                                         Rp {{ number_format($product->stockBatches->last()->sell_price ?? 0, 0, ',', '.') }}
                                     </td> --}}
-                                    @if (Auth::user()->role->name != "Cashier")
-                                        <td>
-                                            <button class="btn btn-warning btn-sm me-1 edit-product-btn"
+                                    <td>
+                                        
+                                            {{-- <button class="btn btn-warning btn-sm me-1 edit-product-btn"
                                             data-productid = "{{ $product->id }}"
                                             data-productname = "{{ $product->name }}"
                                             data-categoryid = "{{ $product->category->id }}"
                                             data-categoryname = "{{ $product->category->name }}">
-                                                <i class="mdi mdi-pencil"></i> Edit Produk
-                                            </button>
-                                            <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                
-                                                <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
-                                                    <i class="mdi mdi-delete"></i> Delete
-                                                </button>
-                                            </form>
-                                        </td>
-                                    @endif
+                                                <i class="mdi mdi-pencil"></i> Detail Stok
+                                            </button> --}}
+                                            <a href="{{ route('stock.detail', $product->id) }}" class="btn btn-warning btn-sm">
+                                                <i class="mdi mdi-information-outline"></i> Detail
+                                            </a>
+                                       
+                                        {{-- <button class="btn btn-primary btn-add-to-cart btn-sm" data-id="{{ $product->id }}">
+                                            <i class="mdi mdi-cart-plus"></i> Tambah
+                                        </button> --}}
+                                        {{-- <a href="{{ route('product.addToCart', $product->id) }}" class="btn btn-warning btn-sm me-1">
+                                            <i class="mdi mdi-pencil"></i> Tambah Ke Keranjang
+                                        </a> --}}
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
@@ -400,41 +399,41 @@
 
                 // === HANDLE DELETE BUTTON CLICK ===
                 // Pastikan CDN SweetAlert sudah dimuat
-                document.addEventListener('DOMContentLoaded', function () {
+                // document.addEventListener('DOMContentLoaded', function () {
                     
-                    // Cari SEMUA form yang punya class .form-delete
-                    const deleteForms = document.querySelectorAll('.form-delete');
+                //     // Cari SEMUA form yang punya class .form-delete
+                //     const deleteForms = document.querySelectorAll('.form-delete');
                     
-                    deleteForms.forEach(form => {
-                        // Kita "dengarkan" saat form ini akan di-submit
-                        form.addEventListener('submit', function (event) {
+                //     deleteForms.forEach(form => {
+                //         // Kita "dengarkan" saat form ini akan di-submit
+                //         form.addEventListener('submit', function (event) {
                             
-                            // 1. HENTIKAN PENGIRIMAN FORM (JANGAN RELOAD DULU)
-                            event.preventDefault(); 
+                //             // 1. HENTIKAN PENGIRIMAN FORM (JANGAN RELOAD DULU)
+                //             event.preventDefault(); 
                             
-                            // Ambil nama dari tombol di dalam form ini
-                            const button = form.querySelector('button[type="submit"]');
-                            const productName = button.dataset.name;
+                //             // Ambil nama dari tombol di dalam form ini
+                //             const button = form.querySelector('button[type="submit"]');
+                //             const productName = button.dataset.name;
 
-                            // 2. Tampilkan Pop-up Konfirmasi
-                            Swal.fire({
-                                title: 'Apakah Anda yakin?',
-                                text: `Anda akan menghapus "${productName}".`,
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonColor: '#d33',
-                                confirmButtonText: 'Ya, hapus!',
-                                cancelButtonText: 'Batal'
-                            }).then((result) => {
-                                // 3. JIKA PENGGUNA KLIK "YA"
-                                if (result.isConfirmed) {
-                                    // Lanjutkan proses submit form (SEKARANG HALAMAN AKAN RELOAD)
-                                    form.submit(); 
-                                }
-                            });
-                        });
-                    });
-                });
+                //             // 2. Tampilkan Pop-up Konfirmasi
+                //             Swal.fire({
+                //                 title: 'Apakah Anda yakin?',
+                //                 text: `Anda akan menghapus "${productName}".`,
+                //                 icon: 'warning',
+                //                 showCancelButton: true,
+                //                 confirmButtonColor: '#d33',
+                //                 confirmButtonText: 'Ya, hapus!',
+                //                 cancelButtonText: 'Batal'
+                //             }).then((result) => {
+                //                 // 3. JIKA PENGGUNA KLIK "YA"
+                //                 if (result.isConfirmed) {
+                //                     // Lanjutkan proses submit form (SEKARANG HALAMAN AKAN RELOAD)
+                //                     form.submit(); 
+                //                 }
+                //             });
+                //         });
+                //     });
+                // });
 
                 document.addEventListener('DOMContentLoaded', function() {
     
