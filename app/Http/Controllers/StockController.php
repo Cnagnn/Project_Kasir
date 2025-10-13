@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Stock;
+use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
-use App\Models\ProductStockBatches;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Redirect;
 
-class StockBatchController extends Controller
+class StockController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,6 +17,13 @@ class StockBatchController extends Controller
     public function index()
     {
         //
+        $products = Product::with('stock', 'category')->get();
+        $categories = Category::all();
+        // dd($product);
+        return view('stock',[
+            'products' => $products,
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -112,5 +121,19 @@ class StockBatchController extends Controller
         $batch->delete();
         
         return redirect()->back()->with('batch_destroy_success', 'Data Batch Berhasil Dihapus.');
+    }
+
+    public function detail(Request $request, $id)
+    {
+        $product = Product::first();
+        // dd($product->category);
+        $stocks = Product::with('category', 'stock')->where('id', $id)->first();
+
+        return view('stock_detail', [
+            'product' => $product,
+            'categories' => $product->category,
+            'stocks' => $stocks
+        ]);
+        
     }
 }

@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Categories;
+use App\Models\Stock;
+use App\Models\Category;
 use App\Models\TransactionDetails;
 use App\Models\ProductStockBatches;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
@@ -21,12 +22,12 @@ class Product extends Model
 
     public function category()
     {
-    	return $this->BelongsTo(Categories::class);
+    	return $this->BelongsTo(Category::class);
     }
 
-    public function stockBatches()
+    public function stock()
     {
-    	return $this->HasMany(ProductStockBatches::class);
+    	return $this->HasMany(Stock::class);
     }
 
     public function transactionDetails()

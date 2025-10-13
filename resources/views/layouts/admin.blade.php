@@ -1,9 +1,24 @@
+@php
+    use Carbon\Carbon;
+    $time = "";
+    if(Carbon::now()->format('H') >= '04' && Carbon::now()->format('H') < '11'){
+      $time = "Morning";
+    }
+    else if (Carbon::now()->format('H') >= '11' && Carbon::now()->format('H') < '15') {
+      $time = "Afternoon";
+    }
+    else if (Carbon::now()->format('H') >= '15' && Carbon::now()->format('H') < '18') {
+      $time = "Evening";
+    }
+    else {
+      $time = "Night";
+    }
+    // dd(Carbon::now()->format('H'));
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Required          <ul class="navbar-nav ms-auto">eta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Star Admin2 </title>
     <!--  plugins:css -->
     <link rel="stylesheet" href="{{ asset('admin/vendors/feather/feather.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/vendors/mdi/css/materialdesignicons.min.css') }}">
@@ -12,7 +27,7 @@
     <link rel="stylesheet" href="{{ asset('admin/vendors/typicons/typicons.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/vendors/simple-line-icons/css/simple-line-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/vendors/css/vendor.bundle.base.css') }}">
-    <link rel="stylesheet" href="{{ asset('admin/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
+    {{-- <link rel="stylesheet" href="{{ asset('admin/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}"> --}}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- endinject -->
     <!-- Plugin css for this page -->
@@ -56,7 +71,7 @@
         <div class="navbar-menu-wrapper d-flex align-items-bottom mt-3">
           <ul class="navbar-nav">
             <li class="nav-item fw-semibold d-none d-lg-block ms-0">
-              <h1 class="welcome-text">Good Morning, <span class="text-black fw-bold">{{ Auth::user()->name }}</span></h1>
+              <h1 class="welcome-text">Good {{ $time }}, <span class="text-black fw-bold">{{ Auth::user()->name }}</span></h1>
               <h3 class="welcome-sub-text">{{ Auth::user()->role->name }}</h3>
             </li>
           </ul>
@@ -117,9 +132,9 @@
     <!-- inject:js -->
     <script src="{{ asset('admin/js/off-canvas.js') }}"></script>
     <script src="{{ asset('admin/js/template.js') }}"></script>
-    <script src="{{ asset('admin/js/settings.js') }}"></script>
+    {{-- <script src="{{ asset('admin/js/settings.js') }}"></script> --}}
     <script src="{{ asset('admin/js/hoverable-collapse.js') }}"></script>
-    <script src="{{ asset('admin/js/todolist.js') }}"></script>
+    {{-- <script src="{{ asset('admin/js/todolist.js') }}"></script> --}}
     <script>
         $.ajaxSetup({
             headers: {
@@ -131,7 +146,7 @@
     <!-- Custom js for this page-->
     @stack('scripts')
     <script src="{{ asset('admin/js/jquery.cookie.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('admin/js/dashboard.js') }}"></script>
+    {{-- <script src="{{ asset('admin/js/dashboard.js') }}"></script> --}}
     
     <!-- <script src="assets/js/Chart.roundedBarCharts.js"></script> -->
     <!-- End custom js for this page-->
