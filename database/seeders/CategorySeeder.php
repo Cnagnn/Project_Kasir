@@ -13,15 +13,16 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('categories')->insert([
-            'name' => "Makanan",
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        DB::table('categories')->insert([
-            'name' => "Minuman",
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $categories = [
+            ['name' => "Makanan Instan", 'created_at' => now(), 'updated_at' => now()],
+            ['name' => "Minuman", 'created_at' => now(), 'updated_at' => now()],
+            ['name' => "Bumbu Dapur", 'created_at' => now(), 'updated_at' => now()],
+            ['name' => "Kebutuhan Rumah Tangga", 'created_at' => now(), 'updated_at' => now()],
+            ['name' => "Perlengkapan Mandi", 'created_at' => now(), 'updated_at' => now()],
+            ['name' => "Jajanan & Makanan Ringan", 'created_at' => now(), 'updated_at' => now()],
+            ['name' => "Kopi & Teh", 'created_at' => now(), 'updated_at' => now()],
+        ];
+
+        DB::table('categories')->insert($categories);
     }
 }

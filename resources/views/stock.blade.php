@@ -77,7 +77,7 @@
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Daftar Produk</h4>
-                        <div class="btn-wrapper">
+                        {{-- <div class="btn-wrapper">
                             @if (Auth::user()->role->name != "Cashier")
                                 <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addCategoryModal">
                                     <i class="mdi mdi-plus"></i> Tambah Kategori
@@ -86,7 +86,7 @@
                                     <i class="mdi mdi-plus"></i> Tambah Product
                                 </button>
                             @endif
-                        </div>
+                        </div> --}}
                     </div>
                     <div class="table-responsive">
                       <table class="table table-bordered table-hover">
@@ -493,8 +493,7 @@
                                         data.forEach((product, index) => {
                                             const categoryName = product.category ? product.category.name : 'Tidak ada kategori';
                                             const totalStock = product.stock.reduce((sum, batch) => sum + batch.remaining_stock, 0);
-                                            const lastBatch = product.stock[product.stock.length - 1];
-                                            const sellPrice = lastBatch ? lastBatch.sell_price : 0;
+                                            const sellPrice = product.sell_price ? product.sell_price : 0;
                                             
                                             // Format harga ke Rupiah
                                             const formattedPrice = new Intl.NumberFormat('id-ID', {

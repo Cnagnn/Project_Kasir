@@ -7,6 +7,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
@@ -18,7 +19,7 @@ class CategoryController extends Controller
         // mengambil data dari table categories
     	// $products = Product::with('category', 'stockBatches')->get();
         // $categories = Categories::with('product')->get();
-        $categories = Category::all();
+        $categories = Category::paginate(10);
         // dd($products);
     	// mengirim data categories ke view 
     	return view('category',[
@@ -43,6 +44,16 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required',
         ]);
+
+        // 1. Cek apakah ada kategori LAIN yang namanya sama (case-insensitive)
+        $existingCategory = Category::whereRaw('LOWER(name) = ?', [strtolower($request->name)])
+                                    ->where('id', '!=', $request->id) // <-- Kuncinya di sini
+                                    ->first();
+
+        if ($existingCategory) {
+            // Nama sudah dipakai oleh data lain
+            return back()->with('failed', 'Nama kategori ' . $request->name . ' sudah digunakan.');
+        }
 
         $category = Category::withTrashed()->where('name', $request->name)->first();
         // dd($category);
@@ -95,16 +106,33 @@ class CategoryController extends Controller
      */
     public function update(Request $request)
     {
-        //
         $id = $request->id;
+        $name = $request->name;
 
-        $category = Category::where('id', $id)->first();
-        
-        $category->update([
-            'name' => $request->name,
-        ]);
+        // 1. Cek apakah ada kategori LAIN yang namanya sama (case-insensitive)
+        $existingCategory = Category::whereRaw('LOWER(name) = ?', [strtolower($name)])
+                                    ->where('id', '!=', $id) // <-- Kuncinya di sini
+                                    ->first();
 
-        return back()->with('success', "Data Kategori Berhasil Diubah");
+        // 2. Jika ditemukan kategori lain dengan nama itu, kembalikan error
+        if ($existingCategory) {
+            // Nama sudah dipakai oleh data lain
+            return back()->with('failed', 'Nama kategori ' . $name . ' sudah digunakan.');
+        }
+
+        // 3. Jika tidak ada duplikat, baru lakukan update
+        $category = Category::find($id); // Lebih baik pakai find()
+
+        if ($category) {
+            $category->update([
+                'name' => $name,
+            ]);
+            // $category->save(); // TIDAK PERLU, ->update() sudah menyimpan
+            return back()->with('success', "Data Kategori Berhasil Diubah");
+        }
+
+        // Jika kategori dengan $id tidak ditemukan
+        return back()->with('failed', 'Kategori tidak ditemukan.');
 
     }
 
@@ -128,6 +156,37 @@ class CategoryController extends Controller
             $category->delete();
             return redirect()->back()->with('category_destroy_success', 'Data Category Berhasil Dihapus.');
         }
+    }
+
+    public function archive(string $id)
+    {
+        //
+        // dd($id);
+        $category = Category::where('id', $id)->first();
+        // dd($category);
+
+        if ($category->is_archived === 'no') {
+
+            $category->update([
+                'is_archived' => 'yes',
+            ]);
+
+            $category->save();
+
+            return back()->with('success', "Data Kategori Berhasil Diarsipkan");
+        }
+        else {
+
+            $category->update([
+                'is_archived' => 'no',
+            ]);
+
+            $category->save();
+
+            return back()->with('success', "Data Kategori Berhasil Pulihkan");
+        }
+
+        
     }
 
     public function search(Request $request)

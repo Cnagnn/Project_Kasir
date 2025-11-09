@@ -78,8 +78,8 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="searchProduct">Cari Kategori</label>
-                                <input type="text" class="form-control" id="searchProduct" placeholder="Nama Kategori">
+                                <label for="searchRole">Cari Peran</label>
+                                <input type="text" class="form-control" id="searchRole" placeholder="Nama Peran">
                             </div>
                         </div>
                     </div>
@@ -99,15 +99,15 @@
 
             {{-- MAIN TABLE / PRODUCT LIST --}}
             
-            <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
+            <div class="col-lg-12 grid-margin stretch-card" id="mainRoleTable">
                 <div class="card">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">Kategori</h4>
+                        <h4 class="card-title mb-0">Role</h4>
                         <div class="btn-wrapper">
                             @if (Auth::user()->role->name != "Cashier")
                                 <button type="button" class="btn btn-primary align-items-center" data-toggle="modal" data-target="#addCategoryModal">
-                                    <i class="mdi mdi-tag-plus"></i> Kategori Baru
+                                    <i class="mdi mdi-tag-plus"></i> Add New role
                                 </button>
                             @endif
                         </div>
@@ -117,45 +117,32 @@
                         <thead>
                           <tr>
                             <th>No</th>
-                            <th>Kategori</th>
-                            <th>Status</th>
+                            <th>Role</th>
                             <th class="text-center">Aksi</th>
                           </tr>
                         </thead>
                         <tbody>
-                            @forelse ($categories as $category)
-                                <tr id="category-row-{{ $category->id }}">
+                            @forelse ($roles as $role)
+                                <tr id="category-row-{{ $role->id }}">
                                     <td>{{ $loop->iteration }}</td>
-                                    <td class="category-name">{{ $category->name }}</td>
-                                    @if ($category->is_archived == "yes")
-                                        <td>Archived</td>
-                                    @else
-                                        <td>Active</td>
-                                    @endif
+                                    <td class="category-name">{{ $role->name }}</td>
                                     <td>
-                                        <button class="btn btn-warning btn-sm me-1 edit-category-btn"
-                                        data-name="{{ $category->name }}" 
-                                        data-id="{{ $category->id }}"
-                                        data-url="{{ route('category.update', $category->id) }}">
-                                            <i class="mdi mdi-pencil"></i> Edit Kategori
+                                        <button class="btn btn-warning btn-sm me-1 edit-role-btn"
+                                        data-name="{{ $role->name }}" 
+                                        data-id="{{ $role->id }}"
+                                        data-url="{{ route('role.update', $role->id) }}">
+                                            <i class="mdi mdi-pencil"></i> Edit Role
                                         </button>
                                         @if (Auth::user()->role->name != "Cashier")
-                                            <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="form-delete d-inline">
+                                            <form action="{{ route('role.destroy', $role->id) }}" method="POST" class="form-delete d-inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 
-                                                <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $category->name }}">
+                                                <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $role->name }}">
                                                     <i class="mdi mdi-delete"></i> Delete
                                                 </button>
                                             </form>
                                         @endif
-                                        <form action="{{ route('category.archive', $category->id) }}" method="POST" class="form-archive d-inline">
-                                            @csrf
-                                            
-                                            <button type="submit" class="btn btn-info btn-sm" data-name="{{ $category->name }}">
-                                                <i class="mdi mdi mdi-archive"></i> Archive
-                                            </button>
-                                        </form>
                                     </td>
                                 </tr>
                             @empty
@@ -165,9 +152,6 @@
                             @endforelse
                         </tbody>
                       </table>
-                    </div>
-                    <div class="card-body mt-3 d-flex justify-content-center">
-                        {{ $categories->links() }}
                     </div>
                   </div>
                 </div>
@@ -184,12 +168,11 @@
                     
                     <div class="modal-content">
 
-                        <form action="{{ route('category.store') }}" method="POST" class="forms-sample material-form">
+                        <form action="{{ route('role.store') }}" method="POST" class="forms-sample material-form">
                             @csrf
-                            <input type="hidden" value="category_page" name="page">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="addProductModalLabel">Tambah Kategori Baru</h5>
-                                <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close">
+                                <h5 class="modal-title" id="addProductModalLabel">Add New Role</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
@@ -197,7 +180,7 @@
                             <div class="modal-body">
                                 <div class="form-group">
                                     <input type="text" class="form-control" id="name" name="name" required="required" />
-                                    <label for="name" class="control-label">Nama Kategori</label><i class="bar"></i>
+                                    <label for="name" class="control-label">New Role</label><i class="bar"></i>
                                 </div>
                             </div>
 
@@ -215,31 +198,35 @@
 
             {{-- MODAL EDIT CATEGORY --}}
 
-                <div class="modal fade" id="editCategoryModal" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel" aria-hidden="true">
+                <div class="modal fade" id="editRoleModal" tabindex="-1" role="dialog" aria-labelledby="editRoleModalLabel" aria-hidden="true">
         
                     <div class="modal-dialog modal-dialog-centered" role="document">
                         
                         <div class="modal-content">
 
-                            <form action="{{ route('category.update') }}" method="POST" id="editCategoryForm">
+                            <form action="{{ route('role.update') }}" method="POST" id="editRoleForm">
                                 @csrf
-                                <input type="hidden" id="category_id" name="id">
+                                {{-- @method('PUT') --}}
+                                <input type="hidden" id="role_id" name="role_id">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="addProductModalLabel">Edit Kategori</h5>
-                                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close">
+                                    <h5 class="modal-title" id="editRoleModalLabel">Edit Peran</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
+
                                 <div class="modal-body">
                                     <div class="form-group">
+                                        <input type="text" class="form-control" id="role_name" name="role_name" required="required" />
                                         <label for="name" class="control-label">Nama Kategori</label><i class="bar"></i>
-                                        <input type="text" class="form-control" id="category_name" name="name" required="required" />
+                                        
                                         <div id="name_error" class="text-danger small mt-1"></div>
                                     </div>
                                 </div>
+
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-light modal-cancel-btn" data-dismiss="modal">Batal</button>
-                                    <button type="submit" class="btn btn-primary" id="btnSaveCategoryEdit">Simpan</button>
+                                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                                    <button type="submit" class="button btn btn-primary"><span>Simpan</span></button>
                                 </div>
                             </form>
 
@@ -349,78 +336,148 @@
                     });
                 });
 
-                // === HANDLE ARCHIVE BUTTON CLICK ===
-                // Pastikan CDN SweetAlert sudah dimuat
-                document.addEventListener('DOMContentLoaded', function () {
-                    
-                    // Cari SEMUA form yang punya class .form-delete
-                    const deleteForms = document.querySelectorAll('.form-archive');
-                    
-                    deleteForms.forEach(form => {
-                        // Kita "dengarkan" saat form ini akan di-submit
-                        form.addEventListener('submit', function (event) {
-                            
-                            // 1. HENTIKAN PENGIRIMAN FORM (JANGAN RELOAD DULU)
-                            event.preventDefault(); 
-                            
-                            // Ambil nama dari tombol di dalam form ini
-                            const button = form.querySelector('button[type="submit"]');
-                            const productName = button.dataset.name;
-
-                            // 2. Tampilkan Pop-up Konfirmasi
-                            Swal.fire({
-                                title: 'Apakah Anda yakin?',
-                                text: `Anda akan Meng-arsipkan "${productName}".`,
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonColor: '#d33',
-                                confirmButtonText: 'Ya, Arsipkan!',
-                                cancelButtonText: 'Batal'
-                            }).then((result) => {
-                                // 3. JIKA PENGGUNA KLIK "YA"
-                                if (result.isConfirmed) {
-                                    // Lanjutkan proses submit form (SEKARANG HALAMAN AKAN RELOAD)
-                                    form.submit(); 
-                                }
-                            });
-                        });
-                    });
-                });
-
-                document.addEventListener('DOMContentLoaded', function() {
+                // document.addEventListener('DOMContentLoaded', function() {
     
-                    // === SEARCH FUNCTIONALITY ===
-                    const searchInput = document.getElementById('searchProduct');
-                    const resultsContainer = document.getElementById('searchResultsContainer');
-                    const mainProductTable = document.getElementById('mainProductTable');
+                //     // === SEARCH FUNCTIONALITY ===
+                //     const searchInput = document.getElementById('searchProduct');
+                //     const resultsContainer = document.getElementById('searchResultsContainer');
+                //     const mainProductTable = document.getElementById('mainProductTable');
 
-                    // Pastikan semua elemen ada sebelum menambahkan event listener
-                    if (searchInput && resultsContainer && mainProductTable) {
+                //     // Pastikan semua elemen ada sebelum menambahkan event listener
+                //     if (searchInput && resultsContainer && mainProductTable) {
                         
-                        searchInput.addEventListener('input', function() {
-                            const searchTerm = this.value.trim();
-                            console.log(searchTerm);
+                //         searchInput.addEventListener('input', function() {
+                //             const searchTerm = this.value.trim();
+                //             console.log(searchTerm);
+
+                //             if (searchTerm === '') {
+                //                 resultsContainer.innerHTML = '';
+                //                 resultsContainer.style.display = 'none';
+                //                 mainProductTable.style.display = 'block';
+                //                 return;
+                //             }
+
+                //             resultsContainer.style.display = 'block';
+                //             mainProductTable.style.display = 'none';
+
+                //             fetch(`/category/search?query=${encodeURIComponent(searchTerm)}`)
+                //                 // 1. Kembali menggunakan .json() karena menerima data
+                //                 .then(response => response.json())
+                //                 .then(data => {
+                //                     resultsContainer.innerHTML = ''; // Kosongkan hasil lama
+
+                //                     // 2. Buat struktur card dan tabel secara dinamis
+                //                     const resultsCard = document.createElement('div');
+                //                     resultsCard.className = 'card';
+
+                //                     let cardContent = `
+                //                         <div class="card-body">
+                //                             <h4 class="card-title mb-4">Hasil Pencarian untuk "${searchTerm}"</h4>
+                //                             <div class="table-responsive">
+                //                                 <table class="table table-hover">
+                //                                     <thead>
+                //                                         <tr>
+                //                                             <th>No</th>
+                //                                             <th>Name</th>
+                //                                             <th>Action</th>
+                //                                         </tr>
+                //                                     </thead>
+                //                                     <tbody>
+                //                     `;
+
+                //                     // 3. Cek jika ada hasil
+                //                     if (data.length > 0) {
+                //                         // 4. Loop setiap produk dan buat baris tabel (<tr>)
+                //                         data.forEach((category, index) => {
+
+                //                             // Buat URL untuk action edit dan delete
+                //                             const editUrl = `{{ url('product') }}/${category.id}/edit`;
+                //                             const deleteUrl = `{{ url('product') }}/${category.id}`;
+
+                //                             cardContent += `
+                //                                 <tr>
+                //                                     <td>${index + 1}</td>
+                //                                     <td>${category.name}</td>
+                //                                     <td>
+                //                                         <a href="${editUrl}" class="btn btn-warning btn-sm me-1">
+                //                                             <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
+                //                                         </a>
+                //                                         <form action="${deleteUrl}" method="POST" class="form-delete d-inline" onsubmit="handleDelete(event)">
+                //                                             @csrf
+                //                                             @method('DELETE')
+                //                                             <button type="submit" class="btn btn-danger btn-sm" data-name="${category.name}">
+                //                                                 <i class="mdi mdi-delete"></i> Delete
+                //                                             </button>
+                //                                         </form>
+                //                                     </td>
+                //                                 </tr>
+                //                             `;
+                //                         });
+                //                     } else {
+                //                         // Jika tidak ada hasil
+                //                         cardContent += `
+                //                             <tr>
+                //                                 <td colspan="6" class="text-center">Produk tidak ditemukan.</td>
+                //                             </tr>
+                //                         `;
+                //                     }
+
+                //                     // 5. Tutup tag html
+                //                     cardContent += `
+                //                                     </tbody>
+                //                                 </table>
+                //                             </div>
+                //                         </div>
+                //                     `;
+
+                //                     // 6. Masukkan semua HTML yang sudah jadi ke dalam card dan tampilkan
+                //                     resultsCard.innerHTML = cardContent;
+                //                     resultsContainer.appendChild(resultsCard);
+                //                 })
+                //                 .catch(error => {
+                //                     console.error('Error fetching search results:', error);
+                //                 });
+                //         });
+
+                //     } else {
+                //         // Jika salah satu elemen tidak ditemukan, log error ke console
+                //         console.error('Satu atau lebih elemen untuk fungsionalitas pencarian tidak ditemukan!');
+                //     }
+
+                // });
+
+                $(document).ready(function () {
+
+                    //Fungsi Search Product
+                    const searchInput = $('#searchRole');
+                    const resultsContainer = $('#searchResultsContainer');
+                    const mainRoleTable = $('#mainRoleTable');
+
+                    if (searchInput.length > 0 && resultsContainer.length > 0 && mainRoleTable.length > 0) {
+                        searchInput.on('input', function() {
+                            const searchTerm = $(this).val().trim();
 
                             if (searchTerm === '') {
-                                resultsContainer.innerHTML = '';
-                                resultsContainer.style.display = 'none';
-                                mainProductTable.style.display = 'block';
+                                resultsContainer.html('');
+                                resultsContainer.hide();
+                                mainRoleTable.show();
                                 return;
                             }
 
-                            resultsContainer.style.display = 'block';
-                            mainProductTable.style.display = 'none';
+                            resultsContainer.show();
+                            mainRoleTable.hide();
 
-                            fetch(`/category/search?query=${encodeURIComponent(searchTerm)}`)
-                                // 1. Kembali menggunakan .json() karena menerima data
-                                .then(response => response.json())
-                                .then(data => {
-                                    resultsContainer.innerHTML = ''; // Kosongkan hasil lama
-
-                                    // 2. Buat struktur card dan tabel secara dinamis
-                                    const resultsCard = document.createElement('div');
-                                    resultsCard.className = 'card';
-
+                            $.ajax({
+                                url: "{{ route('role.search') }}", // Sudah benar
+                                type: 'GET',
+                                data: { query: searchTerm },
+                                dataType: 'json',
+                                success: function(data) {
+                                    resultsContainer.html(''); 
+                                    const resultsCard = $('<div class="card"></div>');
+                                
+                                    // console.log(data);
+                                    
                                     let cardContent = `
                                         <div class="card-body">
                                             <h4 class="card-title mb-4">Hasil Pencarian untuk "${searchTerm}"</h4>
@@ -436,29 +493,30 @@
                                                     <tbody>
                                     `;
 
-                                    // 3. Cek jika ada hasil
+                                    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
                                     if (data.length > 0) {
-                                        // 4. Loop setiap produk dan buat baris tabel (<tr>)
-                                        data.forEach((category, index) => {
+                                        $.each(data, function(index, role) {
 
-                                            // Buat URL untuk action edit dan delete
-                                            const editUrl = `{{ url('product') }}/${category.id}/edit`;
-                                            const deleteUrl = `{{ url('product') }}/${category.id}`;
-
+                                            const deleteUrl = `/product/${role.id}`;
+                                            console.log(role.name);
+                                            console.log(role.id);
+                                            
                                             cardContent += `
                                                 <tr>
                                                     <td>${index + 1}</td>
-                                                    <td>${category.name}</td>
+                                                    <td>${role.name}</td>
                                                     <td>
-                                                        <button class="btn btn-warning btn-sm me-1 edit-category-btn"
-                                                        data-name="${category.name}" 
-                                                        data-id="${category.id}"
-                                                            <i class="mdi mdi-pencil"></i> Edit Kategori
+                                                        <button class="btn btn-warning btn-sm me-1 edit-role-btn" 
+                                                        data-name="${role.name}" 
+                                                        data-id="${role.id}"
+                                                            <i class="mdi mdi-pencil"></i> Edit Peran
                                                         </button>
-                                                        <form action="${deleteUrl}" method="POST" class="form-delete d-inline" onsubmit="handleDelete(event)">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm" data-name="${category.name}">
+
+                                                        <form action="${deleteUrl}" method="POST" class="form-delete d-inline">
+                                                            <input type="hidden" name="_token" value="${csrfToken}">
+                                                            <input type="hidden" name="_method" value="DELETE">
+                                                            <button type="submit" class="btn btn-danger btn-sm" data-name="${role.name}">
                                                                 <i class="mdi mdi-delete"></i> Delete
                                                             </button>
                                                         </form>
@@ -467,96 +525,44 @@
                                             `;
                                         });
                                     } else {
-                                        // Jika tidak ada hasil
-                                        cardContent += `
-                                            <tr>
-                                                <td colspan="6" class="text-center">Produk tidak ditemukan.</td>
-                                            </tr>
-                                        `;
+                                        cardContent += `<tr><td colspan="6" class="text-center">Produk tidak ditemukan.</td></tr>`;
                                     }
 
-                                    // 5. Tutup tag html
-                                    cardContent += `
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    `;
-
-                                    // 6. Masukkan semua HTML yang sudah jadi ke dalam card dan tampilkan
-                                    resultsCard.innerHTML = cardContent;
-                                    resultsContainer.appendChild(resultsCard);
-                                })
-                                .catch(error => {
+                                    cardContent += `</tbody></table></div></div>`;
+                                    resultsCard.html(cardContent);
+                                    resultsContainer.append(resultsCard);
+                                },
+                                error: function(xhr, status, error) {
                                     console.error('Error fetching search results:', error);
-                                });
+                                    resultsContainer.html('<div class="alert alert-danger">Gagal memuat hasil pencarian.</div>');
+                                }
+                            });
                         });
-
-                    } else {
-                        // Jika salah satu elemen tidak ditemukan, log error ke console
-                        console.error('Satu atau lebih elemen untuk fungsionalitas pencarian tidak ditemukan!');
                     }
-
                 });
 
                 $(document).ready(function () {
 
-                    let originalCategoryName = '';
-                    let $saveButton = $('#btnSaveCategoryEdit'); // Tombol simpan dari modal
-
-                    // 1. Menangani event klik pada tombol edit untuk menampilkan modal edit category
-                    $(document).on('click', '.edit-category-btn', function () {
+                    // 1. Menangani event klik pada tombol edit
+                    $(document).on('click', '.edit-role-btn', function () {
                         // Ambil data dari tombol yang di-klik
                         let id = $(this).data('id');
                         let name = $(this).data('name');
                         let url = $(this).data('url');
 
-                        // Simpan nama asli ke variabel di scope atas
-                        originalCategoryName = name;
-
-                        // Set action form di modal sesuai dengan URL update
-                        $('#editCategoryForm').attr('action', url);
                         // Isi value input nama kategori dengan nama yang sekarang
-                        $('#editCategoryForm #category_id').val(id);
-                        $('#editCategoryForm #category_name').val(name);
+                        $('#editRoleForm #role_id').val(id);
+                        $('#editRoleForm #role_name').val(name);
                         // console.log(name);
                         // console.log(id);
                         // console.log(url);
                         // Hapus pesan error sebelumnya (jika ada)
-                        $('#editCategoryForm #category_name').removeClass('is-invalid');
-                        $('#editCategoryForm #name_error').text('');
+                        $('#editRoleForm #role_name').removeClass('is-invalid');
+                        $('#editRoleForm #name_error').text('');
 
-                        // Langsung disable tombol simpan saat modal dibuka
-                        $saveButton.prop('disabled', true);
+                        // [INI KUNCINYA] Tampilkan modal via JavaScript
+                        $('#editRoleModal').modal('show');
 
-                        // Tampilkan modal via JavaScript
-                        $('#editCategoryModal').modal('show');
-                    });
-
-                    // 2. Menangani event klik pada tombol X modal edit category
-                    $(document).on('click', '.modal-close-btn', function () {
-                        $('#editCategoryModal').modal('hide');
-                    });
-
-                    // 3. Menangani event klik pada tombol cancel modal edit category
-                    $(document).on('click', '.modal-cancel-btn', function () {
-                        $('#editCategoryModal').modal('hide');
-                    });
-
-                    // Event listener untuk input nama kategori
-                    // Ini akan memantau setiap ketikan di field #category_name
-                    $('#editCategoryForm #category_name').on('input', function () {
-                        let currentValue = $(this).val(); // Dapatkan nilai saat ini
-                        
-                        // Bandingkan nilai input saat ini dengan nama asli
-                        // Jika sama, tombol disabled (true). Jika beda, tombol enabled (false).
-                        $saveButton.prop('disabled', currentValue === originalCategoryName);
-                    });
-
-                    // Reset tombol saat modal ditutup (baik via tombol X, Batal, atau klik luar)
-                    $('#editCategoryModal').on('hidden.bs.modal', function () {
-                        $saveButton.prop('disabled', true); // Selalu nonaktifkan saat ditutup
-                        originalCategoryName = ''; // Kosongkan variabel
                     });
 
                 });

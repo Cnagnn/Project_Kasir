@@ -84,23 +84,21 @@ class StockController extends Controller
             'initial_stock' => 'required|integer|min:0',
             'remaining_stock' => 'required|integer|min:0|lte:initial_stock',
             'buy_price' => 'required|numeric|min:0',
-            'sell_price' => 'required|numeric|min:0',
         ]);
 
-        $batch = ProductStockBatches::findOrFail($id);
+        $batch = Stock::findOrFail($id);
 
         // $batch adalah model yang didapat otomatis oleh Laravel (Route Model Binding)
         $batch->update([
             'initial_stock' => $request->initial_stock,
             'remaining_stock' => $request->remaining_stock,
             'buy_price' => $request->buy_price,
-            'sell_price' => $request->sell_price,
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
 
+        $batch->save();
+
         // Kembali ke halaman sebelumnya dengan pesan sukses
-        return Redirect::back()->with('batch_update_success', 'Data Batch Berhasil Diperbarui.');
+        return back()->with('batch_update_success', 'Data Batch Berhasil Diperbarui.');
     }
 
     /**
@@ -125,7 +123,7 @@ class StockController extends Controller
 
     public function detail(Request $request, $id)
     {
-        $product = Product::first();
+        $product = Product::where('id',$id)->first();
         // dd($product->category);
         $stocks = Product::with('category', 'stock')->where('id', $id)->first();
 

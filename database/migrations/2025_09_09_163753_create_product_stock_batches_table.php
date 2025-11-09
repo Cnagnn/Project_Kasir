@@ -17,7 +17,6 @@ return new class extends Migration
             $table->integer("initial_stock");
             $table->integer("remaining_stock");
             $table->integer("buy_price");
-            $table->integer("sell_price");
             $table->timestamps();
 
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->char("invoice_number");
             $table->integer("total_payment");
             $table->char("payment_method");
+            $table->char("payment_status");
             $table->datetime("transaction_date");
             $table->unsignedBigInteger("user_id");
             $table->timestamps();

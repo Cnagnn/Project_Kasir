@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->char("name");
+            $table->string("is_archived")->default('no');
             $table->timestamps();
             $table->softDeletes();
         });
