@@ -84,6 +84,7 @@ class StockController extends Controller
             'initial_stock' => 'required|integer|min:0',
             'remaining_stock' => 'required|integer|min:0|lte:initial_stock',
             'buy_price' => 'required|numeric|min:0',
+            'sell_price' => 'required|numeric|min:0',
         ]);
 
         $batch = Stock::findOrFail($id);
@@ -93,6 +94,7 @@ class StockController extends Controller
             'initial_stock' => $request->initial_stock,
             'remaining_stock' => $request->remaining_stock,
             'buy_price' => $request->buy_price,
+            'sell_price' => $request->sell_price,
         ]);
 
         $batch->save();

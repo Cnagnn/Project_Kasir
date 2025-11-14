@@ -32,7 +32,13 @@ class CheckoutController extends Controller
 
         $totalAmount = 0;
         foreach ($cart as $details) {
-            $totalAmount += $details['sell_price'] * $details['quantity'];
+            // Perbaikan: Gunakan 'subtotal_sell' jika ada (Logika FIFO Baru)
+            if (isset($details['subtotal_sell'])) {
+                $totalAmount += $details['subtotal_sell'];
+            } else {
+                // Fallback untuk data lama (jika belum ada subtotal_sell)
+                $totalAmount += $details['sell_price'] * $details['quantity'];
+            }
         }
 
         $paymentMethod = $request->payment_method;
@@ -104,10 +110,10 @@ class CheckoutController extends Controller
                     $transaction->details()->create([
                         'product_id' => $productId,
                         'quantity'   => $stockToTake,
-                        'product_sell_price'      => $item['sell_price'],
+                        'product_sell_price'      => $batch->sell_price,
                         'product_buy_price'  => $batch->buy_price, // Pastikan nama kolom 'harga_beli' benar
-                        'subtotal'   => $item['sell_price'] * $stockToTake,
-                        'profit'     => ($item['sell_price'] - $batch->buy_price) * $stockToTake,
+                        'subtotal'   => $batch->sell_price * $stockToTake,
+                        'profit'     => ($batch->sell_price - $batch->buy_price) * $stockToTake,
                     ]);
                     $quantityToSell -= $stockToTake;
                 }

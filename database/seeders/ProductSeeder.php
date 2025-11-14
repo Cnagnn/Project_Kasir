@@ -397,23 +397,26 @@ class ProductSeeder extends Seeder
         $products = [];
         $stocks = [];
         $currentProductId = 1;
+        $productSellPrice = 0;
 
-        foreach ($productsData as $p) {
+        foreach ($productsData as $product) {
             
             // 1. Siapkan data untuk tabel 'products'
             // Mengambil 'price' langsung dari array
             $products[] = [
                 'id' => $currentProductId,
-                'name' => $p['name'],
-                'category_id' => $p['cat_id'],
-                'sell_price' => $p['price'], // Menggunakan harga jual manual
+                'name' => $product['name'],
+                'category_id' => $product['cat_id'],
+                'sell_price' => $product['price'], // Menggunakan harga jual manual
                 'image' => 'default.jpg',
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
 
+            $productSellPrice = $product['price'];
+
             // 2. Loop melalui setiap batch stok
-            foreach ($p['batches'] as $batch) {
+            foreach ($product['batches'] as $batch) {
                 
                 // Masukkan data stok dengan harga beli yang sudah manual
                 $stocks[] = [
@@ -421,6 +424,7 @@ class ProductSeeder extends Seeder
                     'initial_stock' => $batch['stock'],
                     'remaining_stock' => $batch['stock'],
                     'buy_price' => $batch['buy'], // Menggunakan harga beli manual
+                    'sell_price' => $productSellPrice,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];

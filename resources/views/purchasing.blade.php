@@ -48,10 +48,11 @@
             <table class="table table-bordered mt-3">
                 <thead>
                     <tr>
-                        <th style="width: 40%;">Nama Produk</th>
+                        <th style="width: 30%;">Nama Produk</th>
                         <th style="width: 20%;">Kategori</th>
                         <th style="width: 15%;">Kuantitas</th>
-                        <th style="width: 20%;">Harga Beli</th>
+                        <th style="width: 15%;">Harga Beli</th>
+                        <th style="width: 15%;">Harga Jual</th>
                         <th style="width: 5%;">Aksi</th>
                     </tr>
                 </thead>
@@ -95,14 +96,21 @@
                 type: "GET",
                 data: { 'query': query },
                 success: function(data) {
+                    console.log(data);
+                    
                     listContainer.html(''); // Kosongkan daftar
                     if (data.length > 0) {
                         $.each(data, function(index, product) {
+                            const availableStock = product.stock.find(s => s.remaining_stock > 0);
+                            const sellPrice = availableStock ? availableStock.sell_price : 0;
+                            // console.log(sellPrice);
+                            
                             listContainer.append(
                                 `<button type="button" class="dropdown-item" 
                                     data-id="${product.id}" 
                                     data-name="${product.name}" 
-                                    data-category="${product.category.name}">${product.name}</button>`
+                                    data-category="${product.category.name}"
+                                    data-sellprice="${sellPrice}">${product.name}</button> `
                             );
                         });
                     } else {
@@ -135,7 +143,8 @@
                     </td>
                     <td><input type="text" class="form-control category-name" readonly></td>
                     <td><input type.number" name="quantity[]" class="form-control" min="1" required></td>
-                    <td><input type="number" name="purchase_price[]" class="form-control" min="0" step="any" required></td>
+                    <td><input type="number" name="buy_price[]" class="form-control" min="0" step="any" required></td>
+                    <td><input type="number" name="sell_price[]" class="form-control sell-price" min="0" step="any" required></td>
                     <td><button type="button" class="btn btn-outline-danger mdi mdi-delete-outline remove-row-btn" title="Hapus Baris"><i class="bi bi-trash"></i></button></td>
                 </tr>
             `;
@@ -205,6 +214,9 @@
             let productId = $(this).data('id');
             let productName = $(this).data('name');
             let categoryName = $(this).data('category');
+            let sellPrice = $(this).data('sellprice');
+            console.log("ini adalah harga jual " + productName + " seharga : " + sellPrice);
+            
 
             // Cek jika ini item valid (bukan 'Memuat...' atau 'Tidak ditemukan')
             if (!productId) return; 
@@ -215,6 +227,7 @@
             currentRow.find('.product-id').val(productId);
             currentRow.find('.product-search').val(productName); // Isi input utama
             currentRow.find('.category-name').val(categoryName);
+            currentRow.find('.sell-price').val(sellPrice);
 
             // Sembunyikan dropdown
             const dropdownMenu = $(this).closest('.dropdown-menu');

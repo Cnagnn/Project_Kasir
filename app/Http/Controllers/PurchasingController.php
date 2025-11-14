@@ -77,7 +77,7 @@ class PurchasingController extends Controller
         if ($request->ajax()) {
             $query = $request->get('query');
 
-            $products = Product::with('category'); // Mulai query
+            $products = Product::with('category', 'stock'); // Mulai query
 
             if ($query != '') {
                 // Jika ada query, cari berdasarkan nama
@@ -150,7 +150,8 @@ class PurchasingController extends Controller
         $validator = Validator::make($request->all(), [
             'product_id.*' => 'required|exists:products,id',
             'quantity.*' => 'required|integer|min:1',
-            'purchase_price.*' => 'required|numeric|min:0',
+            'buy_price.*' => 'required|numeric|min:0',
+            'sell_price.*' => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -168,8 +169,8 @@ class PurchasingController extends Controller
                     'product_id' => $productId,
                     'initial_stock' => $request->quantity[$key],
                     'remaining_stock' => $request->quantity[$key],
-                    'buy_price' => $request->purchase_price[$key],
-                    // 'sell_price' => $product->stock->first()->sell_price
+                    'buy_price' => $request->buy_price[$key],
+                    'sell_price' => $request->sell_price[$key]
                 ]);
             }
 

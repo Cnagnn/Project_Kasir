@@ -100,7 +100,7 @@
                                         <td>{{ $batch->initial_stock ?? 'N/A' }}</td> 
                                         <td>{{ $batch->remaining_stock }}</td>
                                         <td>Rp {{ number_format($batch->buy_price, 0, ',', '.') }}</td>
-                                        <td>Rp {{ number_format($product->sell_price, 0, ',', '.') }}</td>
+                                        <td>Rp {{ number_format($batch->sell_price, 0, ',', '.') }}</td>
                                         @if (Auth::user()->role->name != "Cashier")
                                             <td>
                                                 {{-- TOMBOL INI AKAN MEMBUKA MODAL EDIT BATCH --}}
@@ -169,10 +169,10 @@
                         <label for="edit_buy_price" class="form-label">Harga Beli</label>
                         <input type="number" class="form-control" id="edit_buy_price" name="buy_price" required>
                     </div>
-                    {{-- <div class="mb-3">
+                    <div class="mb-3">
                         <label for="edit_sell_price" class="form-label">Harga Jual</label>
                         <input type="number" class="form-control" id="edit_sell_price" name="sell_price" required>
-                    </div> --}}
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>

@@ -346,6 +346,8 @@
                     type: 'GET',
                     dataType: 'json',
                     success: function(data) {
+                        // console.log(data.cart);
+                        
                         renderCart(data.cart); 
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
@@ -377,7 +379,9 @@
 
                 for (const id in items) {
                     const item = items[id];
-                    const subtotal = item.sell_price * item.quantity;
+                    const subtotal = item.subtotal_sell;
+                    // console.log(items.subtotal_sell);
+                    
                     total += subtotal;
 
                     tableHTML += `
@@ -454,6 +458,9 @@
                         button.prop('disabled', true).html('Menambahkan...');
                     },
                     success: function(response) {
+                        console.log(response.product);
+                        console.log(response.cart);
+                        
                         Swal.fire({
                             title: 'Berhasil!',
                             text: response.success,
@@ -525,6 +532,8 @@
                     },
                     success: function(response) {
                         if (response.success) {
+                            console.log(response.cart);
+                            
                             // 1. Update Kuantitas (Ubah .text ke .val)
                             $('#qty-' + productId).val(response.new_quantity);
                             
@@ -569,6 +578,7 @@
                         button.siblings('.btn-increase-qty').prop('disabled', true);
                     },
                     success: function(response) {
+                        console.log(response.cart);
                         if (response.success) {
                             // console.log(response.message);
                             // console.log(response.cart);
