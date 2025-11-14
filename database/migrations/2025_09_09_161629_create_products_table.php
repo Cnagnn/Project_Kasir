@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->char("name");
             $table->unsignedBigInteger("category_id");
+            $table->integer("sell_price");
             $table->char("image");
             $table->timestamps();
             $table->softDeletes();

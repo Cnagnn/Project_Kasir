@@ -21,7 +21,7 @@ class PurchasingController extends Controller
         //
         // return view('stock_in');
         $stockInItems = Session::get('stock_in_cart', []);
-        return view('stock_in', compact('stockInItems'));
+        return view('purchasing', compact('stockInItems'));
     }
 
     /**
@@ -30,8 +30,6 @@ class PurchasingController extends Controller
     public function create()
     {
         //
-        $stockInItems = Session::get('stock_in_cart', []);
-        return view('stock_in', compact('stockInItems'));
     }
 
     /**
@@ -76,18 +74,49 @@ class PurchasingController extends Controller
 
     public function search(Request $request)
     {
-         if ($request->ajax()) {
+        if ($request->ajax()) {
             $query = $request->get('query');
+
+            $products = Product::with('category', 'stock'); // Mulai query
+
             if ($query != '') {
-                $products = Product::with('category', 'stock')
-                                ->where('name', 'like', '%'.$query.'%')
-                                ->limit(10)
-                                ->get();
-            } else {
-                $products = [];
+                // Jika ada query, cari berdasarkan nama
+                $products->where('name', 'like', '%'.$query.'%');
             }
-            return response()->json($products);
+
+            // Ambil 20 hasil (baik itu hasil pencarian atau daftar default)
+            $results = $products->latest()->limit(20)->get(); 
+
+            return response()->json($results);
         }
+    }
+
+    public function findByName(Request $request)
+    {
+        // Validasi input nama harus ada
+        $request->validate(['name' => 'required|string']);
+
+        $productName = $request->input('name');
+
+        // Cari produk dengan nama yang sama persis (case-insensitive)
+        // 'with('category')' agar data kategori ikut terambil
+        $product = Product::with('category')
+                        ->whereRaw('LOWER(name) = ?', [strtolower($productName)])
+                        ->first();
+
+        if ($product) {
+            // Jika produk ditemukan, kirim respons sukses dengan data produk
+            return response()->json([
+                'success' => true,
+                'product' => $product // Mengirim seluruh objek produk
+            ]);
+        }
+
+        // Jika tidak ditemukan, kirim respons gagal
+        return response()->json([
+            'success' => false,
+            'message' => 'Produk tidak ditemukan.'
+        ]);
     }
 
     public function add(Request $request)
@@ -121,7 +150,8 @@ class PurchasingController extends Controller
         $validator = Validator::make($request->all(), [
             'product_id.*' => 'required|exists:products,id',
             'quantity.*' => 'required|integer|min:1',
-            'purchase_price.*' => 'required|numeric|min:0',
+            'buy_price.*' => 'required|numeric|min:0',
+            'sell_price.*' => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -139,8 +169,8 @@ class PurchasingController extends Controller
                     'product_id' => $productId,
                     'initial_stock' => $request->quantity[$key],
                     'remaining_stock' => $request->quantity[$key],
-                    'buy_price' => $request->purchase_price[$key],
-                    'sell_price' => $product->stock->first()->sell_price
+                    'buy_price' => $request->buy_price[$key],
+                    'sell_price' => $request->sell_price[$key]
                 ]);
             }
 

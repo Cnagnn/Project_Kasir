@@ -20,16 +20,18 @@ class ProductController extends Controller
     {
         
         // mengambil data dari table product
-    	$products = Product::with('category', 'stock')->get();
-        $categories = Category::all();
-        // dd($products);
+    	$products = Product::with('category', 'stock')->paginate(20);
+        $categories_all = Category::all();
+        $categories_withoutArchived = Category::where('is_archived', '!=', 'yes')->get();
+        // dd($categories_withoutArchived);
 
         // $page = $request->query('from');
 
     	// mengirim data product ke view 
     	return view('product',[
             'products' => $products,
-            'categories' => $categories,
+            'categories' => $categories_all,
+            'categories_withoutArchived' => $categories_withoutArchived,
         ]);
 
     }
@@ -54,16 +56,28 @@ class ProductController extends Controller
             'category_id' => 'required',
             // 'stock' => 'required',
             // 'buy_price' => 'required',
-            // 'sell_price' => 'required',
+            'sell_price' => 'required',
         ]);
 
-        $product = Product::where('name', $request->name)->first();
+        // Cek apakah ada produk LAIN yang namanya sama (case-insensitive)
+        $existingProduct = Product::whereRaw('LOWER(name) = ?', [strtolower($request->name)])
+                                    ->where('id', '!=', $request->id) // <-- Kuncinya di sini
+                                    ->first();
+
+        // Jika ditemukan produk lain dengan nama itu, kembalikan error
+        if ($existingProduct) {
+            // Nama sudah dipakai oleh data lain
+            return back()->with('failed', 'Nama Product ' . $request->name . ' sudah digunakan.');
+        }
+
+        $product = Product::where('name', "{$request->name}")->first();
         // dd($product);
         if(is_null($product)){
             //create product
             $product = Product::create([
                 'name' => $request->name,
                 'category_id' => $request->category_id,
+                'sell_price' => $request->sell_price,
                 'image' => 'image',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -73,7 +87,7 @@ class ProductController extends Controller
             return back()->with('failed', "Data Produk Sudah Ada");
         }
 
-        return Redirect::back()->with(['product_add_success' => 'Data Product Berhasil Disimpan!']);
+        return Redirect::back()->with(['success' => 'Data Product Berhasil Disimpan!']);
     
     }
 
@@ -120,6 +134,16 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
         ]);
 
+        // Cek apakah ada produk LAIN yang namanya sama (case-insensitive)
+        $existingProduct = Product::whereRaw('LOWER(name) = ?', [strtolower($request->product_name)])
+                                    ->where('id', '!=', $request->product_id) // <-- Kuncinya di sini
+                                    ->first();
+
+        // Jika ditemukan produk lain dengan nama itu, kembalikan error
+        if ($existingProduct) {
+            // Nama sudah dipakai oleh data lain
+            return back()->with('failed', 'Nama Product ' . $request->name . ' sudah digunakan.');
+        }
 
         // dd(
         //     $request->product_id,
@@ -152,8 +176,7 @@ class ProductController extends Controller
 
         // Controller mengirim redirect biasa, halaman akan refresh
         // dan menampilkan pesan sukses ini.
-        return redirect()->route('product.index')
-            ->with('product_delete_success', 'Produk "' . $productName . '" berhasil dihapus!.');
+        return back()->with('success', 'Produk '. $productName .' berhasil dihapus!.');
     }
 
     public function search(Request $request)

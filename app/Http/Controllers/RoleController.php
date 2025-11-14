@@ -17,6 +17,10 @@ class RoleController extends Controller
     public function index()
     {
         //
+        $roles = Role::all();
+        return view('role', [
+            'roles' => $roles
+        ]);
     }
 
     /**
@@ -85,9 +89,25 @@ class RoleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
         //
+        // dd($id);
+        $role = Role::where('id', $request->role_id)->first();
+        // dd($role);
+        // dd($request);
+        $request->validate([
+            'role_id' => 'required',
+            // 'email' => 'required',
+            // 'phone' => 'required',
+            'role_name' => 'required',
+        ]);
+
+        $role->update([
+            'name' => $request->role_name,
+        ]);
+
+        return back()->with('success', 'Data Peran Berhasil Diperbarui');
     }
 
     /**
@@ -96,5 +116,34 @@ class RoleController extends Controller
     public function destroy(string $id)
     {
         //
+        // dd($id);
+        $role = Role::where('id', $id)->first();
+        // dd($role);
+
+        $employee = User::where('role_id', $id)->get();
+        // dd($employee);
+
+        if($employee->isNotEmpty()){
+            return redirect()->back()->with('failed', 'Masih Terdapat User Di Role Ini !');
+        }
+        else{
+            $role->delete();
+            return redirect()->back()->with('success', 'Data Role Berhasil Dihapus.');
+        }
+    }
+
+    public function search(Request $request)
+    {
+        // Ambil keyword pencarian dari query string (?query=...)
+        $query = $request->input('query');
+
+        // Lakukan pencarian di database
+        $roles = Role::where('name', 'LIKE', "%{$query}%")
+            ->take(10) // Batasi hasil agar tidak terlalu banyak
+            ->get();
+
+            // dd($products);
+        // Kembalikan hasil dalam format JSON
+        return response()->json($roles);
     }
 }

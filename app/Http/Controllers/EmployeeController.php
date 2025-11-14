@@ -82,23 +82,23 @@ class EmployeeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
         // dd($id);
-        $user = User::where('id', $id)->first();
+        $user = User::where('id', $request->employee_id)->first();
         // dd($user);
-        dd($request);
+        // dd($request);
         $request->validate([
-            'name' => 'required',
-            'email' => 'required',
-            'phone' => 'required',
+            'employee_name' => 'required',
+            // 'email' => 'required',
+            // 'phone' => 'required',
             'role_id' => 'required',
         ]);
 
         $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
+            'name' => $request->employee_name,
+            // 'email' => $request->email,
+            // 'phone' => $request->phone,
             'role_id' => $request->role_id,
         ]);
 
@@ -111,6 +111,22 @@ class EmployeeController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function search(Request $request)
+    {
+        // Ambil keyword pencarian dari query string (?query=...)
+        $query = $request->input('query');
+
+        // Lakukan pencarian di database
+        $employees = User::where('name', 'LIKE', "%{$query}%")
+            ->with('role') // Eager load category untuk efisiensi
+            ->take(10) // Batasi hasil agar tidak terlalu banyak
+            ->get();
+
+            // dd($products);
+        // Kembalikan hasil dalam format JSON
+        return response()->json($employees);
     }
 
     public function detail(string $id)

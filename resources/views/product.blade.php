@@ -4,42 +4,25 @@
             
             {{-- SWEATALERT --}}
 
-            @if(session()->has('product_add_success'))
+            @if(session()->has('success'))
                 <script>
                     Swal.fire({
                         title: "BERHASIL",
-                        text: "{{ session('product_add_success') }}",
+                        text: "{{ session('success') }}",
                         icon: "success"
                     });
                 </script>    
             @endif
-            @if(session()->has('category_add_success'))
+            @if(session()->has('failed'))
                 <script>
                     Swal.fire({
-                        title: "BERHASIL",
-                        text: "{{ session('category_add_success') }}",
-                        icon: "success"
+                        title: "GAGAL",
+                        text: "{{ session('failed') }}",
+                        icon: "error"
                     });
                 </script>    
             @endif
-            @if(session()->has('product_update_success'))
-                <script>
-                    Swal.fire({
-                        title: "BERHASIL",
-                        text: "{{ session('product_update_success') }}",
-                        icon: "success"
-                    });
-                </script>    
-            @endif
-            @if(session()->has('product_delete_success'))
-                <script>
-                    Swal.fire({
-                        title: "BERHASIL",
-                        text: "{{ session('product_update_success') }}",
-                        icon: "success"
-                    });
-                </script>    
-            @endif
+            
 
             {{-- END SWEATALERT --}}
             
@@ -74,79 +57,83 @@
             
             <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
                 <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">Daftar Produk</h4>
-                        <div class="btn-wrapper">
-                            @if (Auth::user()->role->name != "Cashier")
-                                <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addCategoryModal">
-                                    <i class="mdi mdi-plus"></i> Tambah Kategori
-                                </button>    
-                                <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addProductModal">
-                                    <i class="mdi mdi-plus"></i> Tambah Product
-                                </button>
-                            @endif
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="card-title mb-0">Daftar Produk</h4>
+                            <div class="btn-wrapper">
+                                @if (Auth::user()->role->name != "Cashier")
+                                    <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addCategoryModal">
+                                        <i class="mdi mdi-plus"></i> Tambah Kategori
+                                    </button>    
+                                    <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addProductModal">
+                                        <i class="mdi mdi-plus"></i> Tambah Product
+                                    </button>
+                                @endif
+                            </div>
                         </div>
-                    </div>
-                    <div class="table-responsive">
-                      <table class="table table-bordered table-hover">
-                        <thead>
-                          <tr>
-                            <th>No</th>
-                            <th>Produk</th>
-                            <th>Kategori</th>
-                            {{-- <th>Stok</th>
-                            <th>Harga</th> --}}
-                            @if (Auth::user()->role->name != "Cashier")
-                                <th class="text-center">Aksi</th>
-                            @endif
-                          </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($products as $product)
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead>
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $product->name }}</td>
-                                    <td>
-                                        {{ $product->category->name ?? 'Tidak ada kategori' }}
-                                    </td>
-                                    {{-- <td>
-                                        {{ $product->stockBatches->sum('remaining_stock') }}
-                                    </td>
-                                    <td>
-                                        Rp {{ number_format($product->stockBatches->last()->sell_price ?? 0, 0, ',', '.') }}
-                                    </td> --}}
+                                    <th>No</th>
+                                    <th>Produk</th>
+                                    <th>Kategori</th>
+                                    {{-- <th>Stok</th> --}}
+                                    <th>Harga</th>
                                     @if (Auth::user()->role->name != "Cashier")
-                                        <td>
-                                            <button class="btn btn-warning btn-sm me-1 edit-product-btn"
-                                            data-productid = "{{ $product->id }}"
-                                            data-productname = "{{ $product->name }}"
-                                            data-categoryid = "{{ $product->category->id }}"
-                                            data-categoryname = "{{ $product->category->name }}">
-                                                <i class="mdi mdi-pencil"></i> Edit Produk
-                                            </button>
-                                            <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                
-                                                <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
-                                                    <i class="mdi mdi-delete"></i> Delete
-                                                </button>
-                                            </form>
-                                        </td>
+                                        <th class="text-center">Aksi</th>
                                     @endif
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center">Belum ada data produk.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                      </table>
+                                </thead>
+                                <tbody>
+                                    @forelse ($products as $product)
+                                        @if ($product->category->is_archived != "yes")
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $product->name }}</td>
+                                                <td>
+                                                    {{ $product->category->name ?? 'Tidak ada kategori' }}
+                                                </td>
+                                                <td>
+                                                    Rp {{ number_format($product->sell_price ?? 0, 0, ',', '.') }}
+                                                </td>
+                                                @if (Auth::user()->role->name != "Cashier")
+                                                    <td>
+                                                        <button class="btn btn-warning btn-sm me-1 edit-product-btn"
+                                                        data-productid = "{{ $product->id }}"
+                                                        data-productname = "{{ $product->name }}"
+                                                        data-categoryid = "{{ $product->category->id }}"
+                                                        data-categoryname = "{{ $product->category->name }}"
+                                                        data-url="{{ route('product.update', $product->id) }}">
+                                                            <i class="mdi mdi-pencil"></i> Edit Produk
+                                                        </button>
+                                                        <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            
+                                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
+                                                                <i class="mdi mdi-delete"></i> Delete
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                @endif
+                                            </tr>
+                                        @endif
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="text-center">Belum ada data produk.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-body mt-3 d-flex justify-content-center">
+                            {{ $products->links() }}
+                        </div>
                     </div>
-                  </div>
                 </div>
             </div>
+
 
             {{-- MAIN TABLE / PRODUCT LIST --}}
 
@@ -192,7 +179,7 @@
                                             
                                             <ul class="dropdown-menu" id="category_options">
                                                 {{-- Loop untuk menampilkan semua kategori yang tersedia --}}
-                                                @foreach ($categories as $category)
+                                                @foreach ($categories_withoutArchived as $category)
                                                     <li>
                                                         <a class="dropdown-item" href="#" data-id="{{ $category->id }}" data-name="{{ $category->name }}">
                                                             {{ $category->name }}
@@ -212,12 +199,12 @@
                                     <div class="form-group">
                                         <input type="number" class="form-control" id="buy_price" name="buy_price" required="required" />
                                         <label for="price" class="control-label">Harga Beli</label><i class="bar"></i>
-                                    </div>
+                                    </div> --}}
 
                                     <div class="form-group">
                                         <input type="number" class="form-control" id="sell_price" name="sell_price" required="required" />
                                         <label for="price" class="control-label">Harga Jual</label><i class="bar"></i>
-                                    </div> --}}
+                                    </div>
                                 </div>
 
                                 <div class="modal-footer">
@@ -267,23 +254,23 @@
                         </div>
                     </div>
                 </div>
+
                 {{-- END MODAL ADD CATEGORY --}}
                 
                 {{-- MODAL EDIT PRODUCT --}}
 
                 <div class="modal fade" id="editProductModal" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel" aria-hidden="true">
-        
                     <div class="modal-dialog modal-dialog-centered" role="document">
-                        
                         <div class="modal-content">
 
                             <form action="{{ route('product.update') }}" method="POST" class="forms-sample material-form" id="editProductForm">
                                 @csrf
                                 <input type="hidden" id="product_id" name="product_id">
                                 {{-- <input type="hidden" id="category_id" name="categoryId"> --}}
+                                
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
@@ -293,9 +280,8 @@
                                         <input type="text" class="form-control" id="product_name" name="product_name" required="required" />
                                         <label for="name" class="control-label">Nama Product</label><i class="bar"></i>
                                     </div>
-                                </div>
 
-                                <div class="form-group">
+                                    <div class="form-group">
                                         <label>Kategori</label>
                                         
                                         <input type="hidden" name="category_id" id="selected_category_id" required>
@@ -321,10 +307,11 @@
                                         </div>
                                         <small class="form-text text-muted">Klik panah untuk memilih kategori.</small>
                                     </div>
+                                    </div> 
 
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                                    <button type="submit" class="button btn btn-primary"><span>Simpan</span></button>
+                                    <button type="button" class="btn btn-light modal-close-btn" data-dismiss="modal">Batal</button>
+                                    <button type="submit" class="button btn btn-primary" id="btnSaveProductEdit"><span>Simpan</span></button>
                                 </div>
                             </form>
 
@@ -436,40 +423,42 @@
                     });
                 });
 
-                document.addEventListener('DOMContentLoaded', function() {
-    
-                    // === SEARCH FUNCTIONALITY ===
-                    const searchInput = document.getElementById('searchProduct');
-                    const resultsContainer = document.getElementById('searchResultsContainer');
-                    const mainProductTable = document.getElementById('mainProductTable');
 
-                    // Pastikan semua elemen ada sebelum menambahkan event listener
-                    if (searchInput && resultsContainer && mainProductTable) {
-                        
-                        searchInput.addEventListener('input', function() {
-                            const searchTerm = this.value.trim();
-                            console.log(searchTerm);
+                $(document).ready(function () {
+
+                    //Fungsi Search Product
+                    const searchInput = $('#searchProduct');
+                    const resultsContainer = $('#searchResultsContainer');
+                    const mainProductTable = $('#mainProductTable');
+
+                    if (searchInput.length > 0 && resultsContainer.length > 0 && mainProductTable.length > 0) {
+                        searchInput.on('input', function() {
+                            const searchTerm = $(this).val().trim();
 
                             if (searchTerm === '') {
-                                resultsContainer.innerHTML = '';
-                                resultsContainer.style.display = 'none';
-                                mainProductTable.style.display = 'block';
+                                resultsContainer.html('');
+                                resultsContainer.hide();
+                                mainProductTable.show();
                                 return;
                             }
 
-                            resultsContainer.style.display = 'block';
-                            mainProductTable.style.display = 'none';
+                            resultsContainer.show();
+                            mainProductTable.hide();
 
-                            fetch(`/product/search?query=${encodeURIComponent(searchTerm)}`)
-                                // 1. Kembali menggunakan .json() karena menerima data
-                                .then(response => response.json())
-                                .then(data => {
-                                    resultsContainer.innerHTML = ''; // Kosongkan hasil lama
-
-                                    // 2. Buat struktur card dan tabel secara dinamis
-                                    const resultsCard = document.createElement('div');
-                                    resultsCard.className = 'card';
-
+                            $.ajax({
+                                url: "{{ route('product.search') }}", // Sudah benar
+                                type: 'GET',
+                                data: { query: searchTerm },
+                                dataType: 'json',
+                                success: function(data) {
+                                    resultsContainer.html(''); 
+                                    const resultsCard = $('<div class="card"></div>');
+                                    
+                                    // **PENTING**: Ganti teks tombol "Edit / Lihat Batch"
+                                    // menjadi "Edit Produk" agar konsisten dengan fungsinya.
+                                    // Saya juga menghapus `onsubmit="handleDelete(event)"` dari <form>
+                                    // karena kita akan menanganinya dengan event delegation.
+                                    
                                     let cardContent = `
                                         <div class="card-body">
                                             <h4 class="card-title mb-4">Hasil Pencarian untuk "${searchTerm}"</h4>
@@ -488,25 +477,22 @@
                                                     <tbody>
                                     `;
 
-                                    // 3. Cek jika ada hasil
+                                    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
                                     if (data.length > 0) {
-                                        // 4. Loop setiap produk dan buat baris tabel (<tr>)
-                                        data.forEach((product, index) => {
+                                        $.each(data, function(index, product) {
                                             const categoryName = product.category ? product.category.name : 'Tidak ada kategori';
+                                            const categoryId = product.category ? product.category.id : '';
                                             const totalStock = product.stock.reduce((sum, batch) => sum + batch.remaining_stock, 0);
-                                            const lastBatch = product.stock[product.stock.length - 1];
-                                            const sellPrice = lastBatch ? lastBatch.sell_price : 0;
-                                            
-                                            // Format harga ke Rupiah
+                                            const sellPrice = product.sell_price ? product.sell_price : 0;
+
                                             const formattedPrice = new Intl.NumberFormat('id-ID', {
                                                 style: 'currency',
                                                 currency: 'IDR',
                                                 minimumFractionDigits: 0
                                             }).format(sellPrice);
 
-                                            // Buat URL untuk action edit dan delete
-                                            const editUrl = `{{ url('product') }}/${product.id}/edit`;
-                                            const deleteUrl = `{{ url('product') }}/${product.id}`;
+                                            const deleteUrl = `/product/${product.id}`;
 
                                             cardContent += `
                                                 <tr>
@@ -517,15 +503,16 @@
                                                     <td>${formattedPrice}</td>
                                                     <td>
                                                         <button class="btn btn-warning btn-sm me-1 edit-product-btn" 
-                                                        data-productid = "${product.id}"
-                                                        data-productname = "${product.name}"
-                                                        data-categoryid = "${product.category.id}"
-                                                        data-categoryname = "${product.category.name}">
-                                                            <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
+                                                            data-productid="${product.id}"
+                                                            data-productname="${product.name}"
+                                                            data-categoryid="${categoryId}" 
+                                                            data-categoryname="${categoryName}">
+                                                            <i class="mdi mdi-pencil"></i> Edit Produk
                                                         </button>
-                                                        <form action="${deleteUrl}" method="POST" class="form-delete d-inline" onsubmit="handleDelete(event)">
-                                                            @csrf
-                                                            @method('DELETE')
+
+                                                        <form action="${deleteUrl}" method="POST" class="form-delete d-inline">
+                                                            <input type="hidden" name="_token" value="${csrfToken}">
+                                                            <input type="hidden" name="_method" value="DELETE">
                                                             <button type="submit" class="btn btn-danger btn-sm" data-name="${product.name}">
                                                                 <i class="mdi mdi-delete"></i> Delete
                                                             </button>
@@ -535,94 +522,28 @@
                                             `;
                                         });
                                     } else {
-                                        // Jika tidak ada hasil
-                                        cardContent += `
-                                            <tr>
-                                                <td colspan="6" class="text-center">Produk tidak ditemukan.</td>
-                                            </tr>
-                                        `;
+                                        cardContent += `<tr><td colspan="6" class="text-center">Produk tidak ditemukan.</td></tr>`;
                                     }
 
-                                    // 5. Tutup tag html
-                                    cardContent += `
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    `;
-
-                                    // 6. Masukkan semua HTML yang sudah jadi ke dalam card dan tampilkan
-                                    resultsCard.innerHTML = cardContent;
-                                    resultsContainer.appendChild(resultsCard);
-                                })
-                                .catch(error => {
+                                    cardContent += `</tbody></table></div></div>`;
+                                    resultsCard.html(cardContent);
+                                    resultsContainer.append(resultsCard);
+                                },
+                                error: function(xhr, status, error) {
                                     console.error('Error fetching search results:', error);
-                                });
+                                    resultsContainer.html('<div class="alert alert-danger">Gagal memuat hasil pencarian.</div>');
+                                }
+                            });
                         });
-
-                    } else {
-                        // Jika salah satu elemen tidak ditemukan, log error ke console
-                        console.error('Satu atau lebih elemen untuk fungsionalitas pencarian tidak ditemukan!');
                     }
-                });
+                    //Fungsi Search Product
 
+                    //Menangani event klik pada tombol edit
 
-                $(function(){
-                     $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        }
-                    }); 
-                    // Gunakan event delegation agar tombol yang baru dimuat (misal via live search) tetap berfungsi
-                    $(document).on('click', '.btn-add-to-cart', function(e) {
-                        console.log('Tombol .btn-add-to-cart berhasil diklik!');    
-                        e.preventDefault(); // Mencegah aksi default dari tombol
+                    let originalProductName = '';
+                    let originalCategoryName = '';
+                    let $saveButton = $('#btnSaveProductEdit');
 
-                        var productId = $(this).data('id'); // Ambil product_id dari atribut data-id
-                        var button = $(this); // Simpan referensi tombol
-                        console.log(productId);
-                        // Kirim request AJAX ke server
-                        $.ajax({
-                            url: "{{ route('cart.addToCart') }}", // URL ke controller
-                            method: "POST",
-                            data: {
-                                product_id: productId
-                            },
-                            // Aksi jika request berhasil
-                            success: function(response) {
-                                console.log(response); // Untuk debug
-
-                                // Beri feedback ke user (contoh menggunakan SweetAlert atau Toastr)
-                                // alert(response.message);
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: response.message,
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                });
-
-                                // Opsional: Update angka di ikon keranjang
-                                // Misal Anda punya <span id="cart-count">0</span> di navbar
-                                $('#cart-count').text(response.cart_count);
-                            },
-                            // Aksi jika request gagal
-                            error: function(xhr, status, error) {
-                                console.error("Terjadi kesalahan: " + error);
-                                // Tampilkan pesan error ke user
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Oops...',
-                                    text: 'Gagal menambahkan produk!',
-                                });
-                            }
-                        });
-                    });
-                });
-
-                $(document).ready(function () {
-
-                    // 1. Menangani event klik pada tombol edit
                     $(document).on('click', '.edit-product-btn', function () {
                         // Ambil data dari tombol yang di-klik
                         let productId = $(this).data('productid');
@@ -635,23 +556,70 @@
                         $('#editProductForm #product_name').val(productName);
                         $('#editProductForm #selected_category_id').val(categoryId);
                         $('#editProductForm #category_dropdown_button').text(categoryName);
-                        console.log(productId);
-                        console.log(productName);
-                        console.log(categoryId);
-                        console.log(categoryName);
-                        // console.log(url);
+
+                        originalProductName = productName;
+                        originalCategoryName = categoryName;
+                        
                         // Hapus pesan error sebelumnya (jika ada)
                         $('#editCategoryForm #category_name').removeClass('is-invalid');
                         $('#editCategoryForm #name_error').text('');
+
+                        // Langsung disable tombol simpan saat modal dibuka
+                        $saveButton.prop('disabled', true);
 
                         // [INI KUNCINYA] Tampilkan modal via JavaScript
                         $('#editProductModal').modal('show');
 
                     });
 
-                });
-                
+                    // 1. Menangani event klik pada tombol X edit modal
+                    $(document).on('click', '.modal-close-btn', function () {
+                    
+                        $('#editProductModal').modal('hide');
 
+                    });
+
+                    // Event listener untuk input nama kategori
+                    // Ini akan memantau setiap ketikan di field #category_name
+                    $('#editProductForm #product_name').on('input', function () {
+                        let currentValue = $(this).val(); // Dapatkan nilai saat ini
+                        
+                        // Bandingkan nilai input saat ini dengan nama asli
+                        // Jika sama, tombol disabled (true). Jika beda, tombol enabled (false).
+                        $saveButton.prop('disabled', currentValue === originalProductName);
+                    });
+
+                    $(document).on('click', '#editProductModal #category_options .dropdown-item', function(e) {
+                        e.preventDefault();
+
+                        const selectedCategoryId = $(this).data('id');
+                        const selectedCategoryName = $(this).data('name');
+
+                        // Update teks tombol dropdown & input hidden
+                        $('#editProductModal #category_dropdown_button').text(selectedCategoryName);
+                        $('#editProductModal #selected_category_id').val(selectedCategoryId);
+
+                        if (selectedCategoryName != originalCategoryName) {
+                            // Aktifkan tombol simpan karena ada perubahan
+                            $('#btnSaveProductEdit').prop('disabled', false);
+                        }
+                        else {
+                            $('#btnSaveProductEdit').prop('disabled', true);
+                        }
+                        
+                    });
+
+                    // Reset tombol saat modal ditutup (baik via tombol X, Batal, atau klik luar)
+                    $('#editProductForm').on('hidden.bs.modal', function () {
+                        $saveButton.prop('disabled', true); // Selalu nonaktifkan saat ditutup
+                        originalCategoryName = ''; // Kosongkan variabel
+                    });
+                    //Menangani event klik pada tombol edit
+
+
+                    
+                    
+                });
             </script>
             @endpush
 

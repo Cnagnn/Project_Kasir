@@ -112,7 +112,7 @@
                                                         data-remaining-stock="{{ $batch->remaining_stock }}"
                                                         data-buy-price="{{ $batch->buy_price }}"
                                                         data-sell-price="{{ $batch->sell_price }}"
-                                                        data-update-url="{{ route('stock_batches.update', $batch->id) }}"
+                                                        data-update-url="{{ route('stock.update', $batch->id) }}"
                                                         > 
                                                     <i class="mdi mdi-pencil"></i>
                                                 </button>
