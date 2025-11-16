@@ -52,7 +52,7 @@
             </div>
         </div>
 
-        <div class="row g-3 mb-4">
+        {{-- <div class="row g-3 mb-4">
             @foreach ($dashboardStats as $stat)
                 <div class="col-md-6 col-xl-3">
                     <div class="card card-rounded shadow-sm h-100">
@@ -64,6 +64,48 @@
                     </div>
                 </div>
             @endforeach
+        </div> --}}
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-xl-3">
+                <div class="card card-rounded shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Penjualan Hari Ini</p>
+                        <h3 class="fw-bold mb-2">Rp. {{ number_format($penjualanHariIni ?? 0, 0, ',', '.') }}</h3>
+                        {{-- <span class="small {{ $dashboardStats[0]['trend_class'] }}">{{ $dashboardStats[0]['trend']}}</span> --}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card card-rounded shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Jumlah Transaksi Hari Ini</p>
+                        <h3 class="fw-bold mb-2">{{ $transaksiHariIni }}</h3>
+                        {{-- <span class="small {{ $dashboardStats[0]['trend_class'] }}">{{ $dashboardStats[0]['trend']}}</span> --}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card card-rounded shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Produk Aktif</p>
+                        <h3 class="fw-bold mb-2">{{ $produkAktif }}</h3>
+                        {{-- <span class="small {{ $dashboardStats[0]['trend_class'] }}">{{ $dashboardStats[0]['trend']}}</span> --}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card card-rounded shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">Kategori</p>
+                        <h3 class="fw-bold mb-2">{{ $totalKategori }}</h3>
+                        {{-- <span class="small {{ $dashboardStats[0]['trend_class'] }}">{{ $dashboardStats[0]['trend']}}</span> --}}
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="row g-4">
@@ -79,18 +121,18 @@
                                 <thead>
                                     <tr>
                                         <th>Invoice</th>
-                                        <th>Pembeli</th>
+                                        <th>Operator</th>
                                         <th>Total</th>
                                         <th>Waktu</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($recentTransactions as $transaction)
+                                    @forelse ($transaksiTerbaru as $transaction)
                                         <tr>
                                             <td class="fw-semibold">{{ $transaction['invoice'] ?? $transaction->invoice_number }}</td>
-                                            <td>{{ $transaction['user'] ?? optional($transaction->users)->name ?? '-' }}</td>
-                                            <td>{{ $transaction['total'] ?? number_format($transaction->total_payment ?? 0, 0, ',', '.') }}</td>
-                                            <td>{{ $transaction['time'] ?? optional($transaction->transaction_date)->format('H:i') }}</td>
+                                            <td>{{ $transaction->user->name ?? '-' }}</td>
+                                            <td>Rp. {{ number_format($transaction->total_payment ?? 0, 0, ',', '.') }}</td>
+                                            <td>{{ $transaction->created_at->format('H:i') }}</td>
                                         </tr>
                                     @empty
                                         <tr>
