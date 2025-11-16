@@ -12,12 +12,11 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PurchasingController;
 use App\Http\Controllers\StockBatchController;
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, "index"])->name('dashboard.index');
 
 Route::get('/', [loginController::class, "showLoginForm"])->name('login');
 Route::post('/', [loginController::class, "loginProcess"])->name('login.process');
