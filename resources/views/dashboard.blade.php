@@ -67,7 +67,7 @@
         </div>
 
         <div class="row g-4">
-            <div class="col-lg-8">
+            <div class="col-lg-12">
                 <div class="card card-rounded h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -103,89 +103,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="col-lg-4">
-                <div class="card card-rounded h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="card-title card-title-dash mb-0">Notifikasi Stok</h4>
-                            <span class="badge bg-warning text-dark">{{ $lowStockProducts->count() }} produk</span>
-                        </div>
-                        <ul class="list-group list-group-flush">
-                            @forelse ($lowStockProducts as $product)
-                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <p class="mb-0 fw-semibold">{{ $product['name'] ?? $product->name }}</p>
-                                        <small class="text-muted">{{ $product['category'] ?? optional($product->category)->name ?? '-' }}</small>
-                                    </div>
-                                    <span class="badge bg-light text-danger border border-danger">{{ $product['stock'] ?? $product->remaining_stock }} pcs</span>
-                                </li>
-                            @empty
-                                <li class="list-group-item text-muted text-center">Stok aman</li>
-                            @endforelse
-                        </ul>
-                        <a href="{{ route('stock.index') }}" class="btn btn-outline-primary btn-sm w-100 mt-3">Kelola stok</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4 mt-1">
-            <div class="col-lg-6">
-                <div class="card card-rounded h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="card-title card-title-dash mb-0">Catatan Shift</h4>
-                            <span class="text-muted small">Update terakhir {{ now()->format('H:i') }}</span>
-                        </div>
-                        <ul class="list-unstyled mb-0">
-                            @foreach ($shiftNotes as $note)
-                                <li class="d-flex mb-3">
-                                    <span class="badge bg-primary me-3 rounded-circle" style="width: 10px; height: 10px; min-width: 10px;"></span>
-                                    <span>{{ $note }}</span>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-6">
-                <div class="card card-rounded h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="card-title card-title-dash mb-0">Aksi Cepat</h4>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-sm-6">
-                                <a href="{{ route('selling.index') }}" class="btn btn-primary w-100 h-100 d-flex flex-column justify-content-center align-items-center">
-                                    <i class="mdi mdi-cart-plus mb-1"></i>
-                                    Transaksi Baru
-                                </a>
-                            </div>
-                            <div class="col-sm-6">
-                                <a href="{{ route('product.index') }}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center align-items-center">
-                                    <i class="mdi mdi-package-variant mb-1"></i>
-                                    Data Produk
-                                </a>
-                            </div>
-                            <div class="col-sm-6">
-                                <a href="{{ route('purchasing.index') }}" class="btn btn-outline-secondary w-100 h-100 d-flex flex-column justify-content-center align-items-center">
-                                    <i class="mdi mdi-truck-delivery mb-1"></i>
-                                    Tambah Stok
-                                </a>
-                            </div>
-                            <div class="col-sm-6">
-                                <a href="{{ route('employee.index') }}" class="btn btn-outline-secondary w-100 h-100 d-flex flex-column justify-content-center align-items-center">
-                                    <i class="mdi mdi-account-group mb-1"></i>
-                                    Tim Kasir
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
