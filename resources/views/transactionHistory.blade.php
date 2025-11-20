@@ -45,6 +45,7 @@
                                 <th>No. Invoice</th>
                                 <th>Operator</th>
                                 <th>Total Harga</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -108,6 +109,7 @@
                                         <td>${item.invoice_number}</td>
                                         <td>${item.user ? item.user.name : '-'}</td>
                                         <td>${formattedPrice}</td>
+                                        <td><button class="btn btn-primary btn-sm"><i class="mdi mdi-pencil"></i></button></td>
                                     </tr>
                                 `;
                                 tbody.append(row);
@@ -116,7 +118,7 @@
                             // Jika data kosong
                             tbody.append(`
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">
+                                    <td colspan="5" class="text-center text-muted py-4">
                                         Tidak ada data transaksi pada rentang tanggal ini.
                                     </td>
                                 </tr>
