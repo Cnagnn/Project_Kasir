@@ -58,7 +58,7 @@
             <h4 class="card-title mb-0">Daftar Belanjaan</h4>
         </div>
         <div class="table-responsive">
-            <table class="table table-bordered table-hover">
+            <table class="table table-hover">
             <thead>
                 <tr>
                 <th>No</th>

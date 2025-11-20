@@ -4,6 +4,42 @@
             
             {{-- SWEATALERT --}}
 
+            <style>
+                .action-btn-group {
+                    display: inline-flex;
+                    align-items: stretch;
+                    border-radius: 999px;
+                    overflow: hidden;
+                    background: var(--bs-primary);
+                }
+                .action-btn-group .btn {
+                    border: none;
+                    border-radius: 0;
+                    background: transparent;
+                    color: #fff;
+                    padding: 0.45rem 0.75rem;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .action-btn-group .btn + .btn {
+                    border-left: 1px solid rgba(255, 255, 255, 0.2);
+                }
+                .action-btn-group .btn:hover {
+                    background: rgba(255, 255, 255, 0.15);
+                    color: #fff;
+                }
+                .action-btn-group form {
+                    margin: 0;
+                    display: inline-flex;
+                }
+                .table-centered th,
+                .table-centered td {
+                    text-align: center;
+                    vertical-align: middle;
+                }
+            </style>
+
             @if(session()->has('success'))
                 <script>
                     Swal.fire({
@@ -62,17 +98,17 @@
                             <h4 class="card-title mb-0">Daftar Produk</h4>
                             <div class="btn-wrapper">
                                 @if (Auth::user()->role->name != "Cashier")
-                                    <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addCategoryModal">
+                                    <button type="button" class="btn btn-primary me-0" data-toggle="modal" data-target="#addCategoryModal">
                                         <i class="mdi mdi-plus"></i> Tambah Kategori
                                     </button>    
-                                    <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addProductModal">
+                                    <button type="button" class="btn btn-primary me-0" data-toggle="modal" data-target="#addProductModal">
                                         <i class="mdi mdi-plus"></i> Tambah Product
                                     </button>
                                 @endif
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
+                            <table class="table table-hover table-centered">
                                 <thead>
                                 <tr>
                                     <th>No</th>
@@ -99,22 +135,25 @@
                                                 </td>
                                                 @if (Auth::user()->role->name != "Cashier")
                                                     <td>
-                                                        <button class="btn btn-warning btn-sm me-1 edit-product-btn"
-                                                        data-productid = "{{ $product->id }}"
-                                                        data-productname = "{{ $product->name }}"
-                                                        data-categoryid = "{{ $product->category->id }}"
-                                                        data-categoryname = "{{ $product->category->name }}"
-                                                        data-url="{{ route('product.update', $product->id) }}">
-                                                            <i class="mdi mdi-pencil"></i> Edit Produk
-                                                        </button>
-                                                        <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            
-                                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $product->name }}">
-                                                                <i class="mdi mdi-delete"></i> Delete
+                                                        <div class="action-btn-group" role="group" aria-label="Aksi produk">
+                                                            <button 
+                                                                type="button"
+                                                                class="btn btn-primary btn-sm edit-product-btn"
+                                                                data-productid = "{{ $product->id }}"
+                                                                data-productname = "{{ $product->name }}"
+                                                                data-categoryid = "{{ $product->category->id }}"
+                                                                data-categoryname = "{{ $product->category->name }}"
+                                                                data-url="{{ route('product.update', $product->id) }}">
+                                                                <i class="mdi mdi-pencil"></i>
                                                             </button>
-                                                        </form>
+                                                            <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="form-delete d-inline-block">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-primary btn-sm" data-name="{{ $product->name }}">
+                                                                    <i class="mdi mdi-delete"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </td>
                                                 @endif
                                             </tr>
@@ -463,7 +502,7 @@
                                         <div class="card-body">
                                             <h4 class="card-title mb-4">Hasil Pencarian untuk "${searchTerm}"</h4>
                                             <div class="table-responsive">
-                                                <table class="table table-hover">
+                                                <table class="table table-hover table-centered">
                                                     <thead>
                                                         <tr>
                                                             <th>No</th>
@@ -502,21 +541,23 @@
                                                     <td>${totalStock}</td>
                                                     <td>${formattedPrice}</td>
                                                     <td>
-                                                        <button class="btn btn-warning btn-sm me-1 edit-product-btn" 
-                                                            data-productid="${product.id}"
-                                                            data-productname="${product.name}"
-                                                            data-categoryid="${categoryId}" 
-                                                            data-categoryname="${categoryName}">
-                                                            <i class="mdi mdi-pencil"></i> Edit Produk
-                                                        </button>
-
-                                                        <form action="${deleteUrl}" method="POST" class="form-delete d-inline">
-                                                            <input type="hidden" name="_token" value="${csrfToken}">
-                                                            <input type="hidden" name="_method" value="DELETE">
-                                                            <button type="submit" class="btn btn-danger btn-sm" data-name="${product.name}">
-                                                                <i class="mdi mdi-delete"></i> Delete
+                                                        <div class="action-btn-group" role="group" aria-label="Aksi produk">
+                                                            <button class="btn btn-primary btn-sm edit-product-btn" 
+                                                                data-productid="${product.id}"
+                                                                data-productname="${product.name}"
+                                                                data-categoryid="${categoryId}" 
+                                                                data-categoryname="${categoryName}">
+                                                                <i class="mdi mdi-pencil"></i>
                                                             </button>
-                                                        </form>
+
+                                                            <form action="${deleteUrl}" method="POST" class="form-delete d-inline-block">
+                                                                <input type="hidden" name="_token" value="${csrfToken}">
+                                                                <input type="hidden" name="_method" value="DELETE">
+                                                                <button type="submit" class="btn btn-primary btn-sm" data-name="${product.name}">
+                                                                    <i class="mdi mdi-delete"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             `;

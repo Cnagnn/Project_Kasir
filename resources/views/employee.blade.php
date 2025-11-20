@@ -4,6 +4,42 @@
 
 {{-- SWEATALERT --}}
 
+<style>
+    .action-btn-group {
+        display: inline-flex;
+        align-items: stretch;
+        border-radius: 999px;
+        overflow: hidden;
+        background: var(--bs-primary);
+    }
+    .action-btn-group .btn {
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        color: #fff;
+        padding: 0.45rem 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .action-btn-group .btn + .btn {
+        border-left: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .action-btn-group .btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+    }
+    .action-btn-group form {
+        margin: 0;
+        display: inline-flex;
+    }
+    .table-centered th,
+    .table-centered td {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
 @if(session()->has('success'))
     <script>
         Swal.fire({
@@ -52,21 +88,21 @@
             <h4 class="card-title mb-0">Daftar Pegawai</h4>
             <div class="btn-wrapper">
                 @if (Auth::user()->role->name != "Cashier")
-                    <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addRoleModal">
+                    <button type="button" class="btn btn-primary me-0" data-toggle="modal" data-target="#addRoleModal">
                         <i class="mdi mdi-plus"></i> Tambah Peran
                     </button>
-                    <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addEmployeeModal">
+                    <button type="button" class="btn btn-primary me-0" data-toggle="modal" data-target="#addEmployeeModal">
                         <i class="mdi mdi-plus"></i> Tambah Pegawai
                     </button>
                 @endif
             </div>
         </div>
-        <div class="table-responsive">
-             <table class="table table-bordered table-hover">
+           <div class="table-responsive">
+               <table class="table table-hover table-centered">
             <thead>
                 <tr>
                 <th>No</th>
-                <th>Nama</th>
+                <th>Nama Karyawan</th>
                 <th>Peran</th>
                 <th class="text-center">Aksi</th>
                 </tr>
@@ -78,14 +114,16 @@
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->role->name }}</td>
                         <td>
-                            <button class="btn btn-warning btn-sm me-1 edit-employee-btn"
-                            data-employeeid = "{{ $user->id }}"
-                            data-employeename = "{{ $user->name }}"
-                            data-roleid = "{{ $user->role->id }}"
-                            data-rolename = "{{ $user->role->name }}"
-                            data-url="{{ route('employee.update', $user->id) }}">
-                                <i class="mdi mdi-pencil"></i> Edit Karyawan
-                            </button>
+                            <div class="action-btn-group" role="group" aria-label="Aksi karyawan">
+                                <button class="btn btn-primary btn-sm edit-employee-btn"
+                                data-employeeid = "{{ $user->id }}"
+                                data-employeename = "{{ $user->name }}"
+                                data-roleid = "{{ $user->role->id }}"
+                                data-rolename = "{{ $user->role->name }}"
+                                data-url="{{ route('employee.update', $user->id) }}">
+                                    <i class="mdi mdi-pencil"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 @endforeach
@@ -418,7 +456,7 @@
                                 <div class="card-body">
                                     <h4 class="card-title mb-4">Hasil Pencarian untuk "${searchTerm}"</h4>
                                     <div class="table-responsive">
-                                        <table class="table table-hover">
+                                        <table class="table table-hover table-centered">
                                             <thead>
                                                 <tr>
                                                     <th>No</th>
@@ -445,21 +483,23 @@
                                             <td>${employee.name}</td>
                                             <td>${employee.role.name}</td>
                                             <td>
-                                                <button class="btn btn-warning btn-sm me-1 edit-employee-btn" 
-                                                    data-employeeid="${employee.id}"
-                                                    data-employeename="${employee.name}"
-                                                    data-roleid="${employee.role.id}" 
-                                                    data-rolename="${employee.role.name}">
-                                                    <i class="mdi mdi-pencil"></i> Edit Karyawan
-                                                </button>
-
-                                                <form action="${deleteUrl}" method="POST" class="form-delete d-inline">
-                                                    <input type="hidden" name="_token" value="${csrfToken}">
-                                                    <input type="hidden" name="_method" value="DELETE">
-                                                    <button type="submit" class="btn btn-danger btn-sm" data-name="${employee.name}">
-                                                        <i class="mdi mdi-delete"></i> Delete
+                                                <div class="action-btn-group" role="group" aria-label="Aksi karyawan">
+                                                    <button class="btn btn-primary btn-sm edit-employee-btn" 
+                                                        data-employeeid="${employee.id}"
+                                                        data-employeename="${employee.name}"
+                                                        data-roleid="${employee.role.id}" 
+                                                        data-rolename="${employee.role.name}">
+                                                        <i class="mdi mdi-pencil"></i>
                                                     </button>
-                                                </form>
+
+                                                    <form action="${deleteUrl}" method="POST" class="form-delete d-inline-block">
+                                                        <input type="hidden" name="_token" value="${csrfToken}">
+                                                        <input type="hidden" name="_method" value="DELETE">
+                                                        <button type="submit" class="btn btn-primary btn-sm" data-name="${employee.name}">
+                                                            <i class="mdi mdi-delete"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     `;

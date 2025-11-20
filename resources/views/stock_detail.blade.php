@@ -20,6 +20,42 @@
             });
         </script>    
     @endif
+
+    <style>
+        .action-btn-group {
+            display: inline-flex;
+            align-items: stretch;
+            border-radius: 999px;
+            overflow: hidden;
+            background: var(--bs-primary);
+        }
+        .action-btn-group .btn {
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            color: #fff;
+            padding: 0.45rem 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-btn-group .btn + .btn {
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .action-btn-group .btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+        .action-btn-group form {
+            margin: 0;
+            display: inline-flex;
+        }
+        .table-centered th,
+        .table-centered td {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
     @if(session()->has('batch_update_success'))
         <script>
             Swal.fire({
@@ -74,7 +110,7 @@
                     </div>
                     
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
+                        <table class="table table-hover table-centered">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -103,30 +139,31 @@
                                         <td>Rp {{ number_format($batch->sell_price, 0, ',', '.') }}</td>
                                         @if (Auth::user()->role->name != "Cashier")
                                             <td>
-                                                {{-- TOMBOL INI AKAN MEMBUKA MODAL EDIT BATCH --}}
-                                                <button type="button" class="btn btn-warning btn-sm btn-edit-batch" 
-                                                        data-toggle="modal" 
-                                                        data-target="#editBatchModal"
-                                                        data-batch-id="{{ $batch->id }}"
-                                                        data-initial-stock="{{ $batch->initial_stock ?? 0 }}"
-                                                        data-remaining-stock="{{ $batch->remaining_stock }}"
-                                                        data-buy-price="{{ $batch->buy_price }}"
-                                                        data-sell-price="{{ $batch->sell_price }}"
-                                                        data-update-url="{{ route('stock.update', $batch->id) }}"
-                                                        > 
-                                                    <i class="mdi mdi-pencil"></i>
-                                                </button>
-                                                
-                                                {{-- Form delete batch (jika diperlukan) --}}
-                                                <form 
-                                                    action="{{ route('stock_batches.destroy', $batch->id) }}" 
-                                                    method="POST" class="form-delete d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm">
-                                                        <i class="mdi mdi-delete"></i>
+                                                <div class="action-btn-group" role="group" aria-label="Aksi batch">
+                                                    <button type="button" class="btn btn-primary btn-sm btn-edit-batch" 
+                                                            data-toggle="modal" 
+                                                            data-target="#editBatchModal"
+                                                            data-batch-id="{{ $batch->id }}"
+                                                            data-initial-stock="{{ $batch->initial_stock ?? 0 }}"
+                                                            data-remaining-stock="{{ $batch->remaining_stock }}"
+                                                            data-buy-price="{{ $batch->buy_price }}"
+                                                            data-sell-price="{{ $batch->sell_price }}"
+                                                            data-update-url="{{ route('stock.update', $batch->id) }}"
+                                                            > 
+                                                        <i class="mdi mdi-pencil"></i>
                                                     </button>
-                                                </form>
+                                                    
+                                                    {{-- Form delete batch (jika diperlukan) --}}
+                                                    <form 
+                                                        action="{{ route('stock_batches.destroy', $batch->id) }}" 
+                                                        method="POST" class="form-delete d-inline-block">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-primary btn-sm">
+                                                            <i class="mdi mdi-delete"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         @endif
                                     </tr>

@@ -45,7 +45,7 @@
 
         <form action="{{ route('purchasing.stock.in.process') }}" method="POST">
             @csrf
-            <table class="table table-bordered mt-3">
+            <table class="table mt-3">
                 <thead>
                     <tr>
                         <th style="width: 30%;">Nama Produk</th>
