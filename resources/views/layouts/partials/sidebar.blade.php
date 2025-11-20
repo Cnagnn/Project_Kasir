@@ -57,6 +57,8 @@
       <div class="collapse" id="transactions">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="{{ route('selling.index') }}">Transaction</a></li>
+          <li class="nav-item"> <a class="nav-link" href="{{ route('transactionHistory.index') }}">History</a></li>
+
         </ul>
       </div>
     </li>

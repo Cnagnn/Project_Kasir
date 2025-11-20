@@ -24,8 +24,8 @@
         </script>    
     @endif
 
-    <div class="container mt-5">
-        <h2>Form Penambahan Stok</h2>
+    <div class="container mt-2">
+        <h2 class="mb-4 text-primary fw-bold">Purchasing Form</h2>
 
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>

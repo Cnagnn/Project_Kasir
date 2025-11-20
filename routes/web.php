@@ -15,6 +15,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PurchasingController;
 use App\Http\Controllers\StockBatchController;
+use App\Http\Controllers\TransactionHistoryController;
 
 Route::get('/dashboard', [DashboardController::class, "index"])->name('dashboard.index');
 
@@ -55,7 +56,8 @@ Route::middleware(['auth', 'checkrole:Manager,Cashier'])->group(function () {
     Route::post('/cart/decrease-qty-cart', [CartController::class, 'decreaseQtyCart'])->name('cart.decreaseQtyCart');
     Route::post('/cart/update-qty-cart', [CartController::class, 'updateQtyCart'])->name('cart.updateQtyCart');
 
-    // Route::post('/payment-webhook', [WebhookController::class, 'handle']);
+    Route::get('/transaction_history', [TransactionHistoryController::class, 'index'])->name('transactionHistory.index');
+    Route::get('/transaction_history/get_data', [TransactionHistoryController::class, 'getTransactionHistory'])->name('transactionHistory.getTransactionHistory');
 });
 
 

@@ -22,37 +22,20 @@
     @endif
 
     {{-- SEARCH AND FILTER SECTION --}}
-
-    <div class="col-lg-12 grid-margin stretch-card">
+    <div class="col-lg-12 grid-margin stretch-card" id="search-card">
         <div class="card">
             <div class="card-body">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="searchProduct">Cari Produk</label>
-                        <input type="text" class="form-control" id="searchProduct" placeholder="Nama Produk">
+                <div class="row align-items-center">
+                    {{-- Kolom Pencarian --}}
+                    <div class="col-md-8">
+                        <div class="form-group mb-0">
+                            <label for="searchProduct">Cari Produk</label>
+                            <input type="text" class="form-control" id="searchProduct" placeholder="Ketik nama produk...">
+                        </div>
                     </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- END SEARCH AND FILTER SECTION --}}
-
-    {{-- SEARCH PRODUCT BOX --}}
-
-    <div class="col-lg-12" id="searchResultsContainer">
-        {{-- Search results will be displayed here by JavaScript --}}
-    </div>
-
-    {{-- END SEARCH PRODUCT BOX --}}
-
-        <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">Daftar Produk</h4>
+                    
+                    {{-- Kolom Tombol Navigasi --}}
+                    <div class="col-md-4 text-end mt-4 md-0">
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-outline-primary active" id="btn-show-products">
                                 <i class="mdi mdi-package-variant"></i> Product
@@ -60,41 +43,60 @@
                             <button type="button" class="btn btn-outline-primary" id="btn-show-cart">
                                 <i class="mdi mdi-cart"></i> Cart
                             </button>
-                        </div>    
+                        </div>   
                     </div>
                 </div>
-                
+            </div>
+        </div>
+    </div>
+    {{-- END SEARCH AND FILTER SECTION --}}
+
+    {{-- RESULT SEARCH PRODUCT BOX --}}
+
+    <div class="col-lg-12" id="searchResultsContainer">
+        
+    </div>
+
+    {{-- END RESULT SEARCH PRODUCT BOX --}}
+
+        <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="card-title mb-0">Daftar Produk</h4>
+                </div>
                 <div class="container-fluid" id="product-list-container">
                     <div class="row justify-content-center">
                         @foreach ($products as $item)
                             @if ($item->stock->sum('remaining_stock') == 0)
                                 @continue
                             @endif
-                            <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
-                                <div class="card h-100" style="border: 1px solid black"> 
-                                    <div class="card-body d-flex flex-column">
-                                        <h5 class="card-title">{{ $item->name }}</h5>
-                                        <h6 class="card-subtitle mb-2">
-                                            Harga : <strong>{{ $item->sell_price ?? 'Data tidak tersedia' }}</strong>
-                                        </h6>
-                                        <p class="card-subtitle">Stok : <strong>{{ $item->stock->sum('remaining_stock') }}</strong></p>
-                                        <div class="mt-auto"> 
-                                            <div class="btn-wrapper">
-                                                <button type="button" class="btn btn-primary align-items-center add-to-cart-btn" data-product-id="{{ $item->id }}">
-                                                    <i class="mdi mdi-cart"></i> Tambah Ke Keranjang
-                                                </button>
+                                <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
+                                    <div class="card h-100" style="border: 1px solid black"> 
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title">{{ $item->name }}</h5>
+                                            <h6 class="card-subtitle mb-2">
+                                                Harga : <strong>{{ $item->sell_price ?? 'Data tidak tersedia' }}</strong>
+                                            </h6>
+                                            <p class="card-subtitle">Stok : <strong>{{ $item->stock->sum('remaining_stock') }}</strong></p>
+                                            <div class="mt-auto"> 
+                                                <div class="btn-wrapper">
+                                                    <button type="button" class="btn btn-primary align-items-center add-to-cart-btn" data-product-id="{{ $item->id }}">
+                                                        <i class="mdi mdi-cart"></i> Tambah Ke Keranjang
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                         @endforeach
                         <div class="card-body mt-3 d-flex justify-content-center">
-                    {{ $products->links() }}
-                </div>
+                            {{ $products->links() }}
+                        </div>
                     </div>
+                     
                 </div>
-                
+
                 <div id="cart-container" class="d-none">
                     <div class="text-center">
                         <p>Memuat data keranjang...</p>
@@ -102,76 +104,68 @@
                 </div>
             </div>
         </div>
+    </div>
 
-<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="checkoutModalLabel">Proses Pembayaran</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            
-            <form action="{{ route('cart.checkout.process') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Total Belanja</label>
-                        <input type="text" class="form-control form-control-lg" id="modal-total-display" readonly>
-                        <input type="hidden" id="modal-total-hidden" value="0">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="payment_method" class="form-label">Metode Pembayaran</label>
-                        <select name="payment_method" id="payment-method-select" class="form-select" required>
-                            <option value="Tunai" selected>Tunai (Cash)</option>
-                        </select>
-                    </div>
-
-                    <div id="cash-payment-section">
-                        <div class="mb-3">
-                            <label for="amount-paid-display" class="form-label">Jumlah Uang Dibayar</label>
-                            
-                            {{-- Kita gunakan Input Group Bootstrap --}}
-                            <div class="input-group">
-                                <span class="input-group-text">Rp</span>
-                                
-                                {{-- 
-                                1. Ubah type="number" menjadi type="text"
-                                2. Hapus 'name' agar tidak terkirim ke server
-                                3. Ubah ID menjadi 'amount-paid-display' 
-                                --}}
-                                <input type="text" 
-                                    id="amount-paid-display" 
-                                    class="form-control" 
-                                    placeholder="Masukkan jumlah uang..." 
-                                    autocomplete="off"
-                                >
-
-                                {{-- 
-                                Input tersembunyi (hidden) ini yang akan dikirim ke server.
-                                JavaScript akan mengisi input ini dengan angka bersih (misal: 10000).
-                                --}}
-                                <input type="hidden" 
-                                    name="amount_paid" 
-                                    id="amount-paid-hidden"
-                                    required
-                                >
-                            </div>
-                        </div>
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="checkoutModalLabel">Proses Pembayaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <form action="{{ route('cart.checkout.process') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
                         
-                        <h4 id="change-display" class="text-success">Kembalian: Rp 0</h4>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label">Total Belanja</label>
+                            <input type="text" class="form-control form-control-lg" id="modal-total-display" readonly>
+                            <input type="hidden" id="modal-total-hidden" value="0">
+                        </div>
 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-success">Proses Transaksi</button>
-                </div>
-            </form>
+                        <div class="mb-3">
+                            <label for="payment_method" class="form-label">Metode Pembayaran</label>
+                            <select name="payment_method" id="payment-method-select" class="form-select" required>
+                                <option value="Tunai" selected>Tunai (Cash)</option>
+                            </select>
+                        </div>
+
+                        <div id="cash-payment-section">
+                            <div class="mb-3">
+                                <label for="amount-paid-display" class="form-label">Jumlah Uang Dibayar</label>
+                                
+                                {{-- Kita gunakan Input Group Bootstrap --}}
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    
+                                    <input type="text" 
+                                        id="amount-paid-display" 
+                                        class="form-control" 
+                                        placeholder="Masukkan jumlah uang..." 
+                                        autocomplete="off"
+                                    >
+
+                                    <input type="hidden" 
+                                        name="amount_paid" 
+                                        id="amount-paid-hidden"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                            
+                            <h4 id="change-display" class="text-success">Kembalian: Rp 0</h4>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Proses Transaksi</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
 
 @endsection
@@ -224,15 +218,20 @@
                 $(this).addClass('active');
                 btnShowCart.removeClass('active');
                 
-                // Tampilkan panel produk & search bar
-                productContainer.removeClass('d-none');
-                mainProductCard.show(); // Pastikan kartu utama terlihat
-                searchCard.show();
+                // Cek apakah kolom pencarian ada isinya?
+                if (searchInput.val().trim() !== '') {
+                    // KASUS 1: Sedang mencari produk
+                    resultsContainer.show();      // Tampilkan hasil cari
+                    mainProductCard.hide();       // Sembunyikan kartu utama
+                } else {
+                    // KASUS 2: Tidak sedang mencari
+                    productContainer.removeClass('d-none'); // Tampilkan grid produk
+                    mainProductCard.show();       // Tampilkan kartu utama
+                    resultsContainer.hide();      // Sembunyikan container search
+                }
                 
-                // Sembunyikan panel keranjang & hasil search
+                // Pastikan container cart disembunyikan
                 cartContainer.addClass('d-none');
-                resultsContainer.hide().html(''); // Sembunyikan & kosongkan hasil search
-                searchInput.val(''); // Kosongkan juga input search
             });
 
             btnShowCart.on('click', function() {
@@ -241,24 +240,32 @@
                 
                 // Tampilkan panel keranjang
                 cartContainer.removeClass('d-none');
-                mainProductCard.show(); // Pastikan kartu utama terlihat
+                mainProductCard.show(); // Pastikan kartu utama terlihat (karena cart ada di dalamnya)
                 
-                // Sembunyikan panel produk, search bar, & hasil search
+                // Sembunyikan yang lain
                 productContainer.addClass('d-none');
-                searchCard.hide();
-                resultsContainer.hide().html(''); // Sembunyikan & kosongkan hasil search
-                searchInput.val(''); // Kosongkan juga input search
-
+                resultsContainer.hide(); // PENTING: Sembunyikan hasil search jika pindah ke cart
+                
+                // Jangan kosongkan input search, agar user bisa kembali ke hasil pencarian nanti
+                searchInput.val(''); 
+                
                 // Muat data keranjang
                 loadCartData();
             });
 
             // =======================================================
-            // ==     FUNGSI SEARCH PRODUCT (LOGIKA BARU)           ==
+            // ==     FUNGSI SEARCH PRODUCT (LOGIKA TAMBAHAN)       ==
             // =======================================================
-            
+
             if (searchInput.length > 0) {
                 searchInput.on('input', function() {
+                    // Jika user mengetik, otomatis pindahkan highlight tombol ke "Product"
+                    if (!btnShowProducts.hasClass('active')) {
+                        btnShowProducts.addClass('active');
+                        btnShowCart.removeClass('active');
+                        cartContainer.addClass('d-none');
+                    }
+
                     const searchTerm = $(this).val().trim();
 
                     if (searchTerm === '') {
@@ -829,3 +836,5 @@
         });
     </script>
 @endpush
+
+

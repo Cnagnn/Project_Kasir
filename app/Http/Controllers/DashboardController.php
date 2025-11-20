@@ -66,6 +66,7 @@ class DashboardController extends Controller
         // Mengambil 5 transaksi terakhir
         $transaksiTerbaru = Transaction::latest()       // Mengurutkan berdasarkan 'created_at' (terbaru dulu)
                                         ->with('user') // Mengambil data relasi dengan "users"
+                                        ->whereDate('created_at', $today)
                                         ->take(5)       // Ambil 5 data saja
                                         ->get();
                                       
