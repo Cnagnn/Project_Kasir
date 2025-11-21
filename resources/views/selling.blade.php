@@ -114,7 +114,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
-                <form action="{{ route('cart.checkout.process') }}" method="POST">
+                <form action="{{ route('cart.checkout.process') }}" method="POST" id="checkoutForm">
                     @csrf
                     <div class="modal-body">
                         
@@ -163,6 +163,84 @@
                         <button type="submit" class="btn btn-success">Proses Transaksi</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL STRUK PEMBELIAN --}}
+    <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="receiptModalLabel">
+                        <i class="mdi mdi-receipt"></i> Struk Pembelian
+                    </h5>
+                </div>
+                
+                <div class="modal-body" id="receipt-content">
+                    <div class="text-center mb-4">
+                        <h4 class="mb-1">TOKO KASIR</h4>
+                        <p class="mb-0 small">Jl. Contoh No. 123, Kota</p>
+                        <p class="mb-0 small">Telp: 0812-3456-7890</p>
+                        <hr>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <small>No. Transaksi:</small><br>
+                                <strong id="receipt-transaction-id">-</strong>
+                            </div>
+                            <div class="col-6 text-end">
+                                <small>Tanggal:</small><br>
+                                <strong id="receipt-date">-</strong>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <small>Kasir:</small><br>
+                                <strong id="receipt-cashier">-</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div id="receipt-items" class="mb-3">
+                        <!-- Items akan diisi oleh JavaScript -->
+                    </div>
+
+                    <hr>
+
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>Total:</strong></div>
+                        <div class="col-6 text-end"><strong id="receipt-total">Rp 0</strong></div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6">Bayar:</div>
+                        <div class="col-6 text-end" id="receipt-paid">Rp 0</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">Kembalian:</div>
+                        <div class="col-6 text-end" id="receipt-change">Rp 0</div>
+                    </div>
+
+                    <hr>
+
+                    <div class="text-center">
+                        <p class="mb-0 small">Terima kasih atas kunjungan Anda!</p>
+                        <p class="mb-0 small">Barang yang sudah dibeli tidak dapat ditukar/dikembalikan</p>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-print-receipt">
+                        <i class="mdi mdi-printer"></i> Print
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btn-close-receipt">
+                        <i class="mdi mdi-close"></i> Close
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -831,6 +909,216 @@
             $('#editProductForm').on('hidden.bs.modal', function () {
                 $saveButton.prop('disabled', true);
                 originalCategoryName = '';
+            });
+
+            // =======================================================
+            // ==     LOGIKA SUBMIT FORM CHECKOUT & STRUK          ==
+            // =======================================================
+            
+            $('#checkoutForm').on('submit', function(e) {
+                e.preventDefault(); // Cegah submit default
+                
+                // Validasi kembalian sebelum submit
+                let total = parseFloat($('#modal-total-hidden').val());
+                let amountPaid = parseFloat($('#amount-paid-hidden').val());
+                
+                if (!amountPaid || amountPaid <= 0) {
+                    Swal.fire('Error', 'Silakan masukkan jumlah uang yang dibayar!', 'error');
+                    return;
+                }
+                
+                if (amountPaid < total) {
+                    Swal.fire('Error', 'Uang yang dibayar kurang dari total belanja!', 'error');
+                    return;
+                }
+                
+                let formData = $(this).serialize();
+                
+                $.ajax({
+                    url: '{{ route("cart.checkout.process") }}',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json', // Tambahkan ini untuk memastikan jQuery parsing JSON
+                    success: function(response) {
+                        console.log('Response dari server:', response);
+                        
+                        // Cek apakah response adalah redirect atau berisi success message
+                        if (response.success || response.message) {
+                            // Tutup modal checkout
+                            $('#checkoutModal').modal('hide');
+                            
+                            // Tampilkan notifikasi sukses
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: response.message || 'Transaksi berhasil diproses.',
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            
+                            // Jika ada data transaction, tampilkan struk
+                            if (response.transaction) {
+                                showReceipt(response.transaction);
+                            }
+                            
+                            // Kosongkan keranjang di UI
+                            loadCartData();
+                            
+                            // Reset form
+                            $('#checkoutForm')[0].reset();
+                            $('#amount-paid-display').val('');
+                            $('#amount-paid-hidden').val('');
+                            
+                        } else {
+                            Swal.fire('Gagal', response.message || 'Transaksi gagal diproses.', 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error response:', xhr);
+                        let errorMsg = 'Terjadi kesalahan.';
+                        
+                        if (xhr.responseJSON) {
+                            errorMsg = xhr.responseJSON.message || xhr.responseJSON.error || errorMsg;
+                            console.error('Error detail:', xhr.responseJSON);
+                        }
+                        
+                        Swal.fire('Error', errorMsg, 'error');
+                    }
+                });
+            });
+
+            // =======================================================
+            // ==     FUNGSI TAMPILKAN STRUK                       ==
+            // =======================================================
+            
+            function showReceipt(transaction) {
+                // Format tanggal
+                let transactionDate = new Date(transaction.created_at);
+                let formattedDate = transactionDate.toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                // Isi data struk
+                $('#receipt-transaction-id').text(transaction.id);
+                $('#receipt-date').text(formattedDate);
+                $('#receipt-cashier').text(transaction.cashier_name || 'Admin');
+                
+                // Isi item-item
+                let itemsHtml = '';
+                transaction.details.forEach(function(detail) {
+                    let subtotal = detail.quantity * detail.sell_price;
+                    itemsHtml += `
+                        <div class="row mb-1">
+                            <div class="col-12">
+                                <strong>${detail.product_name}</strong>
+                            </div>
+                            <div class="col-8 ps-3">
+                                ${detail.quantity} x Rp ${new Intl.NumberFormat('id-ID').format(detail.sell_price)}
+                            </div>
+                            <div class="col-4 text-end">
+                                Rp ${new Intl.NumberFormat('id-ID').format(subtotal)}
+                            </div>
+                        </div>
+                    `;
+                });
+                $('#receipt-items').html(itemsHtml);
+
+                // Total, Bayar, Kembalian
+                $('#receipt-total').text('Rp ' + new Intl.NumberFormat('id-ID').format(transaction.total_price));
+                $('#receipt-paid').text('Rp ' + new Intl.NumberFormat('id-ID').format(transaction.amount_paid));
+                $('#receipt-change').text('Rp ' + new Intl.NumberFormat('id-ID').format(transaction.change_amount));
+
+                // Tampilkan modal struk
+                $('#receiptModal').modal('show');
+            }
+
+            // =======================================================
+            // ==     TOMBOL PRINT STRUK                           ==
+            // =======================================================
+            
+            $('#btn-print-receipt').on('click', function() {
+                // Ambil konten struk
+                let receiptContent = $('#receipt-content').html();
+                
+                // Buat jendela print baru
+                let printWindow = window.open('', '_blank', 'width=800,height=600');
+                
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Struk Pembelian</title>
+                        <style>
+                            body {
+                                font-family: 'Courier New', monospace;
+                                padding: 20px;
+                                max-width: 400px;
+                                margin: 0 auto;
+                            }
+                            .text-center { text-align: center; }
+                            .text-end { text-align: right; }
+                            .mb-0 { margin-bottom: 0; }
+                            .mb-1 { margin-bottom: 0.25rem; }
+                            .mb-2 { margin-bottom: 0.5rem; }
+                            .mb-3 { margin-bottom: 1rem; }
+                            .mb-4 { margin-bottom: 1.5rem; }
+                            .mt-2 { margin-top: 0.5rem; }
+                            .ps-3 { padding-left: 1rem; }
+                            .row { display: flex; flex-wrap: wrap; margin: 0 -5px; }
+                            .col-4 { flex: 0 0 33.333333%; max-width: 33.333333%; padding: 0 5px; }
+                            .col-6 { flex: 0 0 50%; max-width: 50%; padding: 0 5px; }
+                            .col-8 { flex: 0 0 66.666667%; max-width: 66.666667%; padding: 0 5px; }
+                            .col-12 { flex: 0 0 100%; max-width: 100%; padding: 0 5px; }
+                            hr { border: none; border-top: 1px dashed #000; margin: 10px 0; }
+                            small { font-size: 0.875em; }
+                            strong { font-weight: bold; }
+                            h4 { margin: 0.5rem 0; font-size: 1.25rem; }
+                            @media print {
+                                body { padding: 0; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${receiptContent}
+                    </body>
+                    </html>
+                `);
+                
+                printWindow.document.close();
+                printWindow.focus();
+                
+                // Tunggu sebentar lalu print
+                setTimeout(function() {
+                    printWindow.print();
+                    printWindow.close();
+                }, 250);
+            });
+
+            // =======================================================
+            // ==     TOMBOL CLOSE STRUK                           ==
+            // =======================================================
+            
+            $('#btn-close-receipt').on('click', function() {
+                $('#receiptModal').modal('hide');
+                
+                // Reset form checkout
+                $('#checkoutForm')[0].reset();
+                $('#amount-paid-display').val('');
+                $('#amount-paid-hidden').val('');
+                $('#change-display').text('Kembalian: Rp 0').removeClass('text-danger').addClass('text-success');
+                
+                // Kembali ke tampilan produk
+                if (!btnShowProducts.hasClass('active')) {
+                    btnShowProducts.addClass('active');
+                    btnShowCart.removeClass('active');
+                    cartContainer.addClass('d-none');
+                    productContainer.removeClass('d-none');
+                    mainProductCard.show();
+                }
             });
 
         });
