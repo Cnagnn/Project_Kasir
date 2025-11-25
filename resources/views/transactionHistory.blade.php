@@ -103,13 +103,14 @@
                                 let dateObj = new Date(item.created_at);
                                 let formattedDate = dateObj.toLocaleDateString('id-ID') + ' ' + dateObj.toLocaleTimeString('id-ID');
 
+                                let detailUrl = `{{ url('/transaction_history/detail') }}/${item.id}`;
                                 let row = `
                                     <tr>
                                         <td>${formattedDate}</td>
                                         <td>${item.invoice_number}</td>
                                         <td>${item.user ? item.user.name : '-'}</td>
                                         <td>${formattedPrice}</td>
-                                        <td><button class="btn btn-primary btn-sm"><i class="mdi mdi-pencil"></i></button></td>
+                                        <td><a href="${detailUrl}" class="btn btn-primary btn-sm"><i class="mdi mdi-pencil"></i></a></td>
                                     </tr>
                                 `;
                                 tbody.append(row);

@@ -58,6 +58,8 @@ Route::middleware(['auth', 'checkrole:Manager,Cashier'])->group(function () {
 
     Route::get('/transaction_history', [TransactionHistoryController::class, 'index'])->name('transactionHistory.index');
     Route::get('/transaction_history/get_data', [TransactionHistoryController::class, 'getTransactionHistory'])->name('transactionHistory.getTransactionHistory');
+    Route::get('/transaction_history/detail/{id}', [TransactionHistoryController::class, 'detail'])->name('transactionHistory.detail');
+    Route::put('/transaction_history/detail/update/{id}', [TransactionHistoryController::class, 'updateDetail'])->name('transactionHistory.updateDetail');
 
     // Data grafik penjualan (JSON)
     Route::get('/dashboard/sales-data', [DashboardController::class, 'salesData'])->name('dashboard.salesData');

@@ -47,4 +47,37 @@ class TransactionHistoryController extends Controller
         }
 
     }
+
+    public function detail($id)
+    {
+        $transaction = Transaction::with(['user', 'details.product'])->findOrFail($id);
+        return view('transactionHistory_detail', compact('transaction'));
+    }
+
+    public function updateDetail(Request $request, $id)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+            'product_buy_price' => 'required|numeric|min:0',
+            'product_sell_price' => 'required|numeric|min:0',
+        ]);
+
+        $detail = \App\Models\TransactionDetail::findOrFail($id);
+        
+        $detail->product_id = $request->product_id;
+        $detail->quantity = $request->quantity;
+        $detail->product_buy_price = $request->product_buy_price;
+        $detail->product_sell_price = $request->product_sell_price;
+        $detail->subtotal = $request->quantity * $request->product_sell_price;
+        $detail->profit = ($request->product_sell_price - $request->product_buy_price) * $request->quantity;
+        $detail->save();
+
+        // Update total transaksi
+        $transaction = $detail->transaction;
+        $transaction->total_payment = $transaction->details->sum('subtotal');
+        $transaction->save();
+
+        return redirect()->back()->with('success', 'Detail transaksi berhasil diupdate!');
+    }
 }
