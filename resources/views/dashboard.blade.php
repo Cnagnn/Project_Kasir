@@ -92,12 +92,12 @@
                 <div class="d-flex flex-wrap gap-2 justify-content-md-end">
                     <div class="dropdown">
                         <button class="btn btn-primary dashboard-filter-btn d-flex justify-content-between align-items-center" type="button" id="timeframeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span>Hari ini ({{ $today->translatedFormat('d F Y') }})</span>
+                            <span id="timeframeLabel">Hari ini ({{ $today->translatedFormat('d F Y') }})</span>
                             <i class="mdi mdi-menu-down ms-2"></i>
                         </button>
                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="timeframeDropdown">
                             @foreach ($timeframeOptions as $index => $option)
-                                <a class="dropdown-item d-flex justify-content-between align-items-center {{ $index === 0 ? 'active fw-semibold' : '' }}" href="#">
+                                <a class="dropdown-item d-flex justify-content-between align-items-center {{ $index === 0 ? 'active fw-semibold' : '' }}" href="#" data-timeframe="{{ $index === 0 ? 'day' : ($index === 1 ? 'week' : 'month') }}">
                                     <span>{{ $option['label'] }}</span>
                                     <small class="text-muted ms-2">{{ $option['range'] }}</small>
                                 </a>
@@ -159,8 +159,8 @@
             <div class="col-md-6 col-xl-3" id="card-penjualan">
                 <div class="card card-rounded shadow-sm h-100">
                     <div class="card-body">
-                        <p class="text-muted small mb-1">Penjualan Hari Ini</p>
-                        <h3 class="fw-bold mb-2">Rp. {{ number_format($penjualanHariIni ?? 0, 0, ',', '.') }}</h3>
+                        <p class="text-muted small mb-1" id="penjualanLabel">Penjualan Hari Ini</p>
+                        <h3 class="fw-bold mb-2">Rp. <span id="penjualanValue">{{ number_format($penjualanHariIni ?? 0, 0, ',', '.') }}</span></h3>
                         {{-- <span class="small {{ $dashboardStats[0]['trend_class'] }}">{{ $dashboardStats[0]['trend']}}</span> --}}
                     </div>
                 </div>
@@ -169,8 +169,8 @@
             <div class="col-md-6 col-xl-3" id="card-transaksi">
                 <div class="card card-rounded shadow-sm h-100">
                     <div class="card-body">
-                        <p class="text-muted small mb-1">Jumlah Transaksi Hari Ini</p>
-                        <h3 class="fw-bold mb-2">{{ $transaksiHariIni }}</h3>
+                        <p class="text-muted small mb-1" id="transaksiLabel">Jumlah Transaksi Hari Ini</p>
+                        <h3 class="fw-bold mb-2" id="transaksiValue">{{ $transaksiHariIni }}</h3>
                         {{-- <span class="small {{ $dashboardStats[0]['trend_class'] }}">{{ $dashboardStats[0]['trend']}}</span> --}}
                     </div>
                 </div>
@@ -201,7 +201,19 @@
             <div class="col-lg-8">
                 <div class="card card-rounded h-100">
                     <div class="card-body">
-                        <h4 class="card-title card-title-dash mb-4">Grafik Penjualan</h4>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="card-title card-title-dash mb-0">Grafik Penjualan</h4>
+                            <div class="dropdown">
+                                <button class="btn btn-primary dashboard-filter-btn d-flex justify-content-between align-items-center" type="button" id="salesRangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span id="salesRangeLabel">Harian</span>
+                                    <i class="mdi mdi-menu-down ms-2"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="salesRangeDropdown" style="min-width: 210px;">
+                                    <li><a class="dropdown-item active" href="#" data-range="daily">Harian</a></li>
+                                    <li><a class="dropdown-item" href="#" data-range="monthly">Bulanan</a></li>
+                                </ul>
+                            </div>
+                        </div>
                         <canvas id="salesChart" height="80"></canvas>
                     </div>
                 </div>
@@ -308,39 +320,170 @@ $(document).ready(function() {
         localStorage.setItem('widgetVisibility', JSON.stringify(widgetVisibility));
         updateWidgetVisibility();
     });
+
+    // Timeframe dropdown - update KPI cards
+    $('#timeframeDropdown').next('.dropdown-menu').find('a[data-timeframe]').on('click', function(e){
+        e.preventDefault();
+        const tf = $(this).data('timeframe');
+        // active state
+        $('#timeframeDropdown').next('.dropdown-menu').find('a').removeClass('active fw-semibold');
+        $(this).addClass('active fw-semibold');
+        // fetch metrics
+        fetch(`{{ route('dashboard.metrics') }}?timeframe=${tf}`)
+            .then(r => r.json())
+            .then(json => {
+                // format penjualan
+                const formattedSales = json.penjualan.toLocaleString('id-ID');
+                $('#penjualanValue').text(formattedSales);
+                $('#transaksiValue').text(json.transaksi);
+                // update label text
+                const labelDateRange = (() => {
+                    if (tf === 'day') {
+                        return new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric'});
+                    }
+                    if (tf === 'week') {
+                        // start monday to today
+                        const now = new Date();
+                        const dayIdx = now.getDay(); // 0=Sun
+                        const mondayOffset = (dayIdx === 0 ? -6 : 1 - dayIdx); // distance to Monday
+                        const monday = new Date(now);
+                        monday.setDate(now.getDate() + mondayOffset);
+                        const startStr = monday.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric'});
+                        const endStr = now.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric'});
+                        return `${startStr} - ${endStr}`;
+                    }
+                    if (tf === 'month') {
+                        const now = new Date();
+                        const first = new Date(now.getFullYear(), now.getMonth(), 1);
+                        const startStr = first.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric'});
+                        const endStr = now.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric'});
+                        return `${startStr} - ${endStr}`;
+                    }
+                    return '';
+                })();
+                $('#timeframeLabel').text(`${json.label} (${labelDateRange})`);
+                // update headings sesuai timeframe
+                const suffix = json.label === 'Hari ini' ? 'Hari Ini' : (json.label === 'Minggu ini' ? 'Minggu Ini' : 'Bulan Ini');
+                $('#penjualanLabel').text(`Penjualan ${suffix}`);
+                $('#transaksiLabel').text(`Jumlah Transaksi ${suffix}`);
+            })
+            .catch(() => {
+                // fallback do nothing / could show toast
+            });
+    });
 });
 </script>
 <script>
     // Grafik Penjualan (Line Chart)
     const salesCtx = document.getElementById('salesChart').getContext('2d');
+    let dailyLabels = [];
+    let dailyData = [];
+    let monthlyLabels = [];
+    let monthlyData = [];
+
+    function formatTick(value, max) {
+        if (max < 1000000) {
+            return 'Rp ' + value.toLocaleString('id-ID');
+        }
+        if (max < 100000000) { // gunakan juta
+            if (value < 1000000) {
+                return 'Rp ' + value.toLocaleString('id-ID');
+            }
+            const v = value / 1000000;
+            const decimals = v >= 10 ? 0 : 1;
+            return 'Rp ' + v.toFixed(decimals) + ' jt';
+        }
+        // di atas 100 juta pakai M (miliar)
+        if (value < 1000000000) {
+            return 'Rp ' + (value / 1000000).toFixed(0) + ' jt';
+        }
+        return 'Rp ' + (value / 1000000000).toFixed(1) + ' M';
+    }
+
+    // Helpers untuk gradient dinamis berdasarkan mode
+    function buildGradient(ctx, rgbBase) {
+        const g = ctx.createLinearGradient(0, 0, 0, 240);
+        g.addColorStop(0, `rgba(${rgbBase},0.35)`);
+        g.addColorStop(0.5, `rgba(${rgbBase},0.18)`);
+        g.addColorStop(1, `rgba(${rgbBase},0)`);
+        return g;
+    }
+    let currentGradient = buildGradient(salesCtx, '34,197,94'); // default green
+
+    // Shadow plugin
+    const shadowPlugin = {
+        id: 'lineShadow',
+        beforeDraw(chart, args, opts) {
+            const {ctx, chartArea} = chart;
+            ctx.save();
+            ctx.shadowColor = 'rgba(34,197,94,0.35)';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetY = 6;
+        },
+        afterDraw(chart){ chart.ctx.restore(); }
+    };
+
+    Chart.register(shadowPlugin);
+
     const salesChart = new Chart(salesCtx, {
         type: 'line',
         data: {
-            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+            labels: [],
             datasets: [{
                 label: 'Penjualan (Rp)',
-                data: [3200000, 4100000, 3800000, 5200000, 4800000, 6100000, 3500000],
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                tension: 0.4,
-                fill: true
+                data: [],
+                borderColor: 'rgba(34,197,94,1)',
+                backgroundColor: currentGradient,
+                tension: 0.45,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 7,
+                pointBorderWidth: 2,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: 'rgba(34,197,94,1)'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: true,
+            animation: {
+                duration: 900,
+                easing: 'easeOutQuart'
+            },
+            interaction: { mode: 'nearest', intersect: false },
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: { usePointStyle: true, boxWidth: 10, font: { weight: '600' } }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(31,41,55,0.9)',
+                    padding: 12,
+                    cornerRadius: 8,
+                    titleFont: { weight: '600', size: 13 },
+                    bodyFont: { size: 13 },
+                    callbacks: {
+                        title: (items) => 'Total',
+                        label: (item) => 'Rp ' + item.parsed.y.toLocaleString('id-ID')
+                    }
                 }
             },
             scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { weight: '500' }, color: '#374151' }
+                },
                 y: {
                     beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.06)', drawBorder: false },
                     ticks: {
-                        callback: function(value) {
-                            return 'Rp ' + (value / 1000000).toFixed(1) + 'jt';
+                        padding: 8,
+                        font: { weight: '500' },
+                        color: '#374151',
+                        callback: function(value){
+                            const max = this.max;
+                            return formatTick(value, max);
                         }
                     }
                 }
@@ -348,20 +491,75 @@ $(document).ready(function() {
         }
     });
 
+    function applyDaily() {
+        currentGradient = buildGradient(salesCtx, '34,197,94'); // green
+        const ds = salesChart.data.datasets[0];
+        ds.borderColor = 'rgba(34,197,94,1)';
+        ds.pointBorderColor = 'rgba(34,197,94,1)';
+        ds.backgroundColor = currentGradient;
+        salesChart.data.labels = dailyLabels;
+        ds.data = dailyData;
+        salesChart.update();
+    }
+
+    function applyMonthly() {
+        currentGradient = buildGradient(salesCtx, '37,99,235'); // blue
+        const ds = salesChart.data.datasets[0];
+        ds.borderColor = 'rgba(37,99,235,1)';
+        ds.pointBorderColor = 'rgba(37,99,235,1)';
+        ds.backgroundColor = currentGradient;
+        salesChart.data.labels = monthlyLabels;
+        ds.data = monthlyData;
+        salesChart.update();
+    }
+
+    function fetchSalesData() {
+        fetch('{{ route('dashboard.salesData') }}')
+            .then(r => r.json())
+            .then(json => {
+                dailyLabels = json.daily.labels;
+                dailyData = json.daily.data;
+                monthlyLabels = json.monthly.labels;
+                monthlyData = json.monthly.data;
+                applyDaily(); // default tampilan harian
+            })
+            .catch(() => {
+                // fallback placeholder jika error
+                dailyLabels = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+                dailyData = [0,0,0,0,0,0,0];
+                monthlyLabels = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+                monthlyData = new Array(12).fill(0);
+                applyDaily();
+            });
+    }
+
+    fetchSalesData();
+
+    document.querySelectorAll('#salesRangeDropdown + .dropdown-menu .dropdown-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const range = this.getAttribute('data-range');
+            document.querySelectorAll('#salesRangeDropdown + .dropdown-menu .dropdown-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('salesRangeLabel').textContent = this.textContent.trim();
+            if (range === 'daily') {
+                applyDaily();
+            } else {
+                applyMonthly();
+            }
+        });
+    });
+
     // Grafik Kategori (Doughnut Chart)
     const categoryCtx = document.getElementById('categoryChart').getContext('2d');
     const categoryChart = new Chart(categoryCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Makanan', 'Minuman', 'Bumbu Dapur', 'Kebutuhan RT', 'Lainnya'],
+            labels: [],
             datasets: [{
-                data: [35, 28, 18, 12, 7],
+                data: [],
                 backgroundColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(54, 162, 235)',
-                    'rgb(255, 205, 86)',
-                    'rgb(75, 192, 192)',
-                    'rgb(153, 102, 255)'
+                    '#6366F1', '#10B981', '#F59E0B', '#EF4444', '#0EA5E9'
                 ],
                 borderWidth: 2,
                 borderColor: '#fff'
@@ -371,11 +569,31 @@ $(document).ready(function() {
             responsive: true,
             maintainAspectRatio: true,
             plugins: {
-                legend: {
-                    position: 'bottom'
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ctx.label + ': Rp ' + ctx.parsed.toLocaleString('id-ID')
+                    }
                 }
-            }
+            },
+            cutout: '55%'
         }
     });
+
+    function fetchCategoryData(){
+        fetch('{{ route('dashboard.categoryData') }}')
+            .then(r => r.json())
+            .then(json => {
+                categoryChart.data.labels = json.labels;
+                categoryChart.data.datasets[0].data = json.data;
+                categoryChart.update();
+            })
+            .catch(() => {
+                categoryChart.data.labels = ['Tidak ada data'];
+                categoryChart.data.datasets[0].data = [0];
+                categoryChart.update();
+            });
+    }
+    fetchCategoryData();
 </script>
 @endpush
