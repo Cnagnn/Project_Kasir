@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\TransactionDetail;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -78,6 +79,63 @@ class ReportController extends Controller
         ])->setPaper('a4', 'portrait');
 
         $filename = 'Laporan Pendapatan per Invoice ' . $startDate->translatedFormat('d F Y') . ' - ' . $endDate->translatedFormat('d F Y') . '.pdf';
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+        ]);
+    }
+
+    public function printProductRevenue(Request $request)
+    {
+        $start = $request->query('start_date');
+        $end = $request->query('end_date');
+
+        if (!$start || !$end) {
+            return response('Tanggal mulai dan selesai wajib diisi.', 422);
+        }
+
+        $startDate = \Carbon\Carbon::parse($start)->startOfDay();
+        $endDate = \Carbon\Carbon::parse($end)->endOfDay();
+
+        // Ambil detail transaksi dalam rentang, agregasi per produk
+        $details = TransactionDetail::with(['product'])
+            ->whereHas('transaction', function($q) use ($startDate, $endDate) {
+                $q->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->get();
+
+        // Hitung pendapatan per produk (qty * price) dan total qty
+        $perProduct = $details->groupBy('product_id')->map(function($rows){
+            $name = optional($rows->first()->product)->name ?? 'Produk';
+            $category = optional($rows->first()->product?->category)->name ?? '-';
+            $qty = $rows->sum('quantity');
+            $revenue = $rows->sum(function($r){
+                // asumsi ada kolom price atau subtotal; fallback subtotal
+                $price = $r->price ?? 0;
+                $subtotal = $r->subtotal ?? ($price * ($r->quantity ?? 0));
+                return (int)$subtotal;
+            });
+            return [
+                'name' => $name,
+                'category' => $category,
+                'qty' => (int)$qty,
+                'revenue' => (int)$revenue,
+            ];
+        })->values();
+
+        $grandQty = $perProduct->sum('qty');
+        $grandRevenue = $perProduct->sum('revenue');
+
+        $pdf = Pdf::loadView('reports.product_revenue_pdf', [
+            'rows' => $perProduct,
+            'grandQty' => $grandQty,
+            'grandRevenue' => $grandRevenue,
+            'rangeLabel' => $startDate->translatedFormat('d F Y'). ' - ' . $endDate->translatedFormat('d F Y'),
+            'generatedAt' => now(),
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'Laporan Pendapatan per Produk ' . $startDate->translatedFormat('d F Y') . ' - ' . $endDate->translatedFormat('d F Y') . '.pdf';
 
         return response($pdf->output(), 200, [
             'Content-Type' => 'application/pdf',

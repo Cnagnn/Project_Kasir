@@ -70,6 +70,8 @@ Route::middleware(['auth', 'checkrole:Manager,Cashier'])->group(function () {
     Route::get('/reports/stock/print', [\App\Http\Controllers\ReportController::class, 'printStock'])->name('reports.stock.print');
     // Laporan Pendapatan per Invoice (PDF)
     Route::get('/reports/invoice-revenue/print', [\App\Http\Controllers\ReportController::class, 'printInvoiceRevenue'])->name('reports.invoiceRevenue.print');
+    // Laporan Pendapatan per Produk (PDF)
+    Route::get('/reports/product-revenue/print', [\App\Http\Controllers\ReportController::class, 'printProductRevenue'])->name('reports.productRevenue.print');
 });
 
 

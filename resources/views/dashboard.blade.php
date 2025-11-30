@@ -265,7 +265,7 @@
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form id="formPendapatanProduk" method="GET" action="#" target="_blank">
+                    <form id="formPendapatanProduk" method="GET" action="{{ route('reports.productRevenue.print') }}" target="_blank">
                         <div class="modal-body">
                             <p class="text-muted mb-3">Pilih rentang tanggal untuk melihat laporan pendapatan per produk.</p>
                             <div class="row g-3">
