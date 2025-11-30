@@ -68,13 +68,15 @@
             </a>
           </div>
         </div>
-        <div class="navbar-menu-wrapper d-flex align-items-bottom mt-3">
-          <ul class="navbar-nav">
-            <li class="nav-item fw-semibold d-none d-lg-block ms-0">
-              <h1 class="welcome-text">Good {{ $time }}, <span class="text-black fw-bold">{{ Auth::user()->name }}</span></h1>
-              <h3 class="welcome-sub-text">{{ Auth::user()->role->name }}</h3>
-            </li>
-          </ul>
+        <div class="navbar-menu-wrapper d-flex align-items-stretch justify-content-between mt-3">
+          <div>
+            <h4 class="mb-1">@yield('page-title', 'Dashboard Kasir')</h4>
+            <p class="text-muted mb-0 small">@yield('page-description', 'Ringkasan singkat operasional hari ini.')</p>
+          </div>
+          <div class="text-end">
+            <h4 class="mb-1">Good {{ $time }}, <span class="text-black fw-bold">{{ Auth::user()->name }}</span></h4>
+            <p class="text-muted mb-0 small">{{ Auth::user()->role->name }}</p>
+          </div>
           <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="offcanvas">
             <span class="mdi mdi-menu"></span>
           </button>

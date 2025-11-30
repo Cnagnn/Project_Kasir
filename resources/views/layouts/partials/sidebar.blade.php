@@ -1,6 +1,12 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
   <ul class="nav">
     <li class="nav-item mt-3">
+      <a class="nav-link" href="#">
+        <i class="menu-icon mdi mdi-file-chart"></i>
+        <span class="menu-title">Laporan</span>
+      </a>
+    </li>
+    <li class="nav-item">
       <a class="nav-link" href="{{ route('dashboard.index') }}">
         <i class="mdi mdi-view-dashboard menu-icon"></i>
         <span class="menu-title">Dashboard</span>
@@ -62,5 +68,6 @@
         </ul>
       </div>
     </li>
+    
   </ul>
 </nav>

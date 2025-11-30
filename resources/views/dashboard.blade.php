@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 
+@section('page-title', 'Dashboard Kasir')
+@section('page-description', 'Ringkasan singkat operasional hari ini')
+
 @section('content')
 
 @php
@@ -61,6 +64,19 @@
     .dashboard-filter-btn {
         min-width: 210px;
     }
+    /* Shadow styling untuk card agar lebih menarik */
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .card.card-rounded .card-body {
+        padding: 1.25rem 1.25rem;
+    }
     .widget-check {
         width: 1.5rem;
         height: 1.5rem;
@@ -83,141 +99,254 @@
 
 <div class="row">
     <div class="col-sm-12">
+
+        <!-- Card untuk kontrol filter dan widget -->
         <div class="card card-rounded shadow-sm mb-4">
-            <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-                <div>
-                    <h3 class="mb-1">Dashboard Kasir</h3>
-                    <p class="text-muted mb-0">Ringkasan singkat operasional hari ini.</p>
-                </div>
-                <div class="d-flex flex-wrap gap-2 justify-content-md-end">
-                    <div class="dropdown">
-                        <button class="btn btn-primary dashboard-filter-btn d-flex justify-content-between align-items-center" type="button" id="timeframeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span id="timeframeLabel">Hari ini ({{ $today->translatedFormat('d F Y') }})</span>
-                            <i class="mdi mdi-menu-down ms-2"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="timeframeDropdown">
-                            @foreach ($timeframeOptions as $index => $option)
-                                <a class="dropdown-item d-flex justify-content-between align-items-center {{ $index === 0 ? 'active fw-semibold' : '' }}" href="#" data-timeframe="{{ $index === 0 ? 'day' : ($index === 1 ? 'week' : 'month') }}">
-                                    <span>{{ $option['label'] }}</span>
-                                    <small class="text-muted ms-2">{{ $option['range'] }}</small>
-                                </a>
-                            @endforeach
-                        </div>
+            <div class="card-body">
+                                <!-- Tabs ringkasan ditempatkan di dalam card kontrol ini -->
+                                <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="laporan-tab" data-bs-toggle="tab" data-bs-target="#laporan" type="button" role="tab" aria-controls="laporan" aria-selected="false">Laporan</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content pt-3" id="dashboardTabContent">
+                                  <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                                    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+                                        <div>
+                                            <h4 class="mb-1">Overview</h4>
+                                            <p class="text-muted mb-0">Ringkasan singkat operasional.</p>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary dashboard-filter-btn d-flex justify-content-between align-items-center" type="button" id="timeframeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <span id="timeframeLabel">Hari ini ({{ $today->translatedFormat('d F Y') }})</span>
+                                                    <i class="mdi mdi-menu-down ms-2"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="timeframeDropdown">
+                                                    @foreach ($timeframeOptions as $index => $option)
+                                                        <a class="dropdown-item d-flex justify-content-between align-items-center {{ $index === 0 ? 'active fw-semibold' : '' }}" href="#" data-timeframe="{{ $index === 0 ? 'day' : ($index === 1 ? 'week' : 'month') }}">
+                                                            <span>{{ $option['label'] }}</span>
+                                                            <small class="text-muted ms-2">{{ $option['range'] }}</small>
+                                                        </a>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary d-flex align-items-center" type="button" id="widgetDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="mdi mdi-view-grid"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-end text-start p-2" style="min-width: 220px;" aria-labelledby="widgetDropdown">
+                                                    <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="penjualan">
+                                                        <span class="widget-check widget-check-active">
+                                                            <i class="mdi mdi-check"></i>
+                                                        </span>
+                                                        <span>Penjualan Hari Ini</span>
+                                                    </a>
+                                                    <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="transaksi">
+                                                        <span class="widget-check widget-check-active">
+                                                            <i class="mdi mdi-check"></i>
+                                                        </span>
+                                                        <span>Jumlah Transaksi Hari Ini</span>
+                                                    </a>
+                                                    <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="produk">
+                                                        <span class="widget-check widget-check-active">
+                                                            <i class="mdi mdi-check"></i>
+                                                        </span>
+                                                        <span>Produk Aktif</span>
+                                                    </a>
+                                                    <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="kategori">
+                                                        <span class="widget-check widget-check-active">
+                                                            <i class="mdi mdi-check"></i>
+                                                        </span>
+                                                        <span>Kategori</span>
+                                                    </a>
+                                                    <div class="dropdown-divider"></div>
+                                                    <a href="#" class="dropdown-item text-primary text-center" id="reset-widgets">Reset ke Default</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-3 mt-1">
+                                      <div class="col-md-6 col-xl-3" id="card-penjualan">
+                                          <div class="card card-rounded shadow-sm h-100">
+                                              <div class="card-body">
+                                                  <p class="text-muted small mb-1" id="penjualanLabel">Penjualan Hari Ini</p>
+                                                  <h3 class="fw-bold mb-2">Rp. <span id="penjualanValue">{{ number_format($penjualanHariIni ?? 0, 0, ',', '.') }}</span></h3>
+                                              </div>
+                                          </div>
+                                      </div>
+
+                                      <div class="col-md-6 col-xl-3" id="card-transaksi">
+                                          <div class="card card-rounded shadow-sm h-100">
+                                              <div class="card-body">
+                                                  <p class="text-muted small mb-1" id="transaksiLabel">Jumlah Transaksi Hari Ini</p>
+                                                  <h3 class="fw-bold mb-2" id="transaksiValue">{{ $transaksiHariIni }}</h3>
+                                              </div>
+                                          </div>
+                                      </div>
+
+                                      <div class="col-md-6 col-xl-3" id="card-produk">
+                                          <div class="card card-rounded shadow-sm h-100">
+                                              <div class="card-body">
+                                                  <p class="text-muted small mb-1">Produk Aktif</p>
+                                                  <h3 class="fw-bold mb-2">{{ $produkAktif }}</h3>
+                                              </div>
+                                          </div>
+                                      </div>
+
+                                      <div class="col-md-6 col-xl-3" id="card-kategori">
+                                          <div class="card card-rounded shadow-sm h-100">
+                                              <div class="card-body">
+                                                  <p class="text-muted small mb-1">Kategori</p>
+                                                  <h3 class="fw-bold mb-2">{{ $totalKategori }}</h3>
+                                              </div>
+                                          </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                    <div class="tab-pane fade" id="laporan" role="tabpanel" aria-labelledby="laporan-tab">
+                                        <div class="mb-3">
+                                            <h4 class="mb-1">Laporan</h4>
+                                            <p class="text-muted mb-0">Pilih jenis laporan yang ingin Anda lihat.</p>
+                                        </div>
+                                        <div class="row g-3 mt-2">
+                                            <div class="col-md-4">
+                                                <a href="{{ route('reports.stock.print') }}" target="_blank" class="text-decoration-none">
+                                                    <div class="card card-rounded h-100 border-primary">
+                                                        <div class="card-body text-center">
+                                                            <i class="mdi mdi-package-variant text-primary" style="font-size: 3rem;"></i>
+                                                            <h5 class="mt-3 mb-2">Laporan Stock</h5>
+                                                            <p class="text-muted small mb-0">Lihat detail stok barang tersedia</p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalPendapatanProduk">
+                                                    <div class="card card-rounded h-100 border-success">
+                                                        <div class="card-body text-center">
+                                                            <i class="mdi mdi-chart-line text-success" style="font-size: 3rem;"></i>
+                                                            <h5 class="mt-3 mb-2">Laporan Pendapatan per Produk</h5>
+                                                            <p class="text-muted small mb-0">Analisis pendapatan setiap produk</p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalPendapatanInvoice">
+                                                    <div class="card card-rounded h-100 border-info">
+                                                        <div class="card-body text-center">
+                                                            <i class="mdi mdi-file-document text-info" style="font-size: 3rem;"></i>
+                                                            <h5 class="mt-3 mb-2">Laporan Pendapatan per Invoice</h5>
+                                                            <p class="text-muted small mb-0">Rincian pendapatan per transaksi</p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                
+            </div>
+        </div>
+
+        <!-- Modal Rentang Tanggal - Laporan Pendapatan per Produk -->
+        <div class="modal fade" id="modalPendapatanProduk" tabindex="-1" aria-labelledby="modalPendapatanProdukLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalPendapatanProdukLabel">
+                            <i class="mdi mdi-chart-line text-success me-2"></i>
+                            Laporan Pendapatan per Produk
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="dropdown">
-                        <button class="btn btn-primary d-flex align-items-center" type="button" id="widgetDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="mdi mdi-view-grid"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end text-start p-2" style="min-width: 220px;" aria-labelledby="widgetDropdown">
-                            <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="penjualan">
-                                <span class="widget-check widget-check-active">
-                                    <i class="mdi mdi-check"></i>
-                                </span>
-                                <span>Penjualan Hari Ini</span>
-                            </a>
-                            <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="transaksi">
-                                <span class="widget-check widget-check-active">
-                                    <i class="mdi mdi-check"></i>
-                                </span>
-                                <span>Jumlah Transaksi Hari Ini</span>
-                            </a>
-                            <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="produk">
-                                <span class="widget-check widget-check-active">
-                                    <i class="mdi mdi-check"></i>
-                                </span>
-                                <span>Produk Aktif</span>
-                            </a>
-                            <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="kategori">
-                                <span class="widget-check widget-check-active">
-                                    <i class="mdi mdi-check"></i>
-                                </span>
-                                <span>Kategori</span>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="#" class="dropdown-item text-primary text-center" id="reset-widgets">Reset ke Default</a>
+                    <form id="formPendapatanProduk" method="GET" action="#" target="_blank">
+                        <div class="modal-body">
+                            <p class="text-muted mb-3">Pilih rentang tanggal untuk melihat laporan pendapatan per produk.</p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="startDateProduk" class="form-label">Tanggal Mulai</label>
+                                    <input type="date" class="form-control" id="startDateProduk" name="start_date" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="endDateProduk" class="form-label">Tanggal Selesai</label>
+                                    <input type="date" class="form-control" id="endDateProduk" name="end_date" required>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="mdi mdi-file-pdf-box me-1"></i> Lihat Laporan PDF
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
-        {{-- <div class="row g-3 mb-4">
-            @foreach ($dashboardStats as $stat)
-                <div class="col-md-6 col-xl-3">
-                    <div class="card card-rounded shadow-sm h-100">
-                        <div class="card-body">
-                            <p class="text-muted small mb-1">{{ $stat['label'] }}</p>
-                            <h3 class="fw-bold mb-2">{{ $stat['value'] }}</h3>
-                            <span class="small {{ $stat['trend_class'] }}">{{ $stat['trend'] }}</span>
+        <!-- Modal Rentang Tanggal - Laporan Pendapatan per Invoice -->
+        <div class="modal fade" id="modalPendapatanInvoice" tabindex="-1" aria-labelledby="modalPendapatanInvoiceLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalPendapatanInvoiceLabel">
+                            <i class="mdi mdi-file-document text-info me-2"></i>
+                            Laporan Pendapatan per Invoice
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="formPendapatanInvoice" method="GET" action="{{ route('reports.invoiceRevenue.print') }}" target="_blank">
+                        <div class="modal-body">
+                            <p class="text-muted mb-3">Pilih rentang tanggal untuk melihat laporan pendapatan per invoice.</p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="startDateInvoice" class="form-label">Tanggal Mulai</label>
+                                    <input type="date" class="form-control" id="startDateInvoice" name="start_date" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="endDateInvoice" class="form-label">Tanggal Selesai</label>
+                                    <input type="date" class="form-control" id="endDateInvoice" name="end_date" required>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            @endforeach
-        </div> --}}
-
-        <div class="row g-3 mb-4">
-            <div class="col-md-6 col-xl-3" id="card-penjualan">
-                <div class="card card-rounded shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1" id="penjualanLabel">Penjualan Hari Ini</p>
-                        <h3 class="fw-bold mb-2">Rp. <span id="penjualanValue">{{ number_format($penjualanHariIni ?? 0, 0, ',', '.') }}</span></h3>
-                        {{-- <span class="small {{ $dashboardStats[0]['trend_class'] }}">{{ $dashboardStats[0]['trend']}}</span> --}}
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-3" id="card-transaksi">
-                <div class="card card-rounded shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1" id="transaksiLabel">Jumlah Transaksi Hari Ini</p>
-                        <h3 class="fw-bold mb-2" id="transaksiValue">{{ $transaksiHariIni }}</h3>
-                        {{-- <span class="small {{ $dashboardStats[0]['trend_class'] }}">{{ $dashboardStats[0]['trend']}}</span> --}}
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-3" id="card-produk">
-                <div class="card card-rounded shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Produk Aktif</p>
-                        <h3 class="fw-bold mb-2">{{ $produkAktif }}</h3>
-                        {{-- <span class="small {{ $dashboardStats[0]['trend_class'] }}">{{ $dashboardStats[0]['trend']}}</span> --}}
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-3" id="card-kategori">
-                <div class="card card-rounded shadow-sm h-100">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Kategori</p>
-                        <h3 class="fw-bold mb-2">{{ $totalKategori }}</h3>
-                        {{-- <span class="small {{ $dashboardStats[0]['trend_class'] }}">{{ $dashboardStats[0]['trend']}}</span> --}}
-                    </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="mdi mdi-file-pdf-box me-1"></i> Lihat Laporan PDF
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
         <div class="row g-4">
             <div class="col-lg-8">
-                <div class="card card-rounded h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="card-title card-title-dash mb-0">Grafik Penjualan</h4>
-                            <div class="dropdown">
-                                <button class="btn btn-primary dashboard-filter-btn d-flex justify-content-between align-items-center" type="button" id="salesRangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span id="salesRangeLabel">Harian</span>
-                                    <i class="mdi mdi-menu-down ms-2"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="salesRangeDropdown" style="min-width: 210px;">
-                                    <li><a class="dropdown-item active" href="#" data-range="daily">Harian</a></li>
-                                    <li><a class="dropdown-item" href="#" data-range="monthly">Bulanan</a></li>
-                                </ul>
-                            </div>
+                                <div class="card card-rounded h-100">
+                                        <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                        <h4 class="card-title card-title-dash mb-0">Grafik Penjualan</h4>
+                                                        <div class="dropdown">
+                                                                <button class="btn btn-primary dashboard-filter-btn d-flex justify-content-between align-items-center" type="button" id="salesRangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                        <span id="salesRangeLabel">Quantity Produk</span>
+                                                                        <i class="mdi mdi-menu-down ms-2"></i>
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="salesRangeDropdown" style="min-width: 210px;">
+                                                                        <li><a class="dropdown-item active" href="#" data-range="quantity">Quantity Produk</a></li>
+                                                                        <li><a class="dropdown-item" href="#" data-range="nominal">Nominal Penjualan</a></li>
+                                                                </ul>
+                                                        </div>
+                                                </div>
+                                                <canvas id="salesChart" height="80"></canvas>
+                                        </div>
+                                </div>
                         </div>
-                        <canvas id="salesChart" height="80"></canvas>
-                    </div>
-                </div>
-            </div>
             <div class="col-lg-4">
                 <div class="card card-rounded h-100">
                     <div class="card-body">
@@ -376,12 +505,17 @@ $(document).ready(function() {
 <script>
     // Grafik Penjualan (Line Chart)
     const salesCtx = document.getElementById('salesChart').getContext('2d');
-    let dailyLabels = [];
-    let dailyData = [];
-    let monthlyLabels = [];
-    let monthlyData = [];
+    let quantityLabels = [];
+    let quantityDatasets = [];
+    let nominalLabels = [];
+    let nominalData = [];
+    let currentMode = 'quantity'; // default mode
 
-    function formatTick(value, max) {
+    function formatTick(value, max, mode) {
+        if (mode === 'quantity') {
+            return value.toLocaleString('id-ID');
+        }
+        // mode nominal
         if (max < 1000000) {
             return 'Rp ' + value.toLocaleString('id-ID');
         }
@@ -429,19 +563,7 @@ $(document).ready(function() {
         type: 'line',
         data: {
             labels: [],
-            datasets: [{
-                label: 'Penjualan (Rp)',
-                data: [],
-                borderColor: 'rgba(34,197,94,1)',
-                backgroundColor: currentGradient,
-                tension: 0.45,
-                fill: true,
-                pointRadius: 4,
-                pointHoverRadius: 7,
-                pointBorderWidth: 2,
-                pointBackgroundColor: '#fff',
-                pointBorderColor: 'rgba(34,197,94,1)'
-            }]
+            datasets: []
         },
         options: {
             responsive: true,
@@ -455,17 +577,22 @@ $(document).ready(function() {
                 legend: {
                     display: true,
                     position: 'top',
-                    labels: { usePointStyle: true, boxWidth: 10, font: { weight: '600' } }
+                    labels: { usePointStyle: true, boxWidth: 10, font: { weight: '600', size: 11 }, padding: 10 }
                 },
                 tooltip: {
                     backgroundColor: 'rgba(31,41,55,0.9)',
                     padding: 12,
                     cornerRadius: 8,
                     titleFont: { weight: '600', size: 13 },
-                    bodyFont: { size: 13 },
+                    bodyFont: { size: 12 },
                     callbacks: {
-                        title: (items) => 'Total',
-                        label: (item) => 'Rp ' + item.parsed.y.toLocaleString('id-ID')
+                        label: (item) => {
+                            const label = item.dataset.label || '';
+                            if (currentMode === 'quantity') {
+                                return label + ': ' + item.parsed.y.toLocaleString('id-ID') + ' produk';
+                            }
+                            return label + ': Rp ' + item.parsed.y.toLocaleString('id-ID');
+                        }
                     }
                 }
             },
@@ -483,7 +610,7 @@ $(document).ready(function() {
                         color: '#374151',
                         callback: function(value){
                             const max = this.max;
-                            return formatTick(value, max);
+                            return formatTick(value, max, currentMode);
                         }
                     }
                 }
@@ -491,45 +618,50 @@ $(document).ready(function() {
         }
     });
 
-    function applyDaily() {
-        currentGradient = buildGradient(salesCtx, '34,197,94'); // green
-        const ds = salesChart.data.datasets[0];
-        ds.borderColor = 'rgba(34,197,94,1)';
-        ds.pointBorderColor = 'rgba(34,197,94,1)';
-        ds.backgroundColor = currentGradient;
-        salesChart.data.labels = dailyLabels;
-        ds.data = dailyData;
+    function applyQuantity() {
+        currentMode = 'quantity';
+        salesChart.data.labels = quantityLabels;
+        salesChart.data.datasets = quantityDatasets;
         salesChart.update();
     }
 
-    function applyMonthly() {
+    function applyNominal() {
+        currentMode = 'nominal';
         currentGradient = buildGradient(salesCtx, '37,99,235'); // blue
-        const ds = salesChart.data.datasets[0];
-        ds.borderColor = 'rgba(37,99,235,1)';
-        ds.pointBorderColor = 'rgba(37,99,235,1)';
-        ds.backgroundColor = currentGradient;
-        salesChart.data.labels = monthlyLabels;
-        ds.data = monthlyData;
+        salesChart.data.labels = nominalLabels;
+        salesChart.data.datasets = [{
+            label: 'Nominal Penjualan',
+            data: nominalData,
+            borderColor: 'rgba(37,99,235,1)',
+            backgroundColor: currentGradient,
+            tension: 0.45,
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 7,
+            pointBorderWidth: 2,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: 'rgba(37,99,235,1)'
+        }];
         salesChart.update();
     }
 
     function fetchSalesData() {
-        fetch('{{ route('dashboard.salesData') }}')
+        fetch('{{ route('dashboard.salesProductData') }}')
             .then(r => r.json())
             .then(json => {
-                dailyLabels = json.daily.labels;
-                dailyData = json.daily.data;
-                monthlyLabels = json.monthly.labels;
-                monthlyData = json.monthly.data;
-                applyDaily(); // default tampilan harian
+                quantityLabels = json.quantity.labels;
+                quantityDatasets = json.quantity.datasets;
+                nominalLabels = json.nominal.labels;
+                nominalData = json.nominal.data;
+                applyQuantity(); // default tampilan quantity
             })
             .catch(() => {
                 // fallback placeholder jika error
-                dailyLabels = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
-                dailyData = [0,0,0,0,0,0,0];
-                monthlyLabels = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-                monthlyData = new Array(12).fill(0);
-                applyDaily();
+                quantityLabels = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+                quantityDatasets = [];
+                nominalLabels = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+                nominalData = new Array(12).fill(0);
+                applyQuantity();
             });
     }
 
@@ -542,10 +674,10 @@ $(document).ready(function() {
             document.querySelectorAll('#salesRangeDropdown + .dropdown-menu .dropdown-item').forEach(i => i.classList.remove('active'));
             this.classList.add('active');
             document.getElementById('salesRangeLabel').textContent = this.textContent.trim();
-            if (range === 'daily') {
-                applyDaily();
+            if (range === 'quantity') {
+                applyQuantity();
             } else {
-                applyMonthly();
+                applyNominal();
             }
         });
     });
@@ -572,7 +704,7 @@ $(document).ready(function() {
                 legend: { position: 'bottom' },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => ctx.label + ': Rp ' + ctx.parsed.toLocaleString('id-ID')
+                        label: (ctx) => ctx.label + ': ' + ctx.parsed + '%'
                     }
                 }
             },

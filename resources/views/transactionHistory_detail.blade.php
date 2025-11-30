@@ -113,10 +113,8 @@
                             <th>No</th>
                             <th>Nama Produk</th>
                             <th>Qty</th>
-                            <th>Harga Beli</th>
                             <th>Harga Jual</th>
                             <th>Subtotal</th>
-                            <th>Profit</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -126,10 +124,8 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $detail->product->name ?? 'Produk Terhapus' }}</td>
                                 <td>{{ $detail->quantity }}</td>
-                                <td>Rp {{ number_format($detail->product_buy_price, 0, ',', '.') }}</td>
                                 <td>Rp {{ number_format($detail->product_sell_price, 0, ',', '.') }}</td>
                                 <td>Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</td>
-                                <td>Rp {{ number_format($detail->profit, 0, ',', '.') }}</td>
                                 <td>
                                     <div class="action-btn-group" role="group" aria-label="Aksi detail">
                                         <button type="button" class="btn btn-primary btn-sm btn-edit-detail" 
@@ -151,15 +147,14 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center">Tidak ada detail item.</td>
+                                <td colspan="6" class="text-center">Tidak ada detail item.</td>
                             </tr>
                         @endforelse
                     </tbody>
                     <tfoot>
                         <tr class="table-active">
-                            <th colspan="5" class="text-end">Total:</th>
+                            <th colspan="4" class="text-end">Total:</th>
                             <th>Rp {{ number_format($transaction->details->sum('subtotal'), 0, ',', '.') }}</th>
-                            <th>Rp {{ number_format($transaction->details->sum('profit'), 0, ',', '.') }}</th>
                             <th></th>
                         </tr>
                     </tfoot>
@@ -170,7 +165,7 @@
 </div>
 
 <div class="col-lg-12 mb-3">
-    <a href="{{ route('transactionHistory.index') }}" class="btn btn-secondary">
+    <a href="{{ route('transactionHistory.index') }}" class="btn btn-primary">
         <i class="mdi mdi-arrow-left"></i> Kembali
     </a>
 </div>
@@ -205,17 +200,14 @@
                         <label for="edit_quantity" class="form-label">Quantity</label>
                         <input type="number" class="form-control" id="edit_quantity" name="quantity" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit_buy_price" class="form-label">Harga Beli</label>
-                        <input type="number" class="form-control" id="edit_buy_price" name="product_buy_price" required readonly>
-                    </div>
+                    <input type="hidden" id="edit_buy_price" name="product_buy_price">
                     <div class="mb-3">
                         <label for="edit_sell_price" class="form-label">Harga Jual</label>
                         <input type="number" class="form-control" id="edit_sell_price" name="product_sell_price" required readonly>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">Update Detail</button>
                 </div>
             </form>

@@ -2,6 +2,9 @@
 
 @extends('layouts.admin')
 
+@section('page-title', 'Riwayat Transaksi')
+@section('page-description', 'Lihat histori transaksi penjualan')
+
 @section('content')
 
     <div class="container mt-2">

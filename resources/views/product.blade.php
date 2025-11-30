@@ -1,8 +1,9 @@
-            @extends('layouts.admin')
+@extends('layouts.admin')
 
-            @section('content')
-            
-            {{-- SWEATALERT --}}
+@section('page-title', 'Produk')
+@section('page-description', 'Kelola data produk dan harga jual')
+
+@section('content')            {{-- SWEATALERT --}}
 
             <style>
                 .action-btn-group {

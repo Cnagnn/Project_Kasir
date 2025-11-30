@@ -63,8 +63,13 @@ Route::middleware(['auth', 'checkrole:Manager,Cashier'])->group(function () {
 
     // Data grafik penjualan (JSON)
     Route::get('/dashboard/sales-data', [DashboardController::class, 'salesData'])->name('dashboard.salesData');
+    Route::get('/dashboard/sales-product-data', [DashboardController::class, 'salesProductData'])->name('dashboard.salesProductData');
     Route::get('/dashboard/metrics', [DashboardController::class, 'metrics'])->name('dashboard.metrics');
     Route::get('/dashboard/category-data', [DashboardController::class, 'categoryData'])->name('dashboard.categoryData');
+    // Laporan Stock (printable)
+    Route::get('/reports/stock/print', [\App\Http\Controllers\ReportController::class, 'printStock'])->name('reports.stock.print');
+    // Laporan Pendapatan per Invoice (PDF)
+    Route::get('/reports/invoice-revenue/print', [\App\Http\Controllers\ReportController::class, 'printInvoiceRevenue'])->name('reports.invoiceRevenue.print');
 });
 
 

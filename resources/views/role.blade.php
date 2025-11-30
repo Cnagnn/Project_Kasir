@@ -1,8 +1,9 @@
-            @extends('layouts.admin')
+@extends('layouts.admin')
 
-            @section('content')
-            
-            {{-- SWEATALERT --}}
+@section('page-title', 'Role & Hak Akses')
+@section('page-description', 'Kelola role dan hak akses pengguna')
+
+@section('content')            {{-- SWEATALERT --}}
 
             @if(session()->has('category_add_success'))
                 <script>

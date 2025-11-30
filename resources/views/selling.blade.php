@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 
+@section('page-title', 'Penjualan')
+@section('page-description', 'Proses transaksi penjualan kasir')
+
 @section('content')
 
     @if(session()->has('success'))

@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 
+@section('page-title', 'Karyawan')
+@section('page-description', 'Kelola data karyawan dan pengguna sistem')
+
 @section('content')
 
 {{-- SWEATALERT --}}

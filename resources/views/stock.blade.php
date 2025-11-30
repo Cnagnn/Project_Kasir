@@ -1,8 +1,9 @@
-            @extends('layouts.admin')
+@extends('layouts.admin')
 
-            @section('content')
-            
-            {{-- SWEATALERT --}}
+@section('page-title', 'Stok Barang')
+@section('page-description', 'Monitor dan kelola stok barang di gudang')
+
+@section('content')            {{-- SWEATALERT --}}
 
             <style>
                 .action-btn-group {

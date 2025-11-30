@@ -209,15 +209,130 @@ class DashboardController extends Controller
             ->selectRaw('categories.name as category, SUM(transaction_details.subtotal) as total')
             ->groupBy('categories.name')
             ->orderByDesc('total')
-            ->limit(5)
             ->get();
 
-        $labels = $rows->pluck('category');
-        $data = $rows->pluck('total')->map(fn($v) => (int)$v);
+        // Filter out categories with zero sales just in case
+        $filtered = $rows->filter(function($row){ return (int)$row->total > 0; });
+        
+        $labels = $filtered->pluck('category');
+        $totals = $filtered->pluck('total')->map(fn($v) => (int)$v);
+        
+        // Hitung total keseluruhan untuk persentase
+        $grandTotal = $totals->sum();
+        
+        // Hitung persentase setiap kategori
+        $data = $totals->map(function($value) use ($grandTotal) {
+            return $grandTotal > 0 ? round(($value / $grandTotal) * 100, 1) : 0;
+        });
 
         return response()->json([
             'labels' => $labels,
             'data' => $data
+        ]);
+    }
+
+    /**
+     * Data produk terjual per bulan: quantity dan nominal.
+     */
+    public function salesProductData()
+    {
+        $now = Carbon::now();
+        $year = $now->year;
+
+        // Data Quantity - Rincian per produk
+        $rawQuantityProducts = DB::table('transaction_details')
+            ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
+            ->join('products', 'transaction_details.product_id', '=', 'products.id')
+            ->selectRaw('products.name as product_name, MONTH(transactions.created_at) as month, SUM(transaction_details.quantity) as total')
+            ->whereYear('transactions.created_at', $year)
+            ->groupBy('products.name', 'month')
+            ->orderBy('products.name')
+            ->orderBy('month')
+            ->get();
+
+        // Group by product
+        $productQuantityMap = [];
+        foreach ($rawQuantityProducts as $row) {
+            if (!isset($productQuantityMap[$row->product_name])) {
+                $productQuantityMap[$row->product_name] = array_fill(1, 12, 0);
+            }
+            $productQuantityMap[$row->product_name][$row->month] = (int)$row->total;
+        }
+
+        // Ambil top 10 produk berdasarkan total penjualan sepanjang tahun
+        $productTotals = [];
+        foreach ($productQuantityMap as $productName => $monthData) {
+            $productTotals[$productName] = array_sum($monthData);
+        }
+        arsort($productTotals);
+        $topProducts = array_slice(array_keys($productTotals), 0, 10, true);
+
+        // Format data untuk chart (top 10 products)
+        $quantityDatasets = [];
+        $colors = [
+            'rgba(99, 102, 241, 1)', // indigo
+            'rgba(16, 185, 129, 1)', // green
+            'rgba(245, 158, 11, 1)', // orange
+            'rgba(239, 68, 68, 1)',  // red
+            'rgba(14, 165, 233, 1)', // blue
+            'rgba(168, 85, 247, 1)', // purple
+            'rgba(236, 72, 153, 1)', // pink
+            'rgba(20, 184, 166, 1)', // teal
+            'rgba(251, 146, 60, 1)', // amber
+            'rgba(132, 204, 22, 1)'  // lime
+        ];
+
+        $colorIndex = 0;
+        foreach ($topProducts as $productName) {
+            $monthData = $productQuantityMap[$productName];
+            $dataArray = [];
+            for ($m = 1; $m <= 12; $m++) {
+                $dataArray[] = $monthData[$m];
+            }
+            
+            $color = $colors[$colorIndex % count($colors)];
+            $quantityDatasets[] = [
+                'label' => $productName,
+                'data' => $dataArray,
+                'borderColor' => $color,
+                'backgroundColor' => str_replace('1)', '0.1)', $color),
+                'tension' => 0.4,
+                'fill' => false,
+                'pointRadius' => 3,
+                'pointHoverRadius' => 6,
+                'pointBorderWidth' => 2,
+                'pointBackgroundColor' => '#fff',
+                'pointBorderColor' => $color
+            ];
+            $colorIndex++;
+        }
+
+        // Data Nominal (total subtotal per bulan)
+        $rawNominal = DB::table('transaction_details')
+            ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
+            ->selectRaw('MONTH(transactions.created_at) as month, SUM(transaction_details.subtotal) as total')
+            ->whereYear('transactions.created_at', $year)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->pluck('total', 'month');
+
+        $monthLabels = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        $nominalData = [];
+
+        for ($m = 1; $m <= 12; $m++) {
+            $nominalData[] = (int)($rawNominal[$m] ?? 0);
+        }
+
+        return response()->json([
+            'quantity' => [
+                'labels' => $monthLabels,
+                'datasets' => $quantityDatasets,
+            ],
+            'nominal' => [
+                'labels' => $monthLabels,
+                'data' => $nominalData,
+            ]
         ]);
     }
 }
