@@ -103,228 +103,96 @@
         <!-- Card untuk kontrol filter dan widget -->
         <div class="card card-rounded shadow-sm mb-4">
             <div class="card-body">
-                                <!-- Tabs ringkasan ditempatkan di dalam card kontrol ini -->
-                                <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="laporan-tab" data-bs-toggle="tab" data-bs-target="#laporan" type="button" role="tab" aria-controls="laporan" aria-selected="false">Laporan</button>
-                                    </li>
-                                </ul>
-                                <div class="tab-content pt-3" id="dashboardTabContent">
-                                  <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-                                    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
-                                        <div>
-                                            <h4 class="mb-1">Overview</h4>
-                                            <p class="text-muted mb-0">Ringkasan singkat operasional.</p>
-                                        </div>
-                                        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
-                                            <div class="dropdown">
-                                                <button class="btn btn-primary dashboard-filter-btn d-flex justify-content-between align-items-center" type="button" id="timeframeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <span id="timeframeLabel">Hari ini ({{ $today->translatedFormat('d F Y') }})</span>
-                                                    <i class="mdi mdi-menu-down ms-2"></i>
-                                                </button>
-                                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="timeframeDropdown">
-                                                    @foreach ($timeframeOptions as $index => $option)
-                                                        <a class="dropdown-item d-flex justify-content-between align-items-center {{ $index === 0 ? 'active fw-semibold' : '' }}" href="#" data-timeframe="{{ $index === 0 ? 'day' : ($index === 1 ? 'week' : 'month') }}">
-                                                            <span>{{ $option['label'] }}</span>
-                                                            <small class="text-muted ms-2">{{ $option['range'] }}</small>
-                                                        </a>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                            <div class="dropdown">
-                                                <button class="btn btn-primary d-flex align-items-center" type="button" id="widgetDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i class="mdi mdi-view-grid"></i>
-                                                </button>
-                                                <div class="dropdown-menu dropdown-menu-end text-start p-2" style="min-width: 220px;" aria-labelledby="widgetDropdown">
-                                                    <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="penjualan">
-                                                        <span class="widget-check widget-check-active">
-                                                            <i class="mdi mdi-check"></i>
-                                                        </span>
-                                                        <span>Penjualan Hari Ini</span>
-                                                    </a>
-                                                    <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="transaksi">
-                                                        <span class="widget-check widget-check-active">
-                                                            <i class="mdi mdi-check"></i>
-                                                        </span>
-                                                        <span>Jumlah Transaksi Hari Ini</span>
-                                                    </a>
-                                                    <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="produk">
-                                                        <span class="widget-check widget-check-active">
-                                                            <i class="mdi mdi-check"></i>
-                                                        </span>
-                                                        <span>Produk Aktif</span>
-                                                    </a>
-                                                    <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="kategori">
-                                                        <span class="widget-check widget-check-active">
-                                                            <i class="mdi mdi-check"></i>
-                                                        </span>
-                                                        <span>Kategori</span>
-                                                    </a>
-                                                    <div class="dropdown-divider"></div>
-                                                    <a href="#" class="dropdown-item text-primary text-center" id="reset-widgets">Reset ke Default</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row g-3 mt-1">
-                                      <div class="col-md-6 col-xl-3" id="card-penjualan">
-                                          <div class="card card-rounded shadow-sm h-100">
-                                              <div class="card-body">
-                                                  <p class="text-muted small mb-1" id="penjualanLabel">Penjualan Hari Ini</p>
-                                                  <h3 class="fw-bold mb-2">Rp. <span id="penjualanValue">{{ number_format($penjualanHariIni ?? 0, 0, ',', '.') }}</span></h3>
-                                              </div>
-                                          </div>
-                                      </div>
-
-                                      <div class="col-md-6 col-xl-3" id="card-transaksi">
-                                          <div class="card card-rounded shadow-sm h-100">
-                                              <div class="card-body">
-                                                  <p class="text-muted small mb-1" id="transaksiLabel">Jumlah Transaksi Hari Ini</p>
-                                                  <h3 class="fw-bold mb-2" id="transaksiValue">{{ $transaksiHariIni }}</h3>
-                                              </div>
-                                          </div>
-                                      </div>
-
-                                      <div class="col-md-6 col-xl-3" id="card-produk">
-                                          <div class="card card-rounded shadow-sm h-100">
-                                              <div class="card-body">
-                                                  <p class="text-muted small mb-1">Produk Aktif</p>
-                                                  <h3 class="fw-bold mb-2">{{ $produkAktif }}</h3>
-                                              </div>
-                                          </div>
-                                      </div>
-
-                                      <div class="col-md-6 col-xl-3" id="card-kategori">
-                                          <div class="card card-rounded shadow-sm h-100">
-                                              <div class="card-body">
-                                                  <p class="text-muted small mb-1">Kategori</p>
-                                                  <h3 class="fw-bold mb-2">{{ $totalKategori }}</h3>
-                                              </div>
-                                          </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                    <div class="tab-pane fade" id="laporan" role="tabpanel" aria-labelledby="laporan-tab">
-                                        <div class="mb-3">
-                                            <h4 class="mb-1">Laporan</h4>
-                                            <p class="text-muted mb-0">Pilih jenis laporan yang ingin Anda lihat.</p>
-                                        </div>
-                                        <div class="row g-3 mt-2">
-                                            <div class="col-md-4">
-                                                <a href="{{ route('reports.stock.print') }}" target="_blank" class="text-decoration-none">
-                                                    <div class="card card-rounded h-100 border-primary">
-                                                        <div class="card-body text-center">
-                                                            <i class="mdi mdi-package-variant text-primary" style="font-size: 3rem;"></i>
-                                                            <h5 class="mt-3 mb-2">Laporan Stock</h5>
-                                                            <p class="text-muted small mb-0">Lihat detail stok barang tersedia</p>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalPendapatanProduk">
-                                                    <div class="card card-rounded h-100 border-success">
-                                                        <div class="card-body text-center">
-                                                            <i class="mdi mdi-chart-line text-success" style="font-size: 3rem;"></i>
-                                                            <h5 class="mt-3 mb-2">Laporan Pendapatan per Produk</h5>
-                                                            <p class="text-muted small mb-0">Analisis pendapatan setiap produk</p>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalPendapatanInvoice">
-                                                    <div class="card card-rounded h-100 border-info">
-                                                        <div class="card-body text-center">
-                                                            <i class="mdi mdi-file-document text-info" style="font-size: 3rem;"></i>
-                                                            <h5 class="mt-3 mb-2">Laporan Pendapatan per Invoice</h5>
-                                                            <p class="text-muted small mb-0">Rincian pendapatan per transaksi</p>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                
-            </div>
-        </div>
-
-        <!-- Modal Rentang Tanggal - Laporan Pendapatan per Produk -->
-        <div class="modal fade" id="modalPendapatanProduk" tabindex="-1" aria-labelledby="modalPendapatanProdukLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalPendapatanProdukLabel">
-                            <i class="mdi mdi-chart-line text-success me-2"></i>
-                            Laporan Pendapatan per Produk
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="d-flex flex-wrap gap-2 justify-content-end mb-4">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dashboard-filter-btn d-flex justify-content-between align-items-center" type="button" id="timeframeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="timeframeLabel">Hari ini ({{ $today->translatedFormat('d F Y') }})</span>
+                            <i class="mdi mdi-menu-down ms-2"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="timeframeDropdown">
+                            @foreach ($timeframeOptions as $index => $option)
+                                <a class="dropdown-item d-flex justify-content-between align-items-center {{ $index === 0 ? 'active fw-semibold' : '' }}" href="#" data-timeframe="{{ $index === 0 ? 'day' : ($index === 1 ? 'week' : 'month') }}">
+                                    <span>{{ $option['label'] }}</span>
+                                    <small class="text-muted ms-2">{{ $option['range'] }}</small>
+                                </a>
+                            @endforeach
+                        </div>
                     </div>
-                    <form id="formPendapatanProduk" method="GET" action="{{ route('reports.productRevenue.print') }}" target="_blank">
-                        <div class="modal-body">
-                            <p class="text-muted mb-3">Pilih rentang tanggal untuk melihat laporan pendapatan per produk.</p>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="startDateProduk" class="form-label">Tanggal Mulai</label>
-                                    <input type="date" class="form-control" id="startDateProduk" name="start_date" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="endDateProduk" class="form-label">Tanggal Selesai</label>
-                                    <input type="date" class="form-control" id="endDateProduk" name="end_date" required>
-                                </div>
+                    <div class="dropdown">
+                        <button class="btn btn-primary d-flex align-items-center" type="button" id="widgetDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="mdi mdi-view-grid"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end text-start p-2" style="min-width: 220px;" aria-labelledby="widgetDropdown">
+                            <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="penjualan">
+                                <span class="widget-check widget-check-active">
+                                    <i class="mdi mdi-check"></i>
+                                </span>
+                                <span>Penjualan Hari Ini</span>
+                            </a>
+                            <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="transaksi">
+                                <span class="widget-check widget-check-active">
+                                    <i class="mdi mdi-check"></i>
+                                </span>
+                                <span>Jumlah Transaksi Hari Ini</span>
+                            </a>
+                            <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="produk">
+                                <span class="widget-check widget-check-active">
+                                    <i class="mdi mdi-check"></i>
+                                </span>
+                                <span>Produk Aktif</span>
+                            </a>
+                            <a href="#" class="dropdown-item d-flex align-items-center gap-2 py-2" data-widget="kategori">
+                                <span class="widget-check widget-check-active">
+                                    <i class="mdi mdi-check"></i>
+                                </span>
+                                <span>Kategori</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item text-primary text-center" id="reset-widgets">Reset ke Default</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6 col-xl-3" id="card-penjualan">
+                        <div class="card card-rounded shadow-sm h-100">
+                            <div class="card-body">
+                                <p class="text-muted small mb-1" id="penjualanLabel">Penjualan Hari Ini</p>
+                                <h3 class="fw-bold mb-2">Rp. <span id="penjualanValue">{{ number_format($penjualanHariIni ?? 0, 0, ',', '.') }}</span></h3>
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="mdi mdi-file-pdf-box me-1"></i> Lihat Laporan PDF
-                            </button>
+                    </div>
+
+                    <div class="col-md-6 col-xl-3" id="card-transaksi">
+                        <div class="card card-rounded shadow-sm h-100">
+                            <div class="card-body">
+                                <p class="text-muted small mb-1" id="transaksiLabel">Jumlah Transaksi Hari Ini</p>
+                                <h3 class="fw-bold mb-2" id="transaksiValue">{{ $transaksiHariIni }}</h3>
+                            </div>
                         </div>
-                    </form>
+                    </div>
+
+                    <div class="col-md-6 col-xl-3" id="card-produk">
+                        <div class="card card-rounded shadow-sm h-100">
+                            <div class="card-body">
+                                <p class="text-muted small mb-1">Produk Aktif</p>
+                                <h3 class="fw-bold mb-2">{{ $produkAktif }}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-xl-3" id="card-kategori">
+                        <div class="card card-rounded shadow-sm h-100">
+                            <div class="card-body">
+                                <p class="text-muted small mb-1">Kategori</p>
+                                <h3 class="fw-bold mb-2">{{ $totalKategori }}</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal Rentang Tanggal - Laporan Pendapatan per Invoice -->
-        <div class="modal fade" id="modalPendapatanInvoice" tabindex="-1" aria-labelledby="modalPendapatanInvoiceLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalPendapatanInvoiceLabel">
-                            <i class="mdi mdi-file-document text-info me-2"></i>
-                            Laporan Pendapatan per Invoice
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form id="formPendapatanInvoice" method="GET" action="{{ route('reports.invoiceRevenue.print') }}" target="_blank">
-                        <div class="modal-body">
-                            <p class="text-muted mb-3">Pilih rentang tanggal untuk melihat laporan pendapatan per invoice.</p>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="startDateInvoice" class="form-label">Tanggal Mulai</label>
-                                    <input type="date" class="form-control" id="startDateInvoice" name="start_date" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="endDateInvoice" class="form-label">Tanggal Selesai</label>
-                                    <input type="date" class="form-control" id="endDateInvoice" name="end_date" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="mdi mdi-file-pdf-box me-1"></i> Lihat Laporan PDF
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+        
 
         <div class="row g-4">
             <div class="col-lg-8">

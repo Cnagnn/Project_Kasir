@@ -1,7 +1,7 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
   <ul class="nav">
     <li class="nav-item mt-3">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="{{ route('reports.index') }}">
         <i class="menu-icon mdi mdi-file-chart"></i>
         <span class="menu-title">Laporan</span>
       </a>

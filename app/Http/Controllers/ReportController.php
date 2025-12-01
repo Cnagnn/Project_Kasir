@@ -10,6 +10,11 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
+    public function index()
+    {
+        return view('reports.report');
+    }
+
     public function printStock(Request $request)
     {
         // Ambil produk beserta stok dan kategori
