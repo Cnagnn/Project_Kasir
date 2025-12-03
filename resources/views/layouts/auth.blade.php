@@ -50,5 +50,6 @@
     <script src="{{ asset('/js/hoverable-collapse.js') }}"></script>
     <script src="{{ asset('/js/todolist.js') }}"></script>
     <!-- endinject -->
+    @stack('scripts')
   </body>
 </html>
