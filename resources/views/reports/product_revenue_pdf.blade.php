@@ -22,8 +22,10 @@
                 <th style="width:32px">#</th>
                 <th>Produk</th>
                 <th>Kategori</th>
+                <th class="text-end">HPP</th>
+                <th class="text-end">Harga Jual</th>
                 <th class="text-end">Jumlah Terjual</th>
-                <th class="text-end">Pendapatan</th>
+                <th class="text-end">Profit</th>
             </tr>
         </thead>
         <tbody>
@@ -32,20 +34,26 @@
                     <td>{{ $i + 1 }}</td>
                     <td>{{ $row['name'] }}</td>
                     <td>{{ $row['category'] }}</td>
+                    <td class="text-end">Rp {{ number_format(($row['buy_price'] ?? 0), 0, ',', '.') }}</td>
+                    <td class="text-end">Rp {{ number_format(($row['sell_price'] ?? 0), 0, ',', '.') }}</td>
                     <td class="text-end">{{ number_format($row['qty'] ?? 0, 0, ',', '.') }}</td>
-                    <td class="text-end">Rp {{ number_format($row['revenue'] ?? 0, 0, ',', '.') }}</td>
+                    @php($profit = ($row['profit'] ?? (($row['revenue'] ?? 0) - (($row['buy_price'] ?? 0) * ($row['qty'] ?? 0)))))
+                    <td class="text-end">Rp {{ number_format($profit, 0, ',', '.') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" style="text-align:center; padding:14px; color:#666;">Tidak ada data pada rentang ini.</td>
+                    <td colspan="8" style="text-align:center; padding:14px; color:#666;">Tidak ada data pada rentang ini.</td>
                 </tr>
             @endforelse
         </tbody>
         <tfoot>
             <tr>
+                @php($grandProfit = $grandProfit ?? ($grandRevenue ?? 0))
                 <th colspan="3" class="text-end">Total</th>
+                <th class="text-end">Rp {{ number_format($grandBuyPrice ?? 0, 0, ',', '.') }}</th>
+                <th class="text-end">Rp {{ number_format($grandSellPrice ?? 0, 0, ',', '.') }}</th>
                 <th class="text-end">{{ number_format($grandQty ?? 0, 0, ',', '.') }}</th>
-                <th class="text-end">Rp {{ number_format($grandRevenue ?? 0, 0, ',', '.') }}</th>
+                <th class="text-end">Rp {{ number_format($grandProfit, 0, ',', '.') }}</th>
             </tr>
         </tfoot>
     </table>

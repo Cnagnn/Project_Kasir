@@ -20,9 +20,9 @@
         <thead>
             <tr>
                 <th style="width:32px">#</th>
+                <th>Tanggal</th>
                 <th>Invoice</th>
                 <th>Operator</th>
-                <th>Tanggal</th>
                 <th class="text-end">Total Pembayaran</th>
             </tr>
         </thead>
@@ -30,9 +30,9 @@
             @forelse($rows as $i => $row)
                 <tr>
                     <td>{{ $i + 1 }}</td>
+                    <td>{{ \Carbon\Carbon::parse($row['date'])->format('d/m/Y H:i') }}</td>
                     <td>{{ $row['invoice'] }}</td>
                     <td>{{ $row['operator'] }}</td>
-                    <td>{{ \Carbon\Carbon::parse($row['date'])->format('d/m/Y H:i') }}</td>
                     <td class="text-end">Rp {{ number_format($row['total'] ?? 0, 0, ',', '.') }}</td>
                 </tr>
             @empty

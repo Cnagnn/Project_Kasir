@@ -62,27 +62,10 @@ class CheckoutController extends Controller
                     
                     // Cek apakah request AJAX
                     if ($request->ajax() || $request->wantsJson()) {
-                        // Siapkan data transaction untuk struk
-                        $transactionData = [
-                            'id' => $transaction->invoice_number,
-                            'created_at' => $transaction->transaction_date,
-                            'cashier_name' => Auth::user()->name ?? 'Admin',
-                            'total_price' => $transaction->total_payment,
-                            'amount_paid' => $request->amount_paid,
-                            'change_amount' => $request->amount_paid - $transaction->total_payment,
-                            'details' => $transaction->details->map(function($detail) {
-                                return [
-                                    'product_name' => $detail->product->name ?? 'Produk',
-                                    'quantity' => $detail->quantity,
-                                    'sell_price' => $detail->product_sell_price,
-                                ];
-                            })
-                        ];
-                        
                         return response()->json([
                             'success' => true, 
                             'message' => 'Transaksi Tunai #' . $transaction->invoice_number . ' berhasil!',
-                            'transaction' => $transactionData
+                            'transaction_id' => $transaction->id
                         ]);
                     }
                     
@@ -222,5 +205,31 @@ class CheckoutController extends Controller
 
         // Kembalikan data untuk view 'payment_wait'
         return ['transaction' => $transaction, 'qr_code_url' => $midtransResponse->actions[0]->url ?? $midtransResponse->qr_string]; // Ambil URL QR dari 'actions' jika ada (lebih baru)
+    }
+
+    /**
+     * Menampilkan struk dalam format HTML 57mm
+     */
+    public function receipt($id)
+    {
+        $transaction = Transaction::with(['user', 'details.product'])->findOrFail($id);
+
+        // Hitung subtotal tiap detail & total akhir
+        $items = $transaction->details->map(function ($d) {
+            return [
+                'name' => optional($d->product)->name ?? '-',
+                'qty' => $d->quantity,
+                'price' => $d->product_sell_price,
+                'subtotal' => $d->subtotal,
+            ];
+        });
+
+        $total = $items->sum('subtotal');
+
+        return view('receipt', [
+            'transaction' => $transaction,
+            'items' => $items,
+            'total' => $total,
+        ]);
     }
 }

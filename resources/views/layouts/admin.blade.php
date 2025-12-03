@@ -40,6 +40,18 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- endinject -->
     <style>
+        /* Alignment antara navbar dan content */
+        .content-wrapper {
+            padding-left: 2.187rem !important;
+            padding-right: 2.187rem !important;
+        }
+        
+        /* Hilangkan padding dari col-lg-12 agar card sejajar dengan navbar */
+        .content-wrapper .row > .col-sm-12 > .col-lg-12 {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        
         .navbar {
             align-items: center !important;
             padding-top: 0 !important;
@@ -47,6 +59,286 @@
         .navbar-menu-wrapper {
             align-items: center !important;
             padding-top: 0 !important;
+            padding-left: 2.187rem !important;
+            padding-right: 2.187rem !important;
+        }
+
+        /* ===== UNIFORM MODAL STYLES ===== */
+        .modal-content {
+            border-radius: 0.75rem;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            background: #1F3BB3;
+            color: #fff;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            border-bottom: none;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .modal-header .modal-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin: 0;
+        }
+
+        .modal-header .close,
+        .modal-header .modal-close-btn {
+            color: #fff;
+            opacity: 0.9;
+            text-shadow: none;
+            font-size: 1.5rem;
+            font-weight: 300;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+            border: none;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .modal-header .close:hover,
+        .modal-header .modal-close-btn:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-body .card-description {
+            color: #6c757d;
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e9ecef;
+            background-color: #f8f9fa;
+            border-bottom-left-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .modal-footer .btn,
+        .modal-footer .button {
+            min-width: 100px;
+            font-weight: 500;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            margin: 0;
+        }
+
+        .modal-footer .btn-light {
+            background-color: #dc3545;
+            border: 1px solid #dc3545;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .modal-footer .btn-light:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .modal-footer .btn-secondary {
+            background-color: #dc3545;
+            border: 1px solid #dc3545;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .modal-footer .btn-secondary:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .modal-footer .btn-primary,
+        .modal-footer .button.btn-primary {
+            background: #1F3BB3;
+            border: none;
+            box-shadow: 0 4px 12px rgba(31, 59, 179, 0.3);
+            color: #fff;
+        }
+
+        .modal-footer .btn-primary:hover,
+        .modal-footer .button.btn-primary:hover {
+            background: #172d88;
+            box-shadow: 0 6px 16px rgba(31, 59, 179, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .modal-footer .button.btn-primary span {
+            color: #fff;
+        }
+
+        /* Form Controls in Modal */
+        .modal-body .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .modal-body .form-group label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .modal-body .form-control {
+            border-radius: 0.5rem;
+            border: 1px solid #dee2e6;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+        }
+
+        .modal-body .form-control:focus {
+            border-color: #1F3BB3;
+            box-shadow: 0 0 0 0.2rem rgba(31, 59, 179, 0.15);
+        }
+
+        .modal-body .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .modal-body .form-control.is-invalid:focus {
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+        }
+
+        .modal-body .invalid-feedback {
+            font-size: 0.8125rem;
+            margin-top: 0.375rem;
+        }
+
+        .modal-body .form-text {
+            font-size: 0.8125rem;
+            color: #6c757d;
+            margin-top: 0.375rem;
+        }
+
+        /* Dropdown in Modal */
+        .modal-body .btn-group .btn {
+            border-radius: 0.5rem;
+            padding: 0.625rem 0.875rem;
+        }
+
+        .modal-body .dropdown-menu {
+            border-radius: 0.5rem;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-body .dropdown-item {
+            padding: 0.5rem 1rem;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+        }
+
+        .modal-body .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #1F3BB3;
+        }
+
+        /* Material Form Style (for existing forms) */
+        .modal-body .material-form .form-group {
+            position: relative;
+            margin-bottom: 1.75rem;
+        }
+
+        .modal-body .material-form .form-control {
+            border: none;
+            border-bottom: 2px solid #dee2e6;
+            border-radius: 0;
+            padding: 0.5rem 0;
+            background: transparent;
+        }
+
+        .modal-body .material-form .form-control:focus {
+            box-shadow: none;
+            border-bottom-color: #1F3BB3;
+        }
+
+        .modal-body .material-form .control-label {
+            position: absolute;
+            top: 0.5rem;
+            left: 0;
+            color: #999;
+            transition: all 0.2s ease;
+            pointer-events: none;
+            font-size: 0.9375rem;
+        }
+
+        .modal-body .material-form .form-control:focus ~ .control-label,
+        .modal-body .material-form .form-control:valid ~ .control-label {
+            top: -1.25rem;
+            font-size: 0.75rem;
+            color: #1F3BB3;
+        }
+
+        .modal-body .material-form .bar {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+
+        .modal-body .material-form .bar:before,
+        .modal-body .material-form .bar:after {
+            content: '';
+            height: 2px;
+            width: 0;
+            bottom: 0;
+            position: absolute;
+            background: #1F3BB3;
+            transition: all 0.2s ease;
+        }
+
+        .modal-body .material-form .bar:before {
+            left: 50%;
+        }
+
+        .modal-body .material-form .bar:after {
+            right: 50%;
+        }
+
+        .modal-body .material-form .form-control:focus ~ .bar:before,
+        .modal-body .material-form .form-control:focus ~ .bar:after {
+            width: 50%;
+        }
+
+        /* Modal Animation */
+        .modal.fade .modal-dialog {
+            transform: scale(0.9) translateY(-20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show .modal-dialog {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        /* Modal Backdrop */
+        .modal-backdrop.show {
+            opacity: 0.6;
         }
     </style>
     <link rel="shortcut icon" href="{{ asset('admin/images/favicon.png') }}" />

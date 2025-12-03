@@ -78,6 +78,33 @@ class TransactionHistoryController extends Controller
         $transaction->total_payment = $transaction->details->sum('subtotal');
         $transaction->save();
 
-        return redirect()->back()->with('success', 'Detail transaksi berhasil diupdate!');
+        return redirect()->back()->with([
+            'success' => 'Detail transaksi berhasil diupdate!',
+            'show_receipt' => true,
+            'transaction_id' => $transaction->id
+        ]);
+    }
+
+    public function print($id)
+    {
+        $transaction = Transaction::with(['user', 'details.product'])->findOrFail($id);
+
+        // Hitung subtotal tiap detail & total akhir
+        $items = $transaction->details->map(function ($d) {
+            return [
+                'name' => optional($d->product)->name ?? '-',
+                'qty' => $d->quantity,
+                'price' => $d->product_sell_price,
+                'subtotal' => $d->subtotal,
+            ];
+        });
+
+        $total = $items->sum('subtotal');
+
+        return view('receipt', [
+            'transaction' => $transaction,
+            'items' => $items,
+            'total' => $total,
+        ]);
     }
 }

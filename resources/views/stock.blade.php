@@ -3,9 +3,26 @@
 @section('page-title', 'Stok Barang')
 @section('page-description', 'Monitor dan kelola stok barang di gudang')
 
-@section('content')            {{-- SWEATALERT --}}
+@section('content')
 
-            <style>
+<style>
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .card.card-rounded .card-body {
+        padding: 1.25rem 1.25rem;
+    }
+</style>
+
+{{-- SWEATALERT --}}
+
+<style>
                 .action-btn-group {
                     display: inline-flex;
                     align-items: stretch;
@@ -78,12 +95,15 @@
                 </script>    
             @endif
 
-            {{-- END SWEATALERT --}}
-            
-            {{-- SEARCH AND FILTER SECTION --}}
+{{-- END SWEATALERT --}}
 
-            <div class="col-lg-12 grid-margin stretch-card">
-                <div class="card">
+<div class="row">
+    <div class="col-sm-12">
+
+        {{-- SEARCH AND FILTER SECTION --}}
+
+        <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card card-rounded">
                   <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
@@ -107,10 +127,10 @@
 
             {{-- END SEARCH PRODUCT BOX --}}
 
-            {{-- MAIN TABLE / PRODUCT LIST --}}
-            
-            <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
-                <div class="card">
+        {{-- MAIN TABLE / PRODUCT LIST --}}
+        
+        <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
+                <div class="card card-rounded">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Daftar Produk</h4>
@@ -365,7 +385,10 @@
 
             
 
-            @endsection
+    </div>
+</div>
+
+@endsection
 
             
             @push('scripts')

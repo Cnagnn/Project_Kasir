@@ -5,7 +5,22 @@
 
 @section('content')
 
-    @if(session()->has('success'))
+<style>
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .card.card-rounded .card-body {
+        padding: 1.25rem 1.25rem;
+    }
+</style>
+
+@if(session()->has('success'))
         <script>
             Swal.fire({
                 title: "BERHASIL",
@@ -24,9 +39,12 @@
         </script>     
     @endif
 
-    {{-- SEARCH AND FILTER SECTION --}}
-    <div class="col-lg-12 grid-margin stretch-card" id="search-card">
-        <div class="card">
+<div class="row">
+    <div class="col-sm-12">
+
+        {{-- SEARCH AND FILTER SECTION --}}
+        <div class="col-lg-12 grid-margin stretch-card" id="search-card">
+            <div class="card card-rounded">
             <div class="card-body">
                 <div class="row align-items-center">
                     {{-- Kolom Pencarian --}}
@@ -63,41 +81,45 @@
     {{-- END RESULT SEARCH PRODUCT BOX --}}
 
         <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
-        <div class="card">
+        <div class="card card-rounded">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h4 class="card-title mb-0">Daftar Produk</h4>
                 </div>
                 <div class="container-fluid" id="product-list-container">
-                    <div class="row justify-content-center">
+                    <div class="row">
                         @foreach ($products as $item)
                             @if ($item->stock->sum('remaining_stock') == 0)
                                 @continue
                             @endif
-                                <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
-                                    <div class="card h-100" style="border: 1px solid black"> 
-                                        <div class="card-body d-flex flex-column">
-                                            <h5 class="card-title">{{ $item->name }}</h5>
-                                            <h6 class="card-subtitle mb-2">
-                                                Harga : <strong>{{ $item->sell_price ?? 'Data tidak tersedia' }}</strong>
-                                            </h6>
-                                            <p class="card-subtitle">Stok : <strong>{{ $item->stock->sum('remaining_stock') }}</strong></p>
+                                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                                    <div class="card card-rounded h-100 shadow-sm" style="border: 1px solid rgba(0, 0, 0, 0.1);"> 
+                                        <div class="card-body d-flex flex-column p-3">
+                                            <h5 class="card-title font-weight-bold mb-3" style="font-size: 1.1rem; color: #2c3e50;">{{ $item->name }}</h5>
+                                            <div class="mb-2">
+                                                <small class="text-muted">Harga</small>
+                                                <h6 class="font-weight-bold text-primary mb-0" style="font-size: 1.25rem;">
+                                                    Rp {{ number_format($item->sell_price ?? 0, 0, ',', '.') }}
+                                                </h6>
+                                            </div>
+                                            <div class="mb-2">
+                                                <small class="text-muted">Stok: {{ $item->stock->sum('remaining_stock') }}</small>
+                                            </div>
                                             <div class="mt-auto"> 
-                                                <div class="btn-wrapper">
-                                                    <button type="button" class="btn btn-primary align-items-center add-to-cart-btn" data-product-id="{{ $item->id }}">
-                                                        <i class="mdi mdi-cart"></i> Tambah Ke Keranjang
-                                                    </button>
-                                                </div>
+                                                <button type="button" class="btn btn-primary btn-block add-to-cart-btn w-100" data-product-id="{{ $item->id }}">
+                                                    <i class="mdi mdi-cart-plus"></i> Tambah
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                         @endforeach
-                        <div class="card-body mt-3 d-flex justify-content-center">
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12 d-flex justify-content-center">
                             {{ $products->links() }}
                         </div>
                     </div>
-                     
                 </div>
 
                 <div id="cart-container" class="d-none">
@@ -155,6 +177,17 @@
                                         required
                                     >
                                 </div>
+                                
+                                {{-- Shortcut nominal uang --}}
+                                <div class="mt-3">
+                                    <small class="text-muted d-block mb-2">Shortcut Nominal:</small>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <button type="button" class="btn btn-primary btn-md money-shortcut" data-amount="10000">10.000</button>
+                                        <button type="button" class="btn btn-primary btn-md money-shortcut" data-amount="20000">20.000</button>
+                                        <button type="button" class="btn btn-primary btn-md money-shortcut" data-amount="50000">50.000</button>
+                                        <button type="button" class="btn btn-primary btn-md money-shortcut" data-amount="100000">100.000</button>
+                                    </div>
+                                </div>
                             </div>
                             
                             <h4 id="change-display" class="text-success">Kembalian: Rp 0</h4>
@@ -170,84 +203,9 @@
         </div>
     </div>
 
-    {{-- MODAL STRUK PEMBELIAN --}}
-    <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="receiptModalLabel">
-                        <i class="mdi mdi-receipt"></i> Struk Pembelian
-                    </h5>
-                </div>
-                
-                <div class="modal-body" id="receipt-content">
-                    <div class="text-center mb-4">
-                        <h4 class="mb-1">TOKO KASIR</h4>
-                        <p class="mb-0 small">Jl. Contoh No. 123, Kota</p>
-                        <p class="mb-0 small">Telp: 0812-3456-7890</p>
-                        <hr>
-                    </div>
 
-                    <div class="mb-3">
-                        <div class="row">
-                            <div class="col-6">
-                                <small>No. Transaksi:</small><br>
-                                <strong id="receipt-transaction-id">-</strong>
-                            </div>
-                            <div class="col-6 text-end">
-                                <small>Tanggal:</small><br>
-                                <strong id="receipt-date">-</strong>
-                            </div>
-                        </div>
-                        <div class="row mt-2">
-                            <div class="col-12">
-                                <small>Kasir:</small><br>
-                                <strong id="receipt-cashier">-</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <div id="receipt-items" class="mb-3">
-                        <!-- Items akan diisi oleh JavaScript -->
-                    </div>
-
-                    <hr>
-
-                    <div class="row mb-2">
-                        <div class="col-6"><strong>Total:</strong></div>
-                        <div class="col-6 text-end"><strong id="receipt-total">Rp 0</strong></div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-6">Bayar:</div>
-                        <div class="col-6 text-end" id="receipt-paid">Rp 0</div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-6">Kembalian:</div>
-                        <div class="col-6 text-end" id="receipt-change">Rp 0</div>
-                    </div>
-
-                    <hr>
-
-                    <div class="text-center">
-                        <p class="mb-0 small">Terima kasih atas kunjungan Anda!</p>
-                        <p class="mb-0 small">Barang yang sudah dibeli tidak dapat ditukar/dikembalikan</p>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="btn-print-receipt">
-                        <i class="mdi mdi-printer"></i> Print
-                    </button>
-                    <button type="button" class="btn btn-secondary" id="btn-close-receipt">
-                        <i class="mdi mdi-close"></i> Close
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
-
+</div>
 
 @endsection
 
@@ -387,20 +345,23 @@
                                     const priceDisplay = product.sell_price ? formattedPrice : 'Data tidak tersedia';
 
                                     cardContent += `
-                                        <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
-                                            <div class="card h-100" style="border: 1px solid black"> 
-                                                <div class="card-body d-flex flex-column">
-                                                    <h5 class="card-title">${product.name}</h5>
-                                                    <h6 class="card-subtitle mb-2">
-                                                        Harga : <strong>${priceDisplay}</strong>
-                                                    </h6>
-                                                    <p class="card-subtitle">Stok : <strong>${totalStock}</strong></p>
+                                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                                            <div class="card card-rounded h-100 shadow-sm" style="border: 1px solid rgba(0, 0, 0, 0.1);"> 
+                                                <div class="card-body d-flex flex-column p-3">
+                                                    <h5 class="card-title font-weight-bold mb-3" style="font-size: 1.1rem; color: #2c3e50;">${product.name}</h5>
+                                                    <div class="mb-2">
+                                                        <small class="text-muted">Harga</small>
+                                                        <h6 class="font-weight-bold text-primary mb-0" style="font-size: 1.25rem;">
+                                                            ${priceDisplay}
+                                                        </h6>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <small class="text-muted">Stok: ${totalStock}</small>
+                                                    </div>
                                                     <div class="mt-auto"> 
-                                                        <div class="btn-wrapper">
-                                                            <button type="button" class="btn btn-primary align-items-center add-to-cart-btn" data-product-id="${product.id}">
-                                                                <i class="mdi mdi-cart"></i> Tambah Ke Keranjang
-                                                            </button>
-                                                        </div>
+                                                        <button type="button" class="btn btn-primary btn-block add-to-cart-btn w-100" data-product-id="${product.id}">
+                                                            <i class="mdi mdi-cart-plus"></i> Tambah
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -454,7 +415,7 @@
                 let tableHTML = `
                     <table class="table table-hover">
                         <thead>
-                            <tr>
+                            <tr class="text-center">
                                 <th>Produk</th>
                                 <th>Harga</th>
                                 <th>Jumlah</th>
@@ -473,14 +434,14 @@
                     total += subtotal;
 
                     tableHTML += `
-                        <tr id="row-${id}">
+                        <tr id="row-${id}" class="text-center">
                             <td>${item.name}</td>
                             <td>Rp ${ new Intl.NumberFormat('id-ID').format(item.sell_price) }</td>
                             
                             <td style="min-width: 150px;">
-                                <div class="d-flex align-items-stretch" role="group" aria-label="Quantity">
+                                <div class="d-flex align-items-stretch justify-content-center" role="group" aria-label="Quantity">
                                     {{-- Tombol minus --}}
-                                    <button type="button" class="btn btn-outline-secondary btn-sm btn-decrease-qty rounded-0 rounded-start" data-product-id="${id}">
+                                    <button type="button" class="btn btn-primary btn-sm btn-decrease-qty rounded-0 rounded-start" data-product-id="${id}">
                                         <i class="mdi mdi-minus"></i>
                                     </button>
                                     
@@ -496,7 +457,7 @@
                                     >
                                     
                                     {{-- Tombol plus --}}
-                                    <button type="button" class="btn btn-outline-secondary btn-sm btn-increase-qty rounded-0 rounded-end" data-product-id="${id}">
+                                    <button type="button" class="btn btn-primary btn-sm btn-increase-qty rounded-0 rounded-end" data-product-id="${id}">
                                         <i class="mdi mdi-plus"></i>
                                     </button>
                                 </div>
@@ -811,6 +772,35 @@
             });
 
             // =======================================================
+            // ==      LOGIKA SHORTCUT NOMINAL UANG                 ==
+            // =======================================================
+            
+            $(document).on('click', '.money-shortcut', function() {
+                let amount = $(this).data('amount');
+                let formattedAmount = new Intl.NumberFormat('id-ID').format(amount);
+                
+                // Set nilai ke input display dan hidden
+                $('#amount-paid-display').val(formattedAmount);
+                $('#amount-paid-hidden').val(amount);
+                
+                // Hitung kembalian
+                let total = parseFloat($('#modal-total-hidden').val());
+                let change = amount - total;
+                
+                let formattedChange = new Intl.NumberFormat('id-ID', { 
+                    style: 'currency', currency: 'IDR', minimumFractionDigits: 0 
+                }).format(change);
+                
+                if (change < 0) {
+                    $('#change-display').text('Uang Kurang: ' + formattedChange);
+                    $('#change-display').removeClass('text-success').addClass('text-danger');
+                } else {
+                    $('#change-display').text('Kembalian: ' + formattedChange);
+                    $('#change-display').removeClass('text-danger').addClass('text-success');
+                }
+            });
+
+            // =======================================================
             // ==      LOGIKA INPUT UANG PEMBAYARAN TRANSAKSI       ==
             // =======================================================
 
@@ -941,11 +931,10 @@
                     url: '{{ route("cart.checkout.process") }}',
                     type: 'POST',
                     data: formData,
-                    dataType: 'json', // Tambahkan ini untuk memastikan jQuery parsing JSON
+                    dataType: 'json',
                     success: function(response) {
                         console.log('Response dari server:', response);
                         
-                        // Cek apakah response adalah redirect atau berisi success message
                         if (response.success || response.message) {
                             // Tutup modal checkout
                             $('#checkoutModal').modal('hide');
@@ -955,13 +944,13 @@
                                 title: 'Berhasil!',
                                 text: response.message || 'Transaksi berhasil diproses.',
                                 icon: 'success',
-                                timer: 2000,
+                                timer: 1500,
                                 showConfirmButton: false
                             });
                             
-                            // Jika ada data transaction, tampilkan struk
-                            if (response.transaction) {
-                                showReceipt(response.transaction);
+                            // Buka struk di window baru
+                            if (response.transaction_id) {
+                                window.open('/selling/receipt/' + response.transaction_id, '_blank');
                             }
                             
                             // Kosongkan keranjang di UI
@@ -990,139 +979,7 @@
                 });
             });
 
-            // =======================================================
-            // ==     FUNGSI TAMPILKAN STRUK                       ==
-            // =======================================================
-            
-            function showReceipt(transaction) {
-                // Format tanggal
-                let transactionDate = new Date(transaction.created_at);
-                let formattedDate = transactionDate.toLocaleDateString('id-ID', {
-                    day: '2-digit',
-                    month: '2-digit', 
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
 
-                // Isi data struk
-                $('#receipt-transaction-id').text(transaction.id);
-                $('#receipt-date').text(formattedDate);
-                $('#receipt-cashier').text(transaction.cashier_name || 'Admin');
-                
-                // Isi item-item
-                let itemsHtml = '';
-                transaction.details.forEach(function(detail) {
-                    let subtotal = detail.quantity * detail.sell_price;
-                    itemsHtml += `
-                        <div class="row mb-1">
-                            <div class="col-12">
-                                <strong>${detail.product_name}</strong>
-                            </div>
-                            <div class="col-8 ps-3">
-                                ${detail.quantity} x Rp ${new Intl.NumberFormat('id-ID').format(detail.sell_price)}
-                            </div>
-                            <div class="col-4 text-end">
-                                Rp ${new Intl.NumberFormat('id-ID').format(subtotal)}
-                            </div>
-                        </div>
-                    `;
-                });
-                $('#receipt-items').html(itemsHtml);
-
-                // Total, Bayar, Kembalian
-                $('#receipt-total').text('Rp ' + new Intl.NumberFormat('id-ID').format(transaction.total_price));
-                $('#receipt-paid').text('Rp ' + new Intl.NumberFormat('id-ID').format(transaction.amount_paid));
-                $('#receipt-change').text('Rp ' + new Intl.NumberFormat('id-ID').format(transaction.change_amount));
-
-                // Tampilkan modal struk
-                $('#receiptModal').modal('show');
-            }
-
-            // =======================================================
-            // ==     TOMBOL PRINT STRUK                           ==
-            // =======================================================
-            
-            $('#btn-print-receipt').on('click', function() {
-                // Ambil konten struk
-                let receiptContent = $('#receipt-content').html();
-                
-                // Buat jendela print baru
-                let printWindow = window.open('', '_blank', 'width=800,height=600');
-                
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Struk Pembelian</title>
-                        <style>
-                            body {
-                                font-family: 'Courier New', monospace;
-                                padding: 20px;
-                                max-width: 400px;
-                                margin: 0 auto;
-                            }
-                            .text-center { text-align: center; }
-                            .text-end { text-align: right; }
-                            .mb-0 { margin-bottom: 0; }
-                            .mb-1 { margin-bottom: 0.25rem; }
-                            .mb-2 { margin-bottom: 0.5rem; }
-                            .mb-3 { margin-bottom: 1rem; }
-                            .mb-4 { margin-bottom: 1.5rem; }
-                            .mt-2 { margin-top: 0.5rem; }
-                            .ps-3 { padding-left: 1rem; }
-                            .row { display: flex; flex-wrap: wrap; margin: 0 -5px; }
-                            .col-4 { flex: 0 0 33.333333%; max-width: 33.333333%; padding: 0 5px; }
-                            .col-6 { flex: 0 0 50%; max-width: 50%; padding: 0 5px; }
-                            .col-8 { flex: 0 0 66.666667%; max-width: 66.666667%; padding: 0 5px; }
-                            .col-12 { flex: 0 0 100%; max-width: 100%; padding: 0 5px; }
-                            hr { border: none; border-top: 1px dashed #000; margin: 10px 0; }
-                            small { font-size: 0.875em; }
-                            strong { font-weight: bold; }
-                            h4 { margin: 0.5rem 0; font-size: 1.25rem; }
-                            @media print {
-                                body { padding: 0; }
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        ${receiptContent}
-                    </body>
-                    </html>
-                `);
-                
-                printWindow.document.close();
-                printWindow.focus();
-                
-                // Tunggu sebentar lalu print
-                setTimeout(function() {
-                    printWindow.print();
-                    printWindow.close();
-                }, 250);
-            });
-
-            // =======================================================
-            // ==     TOMBOL CLOSE STRUK                           ==
-            // =======================================================
-            
-            $('#btn-close-receipt').on('click', function() {
-                $('#receiptModal').modal('hide');
-                
-                // Reset form checkout
-                $('#checkoutForm')[0].reset();
-                $('#amount-paid-display').val('');
-                $('#amount-paid-hidden').val('');
-                $('#change-display').text('Kembalian: Rp 0').removeClass('text-danger').addClass('text-success');
-                
-                // Kembali ke tampilan produk
-                if (!btnShowProducts.hasClass('active')) {
-                    btnShowProducts.addClass('active');
-                    btnShowCart.removeClass('active');
-                    cartContainer.addClass('d-none');
-                    productContainer.removeClass('d-none');
-                    mainProductCard.show();
-                }
-            });
 
         });
     </script>

@@ -230,26 +230,25 @@
                 <div class="card card-rounded h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="card-title card-title-dash mb-0">Transaksi Terbaru</h4>
-                            <a href="#" class="text-primary small">Lihat semua</a>
+                            <h4 class="card-title card-title-dash mb-0">Transaksi Hari Ini</h4>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
+                                        <th>Waktu</th>
                                         <th>Invoice</th>
                                         <th>Operator</th>
                                         <th>Total</th>
-                                        <th>Waktu</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse ($transaksiTerbaru as $transaction)
                                         <tr>
+                                            <td>{{ $transaction->created_at->format('H:i') }}</td>
                                             <td class="fw-semibold">{{ $transaction['invoice'] ?? $transaction->invoice_number }}</td>
                                             <td>{{ $transaction->user->name ?? '-' }}</td>
                                             <td>Rp. {{ number_format($transaction->total_payment ?? 0, 0, ',', '.') }}</td>
-                                            <td>{{ $transaction->created_at->format('H:i') }}</td>
                                         </tr>
                                     @empty
                                         <tr>

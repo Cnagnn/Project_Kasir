@@ -8,6 +8,10 @@
             title: "BERHASIL",
             text: "{{ session('success') }}",
             icon: "success"
+        }).then((result) => {
+            @if(session('show_receipt'))
+                window.open('/transaction_history/print/{{ session('transaction_id') }}', '_blank');
+            @endif
         });
     </script>    
 @endif
@@ -58,8 +62,11 @@
     }
 </style>
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+<div class="row">
+    <div class="col-sm-12">
+
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card card-rounded">
         <div class="card-body">
             <h4 class="card-title mb-4">Info Transaksi</h4>
             <div class="row">
@@ -98,9 +105,9 @@
     </div>
 </div>
 
-{{-- TABEL DETAIL TRANSAKSI --}}
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+        {{-- TABEL DETAIL TRANSAKSI --}}
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card card-rounded">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="card-title mb-0">Detail Item Transaksi</h4>
@@ -164,11 +171,11 @@
     </div>
 </div>
 
-<div class="col-lg-12 mb-3">
-    <a href="{{ route('transactionHistory.index') }}" class="btn btn-primary">
-        <i class="mdi mdi-arrow-left"></i> Kembali
-    </a>
-</div>
+        <div class="col-lg-12 mb-3">
+            <a href="{{ route('transactionHistory.index') }}" class="btn btn-primary">
+                <i class="mdi mdi-arrow-left"></i> Kembali
+            </a>
+        </div>
 
 {{-- MODAL EDIT DETAIL TRANSAKSI --}}
 <div class="modal fade" id="editDetailModal" tabindex="-1" role="dialog" aria-labelledby="editDetailModalLabel" aria-hidden="true">
@@ -212,6 +219,9 @@
                 </div>
             </form>
         </div>
+    </div>
+</div>
+
     </div>
 </div>
 

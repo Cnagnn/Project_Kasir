@@ -44,6 +44,7 @@ Route::middleware(['auth', 'checkrole:Manager,Cashier'])->group(function () {
     Route::get('/Selling/products/search', [SellingController::class, 'search'])->name('selling.products.search');
 
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('cart.checkout.process');
+    Route::get('/selling/receipt/{id}', [CheckoutController::class, 'receipt'])->name('selling.receipt');
 
     Route::get('/cart/items', [CartController::class, 'getCartItems'])->name('cart.items');
     Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
@@ -60,6 +61,7 @@ Route::middleware(['auth', 'checkrole:Manager,Cashier'])->group(function () {
     Route::get('/transaction_history/get_data', [TransactionHistoryController::class, 'getTransactionHistory'])->name('transactionHistory.getTransactionHistory');
     Route::get('/transaction_history/detail/{id}', [TransactionHistoryController::class, 'detail'])->name('transactionHistory.detail');
     Route::put('/transaction_history/detail/update/{id}', [TransactionHistoryController::class, 'updateDetail'])->name('transactionHistory.updateDetail');
+    Route::get('/transaction_history/print/{id}', [TransactionHistoryController::class, 'print'])->name('transactionHistory.print');
 
     // Data grafik penjualan (JSON)
     Route::get('/dashboard/sales-data', [DashboardController::class, 'salesData'])->name('dashboard.salesData');
@@ -127,6 +129,7 @@ Route::middleware(['auth', 'checkrole:Manager'])->group(function () {
     Route::get('/employee', [EmployeeController::class, 'index'])->name('employee.index');
     Route::post('/employee-add', [EmployeeController::class, 'store'])->name('employee.store');
     Route::post('/employee/update', [EmployeeController::class, 'update'])->name('employee.update');
+    Route::delete('/employee/{id}', [EmployeeController::class, 'destroy'])->name('employee.destroy');
     Route::get('/employee/{id}/detail', [EmployeeController::class, 'detail'])->name('employee.detail');
     Route::get('/employee/search', [EmployeeController::class, 'search'])->name('employee.search');
 

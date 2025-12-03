@@ -4,8 +4,23 @@
 @section('page-description', 'Catat pembelian barang dan kelola stok masuk')
 
 @section('content')
+
+<style>
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .card.card-rounded .card-body {
+        padding: 1.25rem 1.25rem;
+    }
+</style>
     
-    <style>
+<style>
         /* Mengatur agar daftar produk bisa di-scroll, terpisah dari search bar */
         .dropdown-list-container {
             max-height: 200px; /* Atur tinggi maksimal daftar */
@@ -27,30 +42,19 @@
         </script>    
     @endif
 
-    <div class="container mt-2">
-        <h2 class="mb-4 text-primary fw-bold">Purchasing Form</h2>
+<div class="row">
+    <div class="col-sm-12">
 
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card card-rounded">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Purchasing</h4>
 
         <form action="{{ route('purchasing.stock.in.process') }}" method="POST">
             @csrf
             <table class="table mt-3">
                 <thead>
-                    <tr>
+                    <tr class="text-center">
                         <th style="width: 30%;">Nama Produk</th>
                         <th style="width: 20%;">Kategori</th>
                         <th style="width: 15%;">Kuantitas</th>
@@ -64,9 +68,17 @@
             </table>
 
             <button type="button" class="btn btn-primary mt-3" id="add-row-btn"> + Tambah Baris</button>
-            <button type="submit" class="btn btn-success float-end mt-3">Simpan ke Database</button>
-        </form>
+            <button type="submit" class="btn btn-success float-end mt-3">
+                <i class="mdi mdi-content-save"></i> Simpan ke Database
+            </button>
+            </form>
+                </div>
+            </div>
+        </div>
+
     </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -145,7 +157,7 @@
                         </div>
                     </td>
                     <td><input type="text" class="form-control category-name" readonly></td>
-                    <td><input type.number" name="quantity[]" class="form-control" min="1" required></td>
+                    <td><input type="number" name="quantity[]" class="form-control" min="1" step="any" required></td>
                     <td><input type="number" name="buy_price[]" class="form-control" min="0" step="any" required></td>
                     <td><input type="number" name="sell_price[]" class="form-control sell-price" min="0" step="any" required></td>
                     <td><button type="button" class="btn btn-outline-danger mdi mdi-delete-outline remove-row-btn" title="Hapus Baris"><i class="bi bi-trash"></i></button></td>

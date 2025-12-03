@@ -2,6 +2,21 @@
 
 @section('content')
 
+<style>
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .card.card-rounded .card-body {
+        padding: 1.25rem 1.25rem;
+    }
+</style>
+
 @if(session()->has('product_edit_success'))
         <script>
             Swal.fire({
@@ -75,9 +90,11 @@
         </script>    
     @endif
    
+<div class="row">
+    <div class="col-sm-12">
     
-    <div class="col-lg-12 grid-margin stretch-card">
-        <div class="card">
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card card-rounded">
             <div class="card-body">
                 <h4 class="card-title mb-4">Info Produk</h4>
                 <div class="mb-3">
@@ -99,11 +116,11 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div>
 
-    {{-- TABEL BATCH PRODUK --}}
-    <div class="col-lg-12 grid-margin stretch-card">
-        <div class="card">
+        {{-- TABEL BATCH PRODUK --}}
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card card-rounded">
             <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Batch Produk</h4>
@@ -217,6 +234,9 @@
                 </div>
             </form>
         </div>
+    </div>
+</div>
+
     </div>
 </div>
 

@@ -38,15 +38,27 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        // dd($request);
         //validate form
         $validated = $request->validate([
-            'name' => 'required',
-            'role_id' => 'required',
-            'email' => 'required',
-            'phone' => 'required',
-            'password' => 'required',
+            'name' => 'required|string|max:255|min:3',
+            'role_id' => 'required|exists:roles,id',
+            'email' => 'required|email:rfc,dns|unique:users,email|max:255',
+            'phone' => 'required|numeric|digits_between:10,15',
+            'password' => 'required|string|min:6|max:255',
+        ], [
+            'name.required' => 'Nama pegawai wajib diisi.',
+            'name.min' => 'Nama pegawai minimal 3 karakter.',
+            'name.max' => 'Nama pegawai maksimal 255 karakter.',
+            'role_id.required' => 'Peran wajib dipilih.',
+            'role_id.exists' => 'Peran yang dipilih tidak valid.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'phone.required' => 'Nomor telepon wajib diisi.',
+            'phone.numeric' => 'Nomor telepon harus berupa angka.',
+            'phone.digits_between' => 'Nomor telepon harus antara 10-15 digit.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 6 karakter.',
         ]);
 
         User::create([
@@ -84,21 +96,32 @@ class EmployeeController extends Controller
      */
     public function update(Request $request)
     {
-        // dd($id);
-        $user = User::where('id', $request->employee_id)->first();
-        // dd($user);
-        // dd($request);
+        $user = User::findOrFail($request->employee_id);
+        
         $request->validate([
-            'employee_name' => 'required',
-            // 'email' => 'required',
-            // 'phone' => 'required',
-            'role_id' => 'required',
+            'employee_name' => 'required|string|max:255|min:3',
+            'role_id' => 'required|exists:roles,id',
+        ], [
+            'employee_name.required' => 'Nama pegawai wajib diisi.',
+            'employee_name.min' => 'Nama pegawai minimal 3 karakter.',
+            'employee_name.max' => 'Nama pegawai maksimal 255 karakter.',
+            'role_id.required' => 'Peran wajib dipilih.',
+            'role_id.exists' => 'Peran yang dipilih tidak valid.',
         ]);
+
+        // Validasi khusus: Jika user adalah Manager terakhir, tidak boleh diganti role-nya
+        if ($user->role->name === 'Manager') {
+            $managerCount = User::whereHas('role', function($query) {
+                $query->where('name', 'Manager');
+            })->count();
+            
+            if ($managerCount <= 1 && $request->role_id != $user->role_id) {
+                return back()->with('error', 'Tidak dapat mengubah role Manager terakhir! Sistem harus memiliki minimal 1 Manager.');
+            }
+        }
 
         $user->update([
             'name' => $request->employee_name,
-            // 'email' => $request->email,
-            // 'phone' => $request->phone,
             'role_id' => $request->role_id,
         ]);
 
@@ -110,7 +133,29 @@ class EmployeeController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $user = User::findOrFail($id);
+            $userName = $user->name;
+            
+            // Cek apakah user adalah Manager
+            if ($user->role->name === 'Manager') {
+                // Hitung jumlah Manager yang ada
+                $managerCount = User::whereHas('role', function($query) {
+                    $query->where('name', 'Manager');
+                })->count();
+                
+                // Jika hanya ada 1 Manager, tidak boleh dihapus
+                if ($managerCount <= 1) {
+                    return back()->with('error', 'Tidak dapat menghapus Manager terakhir! Sistem harus memiliki minimal 1 Manager.');
+                }
+            }
+            
+            $user->delete();
+            
+            return back()->with('success', "Data pegawai '{$userName}' berhasil dihapus!");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus data pegawai: ' . $e->getMessage());
+        }
     }
 
     public function search(Request $request)

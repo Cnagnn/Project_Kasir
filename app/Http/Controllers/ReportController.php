@@ -103,39 +103,61 @@ class ReportController extends Controller
         $startDate = \Carbon\Carbon::parse($start)->startOfDay();
         $endDate = \Carbon\Carbon::parse($end)->endOfDay();
 
-        // Ambil detail transaksi dalam rentang, agregasi per produk
-        $details = TransactionDetail::with(['product'])
+        // Ambil detail transaksi dalam rentang + relasi produk & kategori
+        $details = TransactionDetail::with(['product.category', 'transaction'])
             ->whereHas('transaction', function($q) use ($startDate, $endDate) {
                 $q->whereBetween('created_at', [$startDate, $endDate]);
             })
             ->get();
 
-        // Hitung pendapatan per produk (qty * price) dan total qty
+        // Agregasi per produk: qty total, rata-rata HPP (buy price), rata-rata harga jual, total profit
         $perProduct = $details->groupBy('product_id')->map(function($rows){
-            $name = optional($rows->first()->product)->name ?? 'Produk';
-            $category = optional($rows->first()->product?->category)->name ?? '-';
-            $qty = $rows->sum('quantity');
-            $revenue = $rows->sum(function($r){
-                // asumsi ada kolom price atau subtotal; fallback subtotal
-                $price = $r->price ?? 0;
-                $subtotal = $r->subtotal ?? ($price * ($r->quantity ?? 0));
-                return (int)$subtotal;
-            });
+            $first = $rows->first();
+            $name = optional($first->product)->name ?? 'Produk';
+            $category = optional($first->product?->category)->name ?? '-';
+            $qty = (int)$rows->sum('quantity');
+            // Total cost (HPP agregat) = sum(product_buy_price * quantity)
+            $totalHpp = (int)$rows->sum(fn($r) => ($r->product_buy_price ?? 0) * ($r->quantity ?? 0));
+            // Total revenue (harga jual agregat) = sum(product_sell_price * quantity) or subtotal
+            $totalRevenue = (int)$rows->sum(fn($r) => ($r->product_sell_price ?? 0) * ($r->quantity ?? 0));
+            // Rata-rata per-unit (untuk tampilan kolom) – fallback 0 bila tidak ada qty
+            $avgBuy = $qty > 0 ? (int)round($totalHpp / $qty) : 0;
+            $avgSell = $qty > 0 ? (int)round($totalRevenue / $qty) : 0;
+            // Profit total (gunakan field profit jika tersedia, kalau tidak hitung dari selisih total)
+            $profitTotal = (int)$rows->sum('profit');
+            if ($profitTotal === 0) {
+                $profitTotal = $totalRevenue - $totalHpp;
+            }
             return [
                 'name' => $name,
                 'category' => $category,
-                'qty' => (int)$qty,
-                'revenue' => (int)$revenue,
+                'qty' => $qty,
+                // Kolom buy_price & sell_price di view diinterpretasi sebagai per-unit
+                'buy_price' => $avgBuy,
+                'sell_price' => $avgSell,
+                'profit' => $profitTotal,
+                // Simpan juga total jika nanti perlu dipakai (tidak dipakai di view saat ini)
+                'total_hpp' => $totalHpp,
+                'total_revenue' => $totalRevenue,
             ];
         })->values();
 
+        // Grand totals
         $grandQty = $perProduct->sum('qty');
-        $grandRevenue = $perProduct->sum('revenue');
+        $grandBuyPrice = $details->sum(fn($d) => ($d->product_buy_price ?? 0) * ($d->quantity ?? 0)); // total HPP
+        $grandSellPrice = $details->sum(fn($d) => ($d->product_sell_price ?? 0) * ($d->quantity ?? 0)); // total revenue
+        $grandProfit = $details->sum('profit');
+        if ($grandProfit == 0) {
+            $grandProfit = $grandSellPrice - $grandBuyPrice;
+        }
 
         $pdf = Pdf::loadView('reports.product_revenue_pdf', [
             'rows' => $perProduct,
             'grandQty' => $grandQty,
-            'grandRevenue' => $grandRevenue,
+            // Kirim total agregat untuk ditampilkan di footer
+            'grandBuyPrice' => $grandBuyPrice,
+            'grandSellPrice' => $grandSellPrice,
+            'grandProfit' => $grandProfit,
             'rangeLabel' => $startDate->translatedFormat('d F Y'). ' - ' . $endDate->translatedFormat('d F Y'),
             'generatedAt' => now(),
         ])->setPaper('a4', 'portrait');
