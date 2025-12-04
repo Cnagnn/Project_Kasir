@@ -1,8 +1,62 @@
-            @extends('layouts.admin')
+@extends('layouts.admin')
 
-            @section('content')
-            
-            {{-- SWEATALERT --}}
+@section('page-title', 'Kategori Produk')
+@section('page-description', 'Kelola kategori produk untuk mengorganisir stok barang')
+
+@section('content')
+
+<style>
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .card.card-rounded .card-body {
+        padding: 1.25rem 1.25rem;
+    }
+</style>
+
+{{-- SWEATALERT --}}
+
+<style>
+                .action-btn-group {
+                    display: inline-flex;
+                    align-items: stretch;
+                    border-radius: 999px;
+                    overflow: hidden;
+                    background: var(--bs-primary);
+                }
+                .table-centered th,
+                .table-centered td {
+                    text-align: center;
+                    vertical-align: middle;
+                }
+                .action-btn-group .btn {
+                    border: none;
+                    border-radius: 0;
+                    background: transparent;
+                    color: #fff;
+                    padding: 0.45rem 0.75rem;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .action-btn-group .btn + .btn {
+                    border-left: 1px solid rgba(255, 255, 255, 0.2);
+                }
+                .action-btn-group .btn:hover {
+                    background: rgba(255, 255, 255, 0.15);
+                    color: #fff;
+                }
+                .action-btn-group form {
+                    margin: 0;
+                    display: inline-flex;
+                }
+            </style>
 
             @if(session()->has('category_add_success'))
                 <script>
@@ -68,12 +122,15 @@
                 </script>    
             @endif
 
-            {{-- END SWEATALERT --}}
-            
-            {{-- SEARCH AND FILTER SECTION --}}
+{{-- END SWEATALERT --}}
 
-            <div class="col-lg-12 grid-margin stretch-card">
-                <div class="card">
+<div class="row">
+    <div class="col-sm-12">
+
+        {{-- SEARCH AND FILTER SECTION --}}
+
+        <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card card-rounded">
                   <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
@@ -97,13 +154,13 @@
 
             {{-- END SEARCH PRODUCT BOX --}}
 
-            {{-- MAIN TABLE / PRODUCT LIST --}}
-            
-            <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
-                <div class="card">
+        {{-- MAIN TABLE / PRODUCT LIST --}}
+        
+        <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
+                <div class="card card-rounded">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">Kategori</h4>
+                        <h4 class="card-title mb-0">Daftar Kategori</h4>
                         <div class="btn-wrapper">
                             @if (Auth::user()->role->name != "Cashier")
                                 <button type="button" class="btn btn-primary align-items-center" data-toggle="modal" data-target="#addCategoryModal">
@@ -113,7 +170,7 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                      <table class="table table-bordered table-hover">
+                      <table class="table table-hover table-centered">
                         <thead>
                           <tr>
                             <th>No</th>
@@ -133,29 +190,31 @@
                                         <td>Active</td>
                                     @endif
                                     <td>
-                                        <button class="btn btn-warning btn-sm me-1 edit-category-btn"
-                                        data-name="{{ $category->name }}" 
-                                        data-id="{{ $category->id }}"
-                                        data-url="{{ route('category.update', $category->id) }}">
-                                            <i class="mdi mdi-pencil"></i> Edit Kategori
-                                        </button>
-                                        @if (Auth::user()->role->name != "Cashier")
-                                            <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="form-delete d-inline">
+                                        <div class="action-btn-group" role="group" aria-label="Aksi kategori">
+                                            <button 
+                                                type="button"
+                                                class="btn btn-primary btn-sm edit-category-btn"
+                                                data-name="{{ $category->name }}" 
+                                                data-id="{{ $category->id }}"
+                                                data-url="{{ route('category.update', $category->id) }}">
+                                                <i class="mdi mdi-pencil"></i>
+                                            </button>
+                                            @if (Auth::user()->role->name != "Cashier")
+                                                <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="form-delete d-inline-block">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-primary btn-sm" data-name="{{ $category->name }}">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            <form action="{{ route('category.archive', $category->id) }}" method="POST" class="form-archive d-inline-block">
                                                 @csrf
-                                                @method('DELETE')
-                                                
-                                                <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $category->name }}">
-                                                    <i class="mdi mdi-delete"></i> Delete
+                                                <button type="submit" class="btn btn-primary btn-sm" data-name="{{ $category->name }}">
+                                                    <i class="mdi mdi-archive"></i>
                                                 </button>
                                             </form>
-                                        @endif
-                                        <form action="{{ route('category.archive', $category->id) }}" method="POST" class="form-archive d-inline">
-                                            @csrf
-                                            
-                                            <button type="submit" class="btn btn-info btn-sm" data-name="{{ $category->name }}">
-                                                <i class="mdi mdi mdi-archive"></i> Archive
-                                            </button>
-                                        </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -247,9 +306,12 @@
                     </div>
                 </div>
 
-            {{-- END MODAL EDIT CATEGORY --}}
+        {{-- END MODAL EDIT CATEGORY --}}
 
-            @endsection
+    </div>
+</div>
+
+@endsection
 
             
             @push('scripts')

@@ -26,7 +26,10 @@ class CheckoutController extends Controller
 
         // dd($cart);
         if (empty($cart)) {
-            // Kembali ke halaman kasir jika keranjang kosong
+            // Cek apakah request AJAX
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Keranjang Anda kosong.'], 400);
+            }
             return redirect()->route('selling.index')->with('error', 'Keranjang Anda kosong.'); 
         }
 
@@ -47,18 +50,41 @@ class CheckoutController extends Controller
             switch ($paymentMethod) {
                 case 'Tunai':
                     if ($request->amount_paid < $totalAmount) {
-                         // Kembali ke halaman kasir (atau modal?) dengan error
+                        // Cek apakah request AJAX
+                        if ($request->ajax() || $request->wantsJson()) {
+                            return response()->json(['success' => false, 'message' => 'Jumlah uang tunai tidak mencukupi!'], 400);
+                        }
                         return redirect()->route('selling.index')->with('error', 'Jumlah uang tunai tidak mencukupi!');
                     }
+                    
                     $transaction = $this->handleCashPayment($request, $cart, $totalAmount);
                     session()->forget('cart');
-                     // Kembali ke halaman kasir setelah sukses
+                    
+                    // Cek apakah request AJAX
+                    if ($request->ajax() || $request->wantsJson()) {
+                        return response()->json([
+                            'success' => true, 
+                            'message' => 'Transaksi Tunai #' . $transaction->invoice_number . ' berhasil!',
+                            'transaction_id' => $transaction->id
+                        ]);
+                    }
+                    
                     return redirect()->route('selling.index')->with('success', 'Transaksi Tunai #' . $transaction->invoice_number . ' berhasil!');
 
                 case 'QRIS':
                     $response = $this->handleQrisPayment($cart, $totalAmount);
                     session()->forget('cart');
-                     // Arahkan ke view 'tunggu pembayaran'
+                    
+                    // Cek apakah request AJAX
+                    if ($request->ajax() || $request->wantsJson()) {
+                        return response()->json([
+                            'success' => true,
+                            'message' => 'Silakan scan QR Code untuk pembayaran',
+                            'payment_url' => route('payment.wait', ['id' => $response['transaction']->id]),
+                            'qr_code_url' => $response['qr_code_url']
+                        ]);
+                    }
+                    
                     return view('payment_wait', [
                         'transaction' => $response['transaction'],
                         'qrCodeUrl' => $response['qr_code_url'],
@@ -66,8 +92,11 @@ class CheckoutController extends Controller
                     ]);
             }
         } catch (\Exception $e) {
-            // Kembali ke halaman kasir jika ada error
-            // Log::error('Checkout Error: ' . $e->getMessage()); // Opsional
+            // Cek apakah request AJAX
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Transaksi Gagal! ' . $e->getMessage()], 500);
+            }
+            
             return redirect()->route('selling.index')->with('error', 'Transaksi Gagal! ' . $e->getMessage());
         }
     }
@@ -176,5 +205,31 @@ class CheckoutController extends Controller
 
         // Kembalikan data untuk view 'payment_wait'
         return ['transaction' => $transaction, 'qr_code_url' => $midtransResponse->actions[0]->url ?? $midtransResponse->qr_string]; // Ambil URL QR dari 'actions' jika ada (lebih baru)
+    }
+
+    /**
+     * Menampilkan struk dalam format HTML 57mm
+     */
+    public function receipt($id)
+    {
+        $transaction = Transaction::with(['user', 'details.product'])->findOrFail($id);
+
+        // Hitung subtotal tiap detail & total akhir
+        $items = $transaction->details->map(function ($d) {
+            return [
+                'name' => optional($d->product)->name ?? '-',
+                'qty' => $d->quantity,
+                'price' => $d->product_sell_price,
+                'subtotal' => $d->subtotal,
+            ];
+        });
+
+        $total = $items->sum('subtotal');
+
+        return view('receipt', [
+            'transaction' => $transaction,
+            'items' => $items,
+            'total' => $total,
+        ]);
     }
 }

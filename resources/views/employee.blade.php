@@ -1,26 +1,109 @@
 @extends('layouts.admin')
 
+@section('page-title', 'Karyawan')
+@section('page-description', 'Kelola data karyawan dan pengguna sistem')
+
 @section('content')
 
+<style>
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .card.card-rounded .card-body {
+        padding: 1.25rem 1.25rem;
+    }
+</style>
+
 {{-- SWEATALERT --}}
+
+<style>
+    .action-btn-group {
+        display: inline-flex;
+        align-items: stretch;
+        border-radius: 999px;
+        overflow: hidden;
+        background: var(--bs-primary);
+    }
+    .action-btn-group .btn {
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        color: #fff;
+        padding: 0.45rem 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .action-btn-group .btn + .btn {
+        border-left: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .action-btn-group .btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+    }
+    .action-btn-group form {
+        margin: 0;
+        display: inline-flex;
+    }
+    .table-centered th,
+    .table-centered td {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
 
 @if(session()->has('success'))
     <script>
         Swal.fire({
             title: "BERHASIL",
             text: "{{ session('success') }}",
-            icon: "success"
+            icon: "success",
+            timer: 2000,
+            showConfirmButton: false
         });
     </script>    
+@endif
+
+@if(session()->has('error'))
+    <script>
+        Swal.fire({
+            title: "GAGAL",
+            text: "{{ session('error') }}",
+            icon: "error",
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>    
+@endif
+
+@if ($errors->any())
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(old('name') || old('email') || old('phone') || old('password'))
+                $('#addEmployeeModal').modal('show');
+            @elseif(old('employee_name'))
+                $('#editEmployeeModal').modal('show');
+            @endif
+        });
+    </script>
 @endif
 
 
 {{-- END SWEATALERT --}}
 
-{{-- SEARCH AND FILTER SECTION --}}
+<div class="row">
+    <div class="col-sm-12">
 
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
+        {{-- SEARCH AND FILTER SECTION --}}
+
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card card-rounded">
         <div class="card-body">
         <div class="row">
             <div class="col-md-12">
@@ -45,47 +128,65 @@
 {{-- END SEARCH PRODUCT BOX --}}
 
 {{-- MAIN TABLE / PRODUCT LIST --}}
-<div class="col-lg-12 grid-margin stretch-card" id="mainEmployeeTable">
-    <div class="card">
+        <div class="col-lg-12 grid-margin stretch-card" id="mainEmployeeTable">
+            <div class="card card-rounded">
         <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="card-title mb-0">Daftar Pegawai</h4>
             <div class="btn-wrapper">
                 @if (Auth::user()->role->name != "Cashier")
-                    <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addRoleModal">
+                    <button type="button" class="btn btn-primary me-0" data-toggle="modal" data-target="#addRoleModal">
                         <i class="mdi mdi-plus"></i> Tambah Peran
                     </button>
-                    <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addEmployeeModal">
+                    <button type="button" class="btn btn-primary me-0" data-toggle="modal" data-target="#addEmployeeModal">
                         <i class="mdi mdi-plus"></i> Tambah Pegawai
                     </button>
                 @endif
             </div>
         </div>
-        <div class="table-responsive">
-             <table class="table table-bordered table-hover">
+           <div class="table-responsive">
+               <table class="table table-hover table-centered">
             <thead>
                 <tr>
                 <th>No</th>
-                <th>Nama</th>
+                <th>Nama Karyawan</th>
                 <th>Peran</th>
                 <th class="text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody>
+                @php
+                    $managerCount = $employee->where('role.name', 'Manager')->count();
+                @endphp
                 @foreach ($employee as $user)
+                    @php
+                        $isLastManager = ($user->role->name === 'Manager' && $managerCount <= 1);
+                    @endphp
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->role->name }}</td>
                         <td>
-                            <button class="btn btn-warning btn-sm me-1 edit-employee-btn"
-                            data-employeeid = "{{ $user->id }}"
-                            data-employeename = "{{ $user->name }}"
-                            data-roleid = "{{ $user->role->id }}"
-                            data-rolename = "{{ $user->role->name }}"
-                            data-url="{{ route('employee.update', $user->id) }}">
-                                <i class="mdi mdi-pencil"></i> Edit Karyawan
-                            </button>
+                            <div class="action-btn-group" role="group" aria-label="Aksi karyawan">
+                                <button class="btn btn-primary btn-sm edit-employee-btn"
+                                data-employeeid = "{{ $user->id }}"
+                                data-employeename = "{{ $user->name }}"
+                                data-roleid = "{{ $user->role->id }}"
+                                data-rolename = "{{ $user->role->name }}"
+                                data-url="{{ route('employee.update', $user->id) }}">
+                                    <i class="mdi mdi-pencil"></i>
+                                </button>
+                                
+                                @if (!$isLastManager)
+                                <form action="{{ route('employee.destroy', $user->id) }}" method="POST" class="form-delete">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-primary btn-sm" data-name="{{ $user->name }}">
+                                        <i class="mdi mdi-delete"></i>
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                 @endforeach
@@ -121,8 +222,11 @@
                         <p class="card-description">Isi detail Pegawai di bawah ini.</p>
 
                         <div class="form-group">
-                            <input type="text" class="form-control" id="name" name="name" required="required" />
+                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" required="required" value="{{ old('name') }}" />
                             <label for="name" class="control-label">Nama Pegawai</label><i class="bar"></i>
+                            @error('name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">
@@ -131,7 +235,7 @@
                             <input type="hidden" name="role_id" id="selected_role_id" required>
 
                             <div class="btn-group d-block">
-                                <button type="button" class="btn btn-outline-primary" id="role_dropdown_button">
+                                <button type="button" class="btn btn-outline-primary @error('role_id') is-invalid @enderror" id="role_dropdown_button">
                                     -- Pilih Peran --
                                 </button>
                                 <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
@@ -150,21 +254,36 @@
                                 </ul>
                             </div>
                             <small class="form-text text-muted">Klik panah untuk memilih peran.</small>
+                            @error('role_id')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">
-                            <input type="text" class="form-control" id="email" name="email" required="required" />
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" required="required" value="{{ old('email') }}" />
                             <label for="email" class="control-label">Email</label><i class="bar"></i>
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">Contoh: nama@domain.com</small>
                         </div>
 
                         <div class="form-group">
-                            <input type="number" class="form-control" id="phone" name="phone" required="required" />
+                            <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" required="required" pattern="[0-9]{10,15}" value="{{ old('phone') }}" />
                             <label for="phone" class="control-label">No. Telp</label><i class="bar"></i>
+                            @error('phone')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">10-15 digit angka</small>
                         </div>
 
                         <div class="form-group">
-                            <input type="text" class="form-control" id="password" name="password" required="required" />
+                            <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required="required" minlength="6" />
                             <label for="password" class="control-label">Password</label><i class="bar"></i>
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">Minimal 6 karakter</small>
                         </div>
                     </div>
 
@@ -235,8 +354,11 @@
 
                     <div class="modal-body">
                         <div class="form-group">
-                            <input type="text" class="form-control" id="employee_name" name="employee_name" required="required" />
+                            <input type="text" class="form-control @error('employee_name') is-invalid @enderror" id="employee_name" name="employee_name" required="required" />
                             <label for="name" class="control-label">Nama Karyawan</label><i class="bar"></i>
+                            @error('employee_name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">
@@ -245,7 +367,7 @@
                             <input type="hidden" name="role_id" id="selected_role_id" required>
 
                             <div class="btn-group d-block">
-                                <button type="button" class="btn btn-outline-primary" id="role_dropdown_button">
+                                <button type="button" class="btn btn-outline-primary @error('role_id') is-invalid @enderror" id="role_dropdown_button">
                                     -- Pilih Peran --
                                 </button>
                                 <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
@@ -264,6 +386,9 @@
                                 </ul>
                             </div>
                             <small class="form-text text-muted">Klik panah untuk memilih kategori.</small>
+                            @error('role_id')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
                         </div>
                         </div> 
 
@@ -280,6 +405,9 @@
     {{-- END MODAL EDIT PRODUCT --}}
 
 @endif
+
+    </div>
+</div>
 
 @endsection
 
@@ -418,7 +546,7 @@
                                 <div class="card-body">
                                     <h4 class="card-title mb-4">Hasil Pencarian untuk "${searchTerm}"</h4>
                                     <div class="table-responsive">
-                                        <table class="table table-hover">
+                                        <table class="table table-hover table-centered">
                                             <thead>
                                                 <tr>
                                                     <th>No</th>
@@ -433,11 +561,26 @@
                             const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
                             if (data.length > 0) {
+                                // Hitung jumlah Manager
+                                const managerCount = data.filter(emp => emp.role.name === 'Manager').length;
+                                
                                 $.each(data, function(index, employee) {
 
-                                    const deleteUrl = `/product/${employee.id}`;
-                                    console.log(employee.name);
-                                    console.log(employee.role.id);
+                                    const deleteUrl = `/employee/${employee.id}`;
+                                    const isLastManager = (employee.role.name === 'Manager' && managerCount <= 1);
+                                    
+                                    let deleteButton = '';
+                                    if (!isLastManager) {
+                                        deleteButton = `
+                                            <form action="${deleteUrl}" method="POST" class="form-delete d-inline-block">
+                                                <input type="hidden" name="_token" value="${csrfToken}">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button type="submit" class="btn btn-primary btn-sm" data-name="${employee.name}">
+                                                    <i class="mdi mdi-delete"></i>
+                                                </button>
+                                            </form>
+                                        `;
+                                    }
                                     
                                     cardContent += `
                                         <tr>
@@ -445,21 +588,16 @@
                                             <td>${employee.name}</td>
                                             <td>${employee.role.name}</td>
                                             <td>
-                                                <button class="btn btn-warning btn-sm me-1 edit-employee-btn" 
-                                                    data-employeeid="${employee.id}"
-                                                    data-employeename="${employee.name}"
-                                                    data-roleid="${employee.role.id}" 
-                                                    data-rolename="${employee.role.name}">
-                                                    <i class="mdi mdi-pencil"></i> Edit Karyawan
-                                                </button>
-
-                                                <form action="${deleteUrl}" method="POST" class="form-delete d-inline">
-                                                    <input type="hidden" name="_token" value="${csrfToken}">
-                                                    <input type="hidden" name="_method" value="DELETE">
-                                                    <button type="submit" class="btn btn-danger btn-sm" data-name="${employee.name}">
-                                                        <i class="mdi mdi-delete"></i> Delete
+                                                <div class="action-btn-group" role="group" aria-label="Aksi karyawan">
+                                                    <button class="btn btn-primary btn-sm edit-employee-btn" 
+                                                        data-employeeid="${employee.id}"
+                                                        data-employeename="${employee.name}"
+                                                        data-roleid="${employee.role.id}" 
+                                                        data-rolename="${employee.role.name}">
+                                                        <i class="mdi mdi-pencil"></i>
                                                     </button>
-                                                </form>
+                                                    ${deleteButton}
+                                                </div>
                                             </td>
                                         </tr>
                                     `;

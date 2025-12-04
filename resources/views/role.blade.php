@@ -1,10 +1,28 @@
-            @extends('layouts.admin')
+@extends('layouts.admin')
 
-            @section('content')
-            
-            {{-- SWEATALERT --}}
+@section('page-title', 'Role & Hak Akses')
+@section('page-description', 'Kelola role dan hak akses pengguna')
 
-            @if(session()->has('category_add_success'))
+@section('content')
+
+<style>
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .card.card-rounded .card-body {
+        padding: 1.25rem 1.25rem;
+    }
+</style>
+
+{{-- SWEATALERT --}}
+
+@if(session()->has('category_add_success'))
                 <script>
                     Swal.fire({
                         title: "BERHASIL",
@@ -68,12 +86,15 @@
                 </script>    
             @endif
 
-            {{-- END SWEATALERT --}}
-            
-            {{-- SEARCH AND FILTER SECTION --}}
+{{-- END SWEATALERT --}}
 
-            <div class="col-lg-12 grid-margin stretch-card">
-                <div class="card">
+<div class="row">
+    <div class="col-sm-12">
+
+        {{-- SEARCH AND FILTER SECTION --}}
+
+        <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card card-rounded">
                   <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
@@ -97,10 +118,10 @@
 
             {{-- END SEARCH PRODUCT BOX --}}
 
-            {{-- MAIN TABLE / PRODUCT LIST --}}
-            
-            <div class="col-lg-12 grid-margin stretch-card" id="mainRoleTable">
-                <div class="card">
+        {{-- MAIN TABLE / ROLE LIST --}}
+        
+        <div class="col-lg-12 grid-margin stretch-card" id="mainRoleTable">
+                <div class="card card-rounded">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Role</h4>
@@ -113,7 +134,7 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                      <table class="table table-bordered table-hover">
+                      <table class="table table-hover">
                         <thead>
                           <tr>
                             <th>No</th>
@@ -236,7 +257,10 @@
 
             {{-- END MODAL EDIT CATEGORY --}}
 
-            @endsection
+    </div>
+</div>
+
+@endsection
 
             
             @push('scripts')

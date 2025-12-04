@@ -1,8 +1,26 @@
 @extends('layouts.admin')
 
+@section('page-title', 'Penjualan')
+@section('page-description', 'Proses transaksi penjualan kasir')
+
 @section('content')
 
-    @if(session()->has('success'))
+<style>
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .card.card-rounded .card-body {
+        padding: 1.25rem 1.25rem;
+    }
+</style>
+
+@if(session()->has('success'))
         <script>
             Swal.fire({
                 title: "BERHASIL",
@@ -21,38 +39,24 @@
         </script>     
     @endif
 
-    {{-- SEARCH AND FILTER SECTION --}}
+<div class="row">
+    <div class="col-sm-12">
 
-    <div class="col-lg-12 grid-margin stretch-card">
-        <div class="card">
+        {{-- SEARCH AND FILTER SECTION --}}
+        <div class="col-lg-12 grid-margin stretch-card" id="search-card">
+            <div class="card card-rounded">
             <div class="card-body">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="searchProduct">Cari Produk</label>
-                        <input type="text" class="form-control" id="searchProduct" placeholder="Nama Produk">
+                <div class="row align-items-center">
+                    {{-- Kolom Pencarian --}}
+                    <div class="col-md-8">
+                        <div class="form-group mb-0">
+                            <label for="searchProduct">Cari Produk</label>
+                            <input type="text" class="form-control" id="searchProduct" placeholder="Ketik nama produk...">
+                        </div>
                     </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- END SEARCH AND FILTER SECTION --}}
-
-    {{-- SEARCH PRODUCT BOX --}}
-
-    <div class="col-lg-12" id="searchResultsContainer">
-        {{-- Search results will be displayed here by JavaScript --}}
-    </div>
-
-    {{-- END SEARCH PRODUCT BOX --}}
-
-        <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">Daftar Produk</h4>
+                    
+                    {{-- Kolom Tombol Navigasi --}}
+                    <div class="col-md-4 text-end mt-4 md-0">
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-outline-primary active" id="btn-show-products">
                                 <i class="mdi mdi-package-variant"></i> Product
@@ -60,41 +64,64 @@
                             <button type="button" class="btn btn-outline-primary" id="btn-show-cart">
                                 <i class="mdi mdi-cart"></i> Cart
                             </button>
-                        </div>    
+                        </div>   
                     </div>
                 </div>
-                
+            </div>
+        </div>
+    </div>
+    {{-- END SEARCH AND FILTER SECTION --}}
+
+    {{-- RESULT SEARCH PRODUCT BOX --}}
+
+    <div class="col-lg-12" id="searchResultsContainer">
+        
+    </div>
+
+    {{-- END RESULT SEARCH PRODUCT BOX --}}
+
+        <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
+        <div class="card card-rounded">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="card-title mb-0">Daftar Produk</h4>
+                </div>
                 <div class="container-fluid" id="product-list-container">
-                    <div class="row justify-content-center">
+                    <div class="row">
                         @foreach ($products as $item)
                             @if ($item->stock->sum('remaining_stock') == 0)
                                 @continue
                             @endif
-                            <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
-                                <div class="card h-100" style="border: 1px solid black"> 
-                                    <div class="card-body d-flex flex-column">
-                                        <h5 class="card-title">{{ $item->name }}</h5>
-                                        <h6 class="card-subtitle mb-2">
-                                            Harga : <strong>{{ $item->sell_price ?? 'Data tidak tersedia' }}</strong>
-                                        </h6>
-                                        <p class="card-subtitle">Stok : <strong>{{ $item->stock->sum('remaining_stock') }}</strong></p>
-                                        <div class="mt-auto"> 
-                                            <div class="btn-wrapper">
-                                                <button type="button" class="btn btn-primary align-items-center add-to-cart-btn" data-product-id="{{ $item->id }}">
-                                                    <i class="mdi mdi-cart"></i> Tambah Ke Keranjang
+                                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                                    <div class="card card-rounded h-100 shadow-sm" style="border: 1px solid rgba(0, 0, 0, 0.1);"> 
+                                        <div class="card-body d-flex flex-column p-3">
+                                            <h5 class="card-title font-weight-bold mb-3" style="font-size: 1.1rem; color: #2c3e50;">{{ $item->name }}</h5>
+                                            <div class="mb-2">
+                                                <small class="text-muted">Harga</small>
+                                                <h6 class="font-weight-bold text-primary mb-0" style="font-size: 1.25rem;">
+                                                    Rp {{ number_format($item->sell_price ?? 0, 0, ',', '.') }}
+                                                </h6>
+                                            </div>
+                                            <div class="mb-2">
+                                                <small class="text-muted">Stok: {{ $item->stock->sum('remaining_stock') }}</small>
+                                            </div>
+                                            <div class="mt-auto"> 
+                                                <button type="button" class="btn btn-primary btn-block add-to-cart-btn w-100" data-product-id="{{ $item->id }}">
+                                                    <i class="mdi mdi-cart-plus"></i> Tambah
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                         @endforeach
-                        <div class="card-body mt-3 d-flex justify-content-center">
-                    {{ $products->links() }}
-                </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12 d-flex justify-content-center">
+                            {{ $products->links() }}
+                        </div>
                     </div>
                 </div>
-                
+
                 <div id="cart-container" class="d-none">
                     <div class="text-center">
                         <p>Memuat data keranjang...</p>
@@ -102,77 +129,83 @@
                 </div>
             </div>
         </div>
+    </div>
 
-<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="checkoutModalLabel">Proses Pembayaran</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            
-            <form action="{{ route('cart.checkout.process') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Total Belanja</label>
-                        <input type="text" class="form-control form-control-lg" id="modal-total-display" readonly>
-                        <input type="hidden" id="modal-total-hidden" value="0">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="payment_method" class="form-label">Metode Pembayaran</label>
-                        <select name="payment_method" id="payment-method-select" class="form-select" required>
-                            <option value="Tunai" selected>Tunai (Cash)</option>
-                        </select>
-                    </div>
-
-                    <div id="cash-payment-section">
-                        <div class="mb-3">
-                            <label for="amount-paid-display" class="form-label">Jumlah Uang Dibayar</label>
-                            
-                            {{-- Kita gunakan Input Group Bootstrap --}}
-                            <div class="input-group">
-                                <span class="input-group-text">Rp</span>
-                                
-                                {{-- 
-                                1. Ubah type="number" menjadi type="text"
-                                2. Hapus 'name' agar tidak terkirim ke server
-                                3. Ubah ID menjadi 'amount-paid-display' 
-                                --}}
-                                <input type="text" 
-                                    id="amount-paid-display" 
-                                    class="form-control" 
-                                    placeholder="Masukkan jumlah uang..." 
-                                    autocomplete="off"
-                                >
-
-                                {{-- 
-                                Input tersembunyi (hidden) ini yang akan dikirim ke server.
-                                JavaScript akan mengisi input ini dengan angka bersih (misal: 10000).
-                                --}}
-                                <input type="hidden" 
-                                    name="amount_paid" 
-                                    id="amount-paid-hidden"
-                                    required
-                                >
-                            </div>
-                        </div>
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="checkoutModalLabel">Proses Pembayaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <form action="{{ route('cart.checkout.process') }}" method="POST" id="checkoutForm">
+                    @csrf
+                    <div class="modal-body">
                         
-                        <h4 id="change-display" class="text-success">Kembalian: Rp 0</h4>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label">Total Belanja</label>
+                            <input type="text" class="form-control form-control-lg" id="modal-total-display" readonly>
+                            <input type="hidden" id="modal-total-hidden" value="0">
+                        </div>
 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-success">Proses Transaksi</button>
-                </div>
-            </form>
+                        <div class="mb-3">
+                            <label for="payment_method" class="form-label">Metode Pembayaran</label>
+                            <select name="payment_method" id="payment-method-select" class="form-select" required>
+                                <option value="Tunai" selected>Tunai (Cash)</option>
+                            </select>
+                        </div>
+
+                        <div id="cash-payment-section">
+                            <div class="mb-3">
+                                <label for="amount-paid-display" class="form-label">Jumlah Uang Dibayar</label>
+                                
+                                {{-- Kita gunakan Input Group Bootstrap --}}
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    
+                                    <input type="text" 
+                                        id="amount-paid-display" 
+                                        class="form-control" 
+                                        placeholder="Masukkan jumlah uang..." 
+                                        autocomplete="off"
+                                    >
+
+                                    <input type="hidden" 
+                                        name="amount_paid" 
+                                        id="amount-paid-hidden"
+                                        required
+                                    >
+                                </div>
+                                
+                                {{-- Shortcut nominal uang --}}
+                                <div class="mt-3">
+                                    <small class="text-muted d-block mb-2">Shortcut Nominal:</small>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <button type="button" class="btn btn-primary btn-md money-shortcut" data-amount="10000">10.000</button>
+                                        <button type="button" class="btn btn-primary btn-md money-shortcut" data-amount="20000">20.000</button>
+                                        <button type="button" class="btn btn-primary btn-md money-shortcut" data-amount="50000">50.000</button>
+                                        <button type="button" class="btn btn-primary btn-md money-shortcut" data-amount="100000">100.000</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h4 id="change-display" class="text-success">Kembalian: Rp 0</h4>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Proses Transaksi</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
+
+    </div>
+</div>
 
 @endsection
 
@@ -224,15 +257,20 @@
                 $(this).addClass('active');
                 btnShowCart.removeClass('active');
                 
-                // Tampilkan panel produk & search bar
-                productContainer.removeClass('d-none');
-                mainProductCard.show(); // Pastikan kartu utama terlihat
-                searchCard.show();
+                // Cek apakah kolom pencarian ada isinya?
+                if (searchInput.val().trim() !== '') {
+                    // KASUS 1: Sedang mencari produk
+                    resultsContainer.show();      // Tampilkan hasil cari
+                    mainProductCard.hide();       // Sembunyikan kartu utama
+                } else {
+                    // KASUS 2: Tidak sedang mencari
+                    productContainer.removeClass('d-none'); // Tampilkan grid produk
+                    mainProductCard.show();       // Tampilkan kartu utama
+                    resultsContainer.hide();      // Sembunyikan container search
+                }
                 
-                // Sembunyikan panel keranjang & hasil search
+                // Pastikan container cart disembunyikan
                 cartContainer.addClass('d-none');
-                resultsContainer.hide().html(''); // Sembunyikan & kosongkan hasil search
-                searchInput.val(''); // Kosongkan juga input search
             });
 
             btnShowCart.on('click', function() {
@@ -241,24 +279,32 @@
                 
                 // Tampilkan panel keranjang
                 cartContainer.removeClass('d-none');
-                mainProductCard.show(); // Pastikan kartu utama terlihat
+                mainProductCard.show(); // Pastikan kartu utama terlihat (karena cart ada di dalamnya)
                 
-                // Sembunyikan panel produk, search bar, & hasil search
+                // Sembunyikan yang lain
                 productContainer.addClass('d-none');
-                searchCard.hide();
-                resultsContainer.hide().html(''); // Sembunyikan & kosongkan hasil search
-                searchInput.val(''); // Kosongkan juga input search
-
+                resultsContainer.hide(); // PENTING: Sembunyikan hasil search jika pindah ke cart
+                
+                // Jangan kosongkan input search, agar user bisa kembali ke hasil pencarian nanti
+                searchInput.val(''); 
+                
                 // Muat data keranjang
                 loadCartData();
             });
 
             // =======================================================
-            // ==     FUNGSI SEARCH PRODUCT (LOGIKA BARU)           ==
+            // ==     FUNGSI SEARCH PRODUCT (LOGIKA TAMBAHAN)       ==
             // =======================================================
-            
+
             if (searchInput.length > 0) {
                 searchInput.on('input', function() {
+                    // Jika user mengetik, otomatis pindahkan highlight tombol ke "Product"
+                    if (!btnShowProducts.hasClass('active')) {
+                        btnShowProducts.addClass('active');
+                        btnShowCart.removeClass('active');
+                        cartContainer.addClass('d-none');
+                    }
+
                     const searchTerm = $(this).val().trim();
 
                     if (searchTerm === '') {
@@ -299,20 +345,23 @@
                                     const priceDisplay = product.sell_price ? formattedPrice : 'Data tidak tersedia';
 
                                     cardContent += `
-                                        <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
-                                            <div class="card h-100" style="border: 1px solid black"> 
-                                                <div class="card-body d-flex flex-column">
-                                                    <h5 class="card-title">${product.name}</h5>
-                                                    <h6 class="card-subtitle mb-2">
-                                                        Harga : <strong>${priceDisplay}</strong>
-                                                    </h6>
-                                                    <p class="card-subtitle">Stok : <strong>${totalStock}</strong></p>
+                                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                                            <div class="card card-rounded h-100 shadow-sm" style="border: 1px solid rgba(0, 0, 0, 0.1);"> 
+                                                <div class="card-body d-flex flex-column p-3">
+                                                    <h5 class="card-title font-weight-bold mb-3" style="font-size: 1.1rem; color: #2c3e50;">${product.name}</h5>
+                                                    <div class="mb-2">
+                                                        <small class="text-muted">Harga</small>
+                                                        <h6 class="font-weight-bold text-primary mb-0" style="font-size: 1.25rem;">
+                                                            ${priceDisplay}
+                                                        </h6>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <small class="text-muted">Stok: ${totalStock}</small>
+                                                    </div>
                                                     <div class="mt-auto"> 
-                                                        <div class="btn-wrapper">
-                                                            <button type="button" class="btn btn-primary align-items-center add-to-cart-btn" data-product-id="${product.id}">
-                                                                <i class="mdi mdi-cart"></i> Tambah Ke Keranjang
-                                                            </button>
-                                                        </div>
+                                                        <button type="button" class="btn btn-primary btn-block add-to-cart-btn w-100" data-product-id="${product.id}">
+                                                            <i class="mdi mdi-cart-plus"></i> Tambah
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -366,7 +415,7 @@
                 let tableHTML = `
                     <table class="table table-hover">
                         <thead>
-                            <tr>
+                            <tr class="text-center">
                                 <th>Produk</th>
                                 <th>Harga</th>
                                 <th>Jumlah</th>
@@ -385,14 +434,14 @@
                     total += subtotal;
 
                     tableHTML += `
-                        <tr id="row-${id}">
+                        <tr id="row-${id}" class="text-center">
                             <td>${item.name}</td>
                             <td>Rp ${ new Intl.NumberFormat('id-ID').format(item.sell_price) }</td>
                             
                             <td style="min-width: 150px;">
-                                <div class="d-flex align-items-stretch" role="group" aria-label="Quantity">
+                                <div class="d-flex align-items-stretch justify-content-center" role="group" aria-label="Quantity">
                                     {{-- Tombol minus --}}
-                                    <button type="button" class="btn btn-outline-secondary btn-sm btn-decrease-qty rounded-0 rounded-start" data-product-id="${id}">
+                                    <button type="button" class="btn btn-primary btn-sm btn-decrease-qty rounded-0 rounded-start" data-product-id="${id}">
                                         <i class="mdi mdi-minus"></i>
                                     </button>
                                     
@@ -408,7 +457,7 @@
                                     >
                                     
                                     {{-- Tombol plus --}}
-                                    <button type="button" class="btn btn-outline-secondary btn-sm btn-increase-qty rounded-0 rounded-end" data-product-id="${id}">
+                                    <button type="button" class="btn btn-primary btn-sm btn-increase-qty rounded-0 rounded-end" data-product-id="${id}">
                                         <i class="mdi mdi-plus"></i>
                                     </button>
                                 </div>
@@ -723,6 +772,35 @@
             });
 
             // =======================================================
+            // ==      LOGIKA SHORTCUT NOMINAL UANG                 ==
+            // =======================================================
+            
+            $(document).on('click', '.money-shortcut', function() {
+                let amount = $(this).data('amount');
+                let formattedAmount = new Intl.NumberFormat('id-ID').format(amount);
+                
+                // Set nilai ke input display dan hidden
+                $('#amount-paid-display').val(formattedAmount);
+                $('#amount-paid-hidden').val(amount);
+                
+                // Hitung kembalian
+                let total = parseFloat($('#modal-total-hidden').val());
+                let change = amount - total;
+                
+                let formattedChange = new Intl.NumberFormat('id-ID', { 
+                    style: 'currency', currency: 'IDR', minimumFractionDigits: 0 
+                }).format(change);
+                
+                if (change < 0) {
+                    $('#change-display').text('Uang Kurang: ' + formattedChange);
+                    $('#change-display').removeClass('text-success').addClass('text-danger');
+                } else {
+                    $('#change-display').text('Kembalian: ' + formattedChange);
+                    $('#change-display').removeClass('text-danger').addClass('text-success');
+                }
+            });
+
+            // =======================================================
             // ==      LOGIKA INPUT UANG PEMBAYARAN TRANSAKSI       ==
             // =======================================================
 
@@ -826,6 +904,85 @@
                 originalCategoryName = '';
             });
 
+            // =======================================================
+            // ==     LOGIKA SUBMIT FORM CHECKOUT & STRUK          ==
+            // =======================================================
+            
+            $('#checkoutForm').on('submit', function(e) {
+                e.preventDefault(); // Cegah submit default
+                
+                // Validasi kembalian sebelum submit
+                let total = parseFloat($('#modal-total-hidden').val());
+                let amountPaid = parseFloat($('#amount-paid-hidden').val());
+                
+                if (!amountPaid || amountPaid <= 0) {
+                    Swal.fire('Error', 'Silakan masukkan jumlah uang yang dibayar!', 'error');
+                    return;
+                }
+                
+                if (amountPaid < total) {
+                    Swal.fire('Error', 'Uang yang dibayar kurang dari total belanja!', 'error');
+                    return;
+                }
+                
+                let formData = $(this).serialize();
+                
+                $.ajax({
+                    url: '{{ route("cart.checkout.process") }}',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('Response dari server:', response);
+                        
+                        if (response.success || response.message) {
+                            // Tutup modal checkout
+                            $('#checkoutModal').modal('hide');
+                            
+                            // Tampilkan notifikasi sukses
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: response.message || 'Transaksi berhasil diproses.',
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            
+                            // Buka struk di window baru
+                            if (response.transaction_id) {
+                                window.open('/selling/receipt/' + response.transaction_id, '_blank');
+                            }
+                            
+                            // Kosongkan keranjang di UI
+                            loadCartData();
+                            
+                            // Reset form
+                            $('#checkoutForm')[0].reset();
+                            $('#amount-paid-display').val('');
+                            $('#amount-paid-hidden').val('');
+                            
+                        } else {
+                            Swal.fire('Gagal', response.message || 'Transaksi gagal diproses.', 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error response:', xhr);
+                        let errorMsg = 'Terjadi kesalahan.';
+                        
+                        if (xhr.responseJSON) {
+                            errorMsg = xhr.responseJSON.message || xhr.responseJSON.error || errorMsg;
+                            console.error('Error detail:', xhr.responseJSON);
+                        }
+                        
+                        Swal.fire('Error', errorMsg, 'error');
+                    }
+                });
+            });
+
+
+
         });
     </script>
 @endpush
+
+

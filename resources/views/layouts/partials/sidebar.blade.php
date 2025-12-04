@@ -1,6 +1,12 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
   <ul class="nav">
     <li class="nav-item mt-3">
+      <a class="nav-link" href="{{ route('reports.index') }}">
+        <i class="menu-icon mdi mdi-file-chart"></i>
+        <span class="menu-title">Laporan</span>
+      </a>
+    </li>
+    <li class="nav-item">
       <a class="nav-link" href="{{ route('dashboard.index') }}">
         <i class="mdi mdi-view-dashboard menu-icon"></i>
         <span class="menu-title">Dashboard</span>
@@ -57,8 +63,11 @@
       <div class="collapse" id="transactions">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="{{ route('selling.index') }}">Transaction</a></li>
+          <li class="nav-item"> <a class="nav-link" href="{{ route('transactionHistory.index') }}">History</a></li>
+
         </ul>
       </div>
     </li>
+    
   </ul>
 </nav>

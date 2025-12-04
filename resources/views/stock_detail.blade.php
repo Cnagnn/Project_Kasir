@@ -1,6 +1,24 @@
 @extends('layouts.admin') 
 
+@section('page-title', 'Detail Stok Produk')
+@section('page-description', 'Lihat detail stok dan riwayat batch')
+
 @section('content')
+
+<style>
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .card.card-rounded .card-body {
+        padding: 1.25rem 1.25rem;
+    }
+</style>
 
 @if(session()->has('product_edit_success'))
         <script>
@@ -20,6 +38,42 @@
             });
         </script>    
     @endif
+
+    <style>
+        .action-btn-group {
+            display: inline-flex;
+            align-items: stretch;
+            border-radius: 999px;
+            overflow: hidden;
+            background: var(--bs-primary);
+        }
+        .action-btn-group .btn {
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            color: #fff;
+            padding: 0.45rem 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-btn-group .btn + .btn {
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .action-btn-group .btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+        .action-btn-group form {
+            margin: 0;
+            display: inline-flex;
+        }
+        .table-centered th,
+        .table-centered td {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
     @if(session()->has('batch_update_success'))
         <script>
             Swal.fire({
@@ -39,9 +93,11 @@
         </script>    
     @endif
    
+<div class="row">
+    <div class="col-sm-12">
     
-    <div class="col-lg-12 grid-margin stretch-card">
-        <div class="card">
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card card-rounded">
             <div class="card-body">
                 <h4 class="card-title mb-4">Info Produk</h4>
                 <div class="mb-3">
@@ -63,18 +119,18 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div>
 
-    {{-- TABEL BATCH PRODUK --}}
-    <div class="col-lg-12 grid-margin stretch-card">
-        <div class="card">
+        {{-- TABEL BATCH PRODUK --}}
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card card-rounded">
             <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Batch Produk</h4>
                     </div>
                     
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
+                        <table class="table table-hover table-centered">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -103,30 +159,31 @@
                                         <td>Rp {{ number_format($batch->sell_price, 0, ',', '.') }}</td>
                                         @if (Auth::user()->role->name != "Cashier")
                                             <td>
-                                                {{-- TOMBOL INI AKAN MEMBUKA MODAL EDIT BATCH --}}
-                                                <button type="button" class="btn btn-warning btn-sm btn-edit-batch" 
-                                                        data-toggle="modal" 
-                                                        data-target="#editBatchModal"
-                                                        data-batch-id="{{ $batch->id }}"
-                                                        data-initial-stock="{{ $batch->initial_stock ?? 0 }}"
-                                                        data-remaining-stock="{{ $batch->remaining_stock }}"
-                                                        data-buy-price="{{ $batch->buy_price }}"
-                                                        data-sell-price="{{ $batch->sell_price }}"
-                                                        data-update-url="{{ route('stock.update', $batch->id) }}"
-                                                        > 
-                                                    <i class="mdi mdi-pencil"></i>
-                                                </button>
-                                                
-                                                {{-- Form delete batch (jika diperlukan) --}}
-                                                <form 
-                                                    action="{{ route('stock_batches.destroy', $batch->id) }}" 
-                                                    method="POST" class="form-delete d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm">
-                                                        <i class="mdi mdi-delete"></i>
+                                                <div class="action-btn-group" role="group" aria-label="Aksi batch">
+                                                    <button type="button" class="btn btn-primary btn-sm btn-edit-batch" 
+                                                            data-toggle="modal" 
+                                                            data-target="#editBatchModal"
+                                                            data-batch-id="{{ $batch->id }}"
+                                                            data-initial-stock="{{ $batch->initial_stock ?? 0 }}"
+                                                            data-remaining-stock="{{ $batch->remaining_stock }}"
+                                                            data-buy-price="{{ $batch->buy_price }}"
+                                                            data-sell-price="{{ $batch->sell_price }}"
+                                                            data-update-url="{{ route('stock.update', $batch->id) }}"
+                                                            > 
+                                                        <i class="mdi mdi-pencil"></i>
                                                     </button>
-                                                </form>
+                                                    
+                                                    {{-- Form delete batch (jika diperlukan) --}}
+                                                    <form 
+                                                        action="{{ route('stock_batches.destroy', $batch->id) }}" 
+                                                        method="POST" class="form-delete d-inline-block">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-primary btn-sm">
+                                                            <i class="mdi mdi-delete"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         @endif
                                     </tr>
@@ -180,6 +237,9 @@
                 </div>
             </form>
         </div>
+    </div>
+</div>
+
     </div>
 </div>
 

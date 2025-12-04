@@ -1,8 +1,62 @@
-            @extends('layouts.admin')
+@extends('layouts.admin')
 
-            @section('content')
-            
-            {{-- SWEATALERT --}}
+@section('page-title', 'Stok Barang')
+@section('page-description', 'Monitor dan kelola stok barang di gudang')
+
+@section('content')
+
+<style>
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .card.card-rounded .card-body {
+        padding: 1.25rem 1.25rem;
+    }
+</style>
+
+{{-- SWEATALERT --}}
+
+<style>
+                .action-btn-group {
+                    display: inline-flex;
+                    align-items: stretch;
+                    border-radius: 999px;
+                    overflow: hidden;
+                    background: var(--bs-primary);
+                }
+                .action-btn-group .btn {
+                    border: none;
+                    border-radius: 0;
+                    background: transparent;
+                    color: #fff;
+                    padding: 0.45rem 0.75rem;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .action-btn-group .btn + .btn {
+                    border-left: 1px solid rgba(255, 255, 255, 0.2);
+                }
+                .action-btn-group .btn:hover {
+                    background: rgba(255, 255, 255, 0.15);
+                    color: #fff;
+                }
+                .action-btn-group form {
+                    margin: 0;
+                    display: inline-flex;
+                }
+                .table-centered th,
+                .table-centered td {
+                    text-align: center;
+                    vertical-align: middle;
+                }
+            </style>
 
             @if(session()->has('product_add_success'))
                 <script>
@@ -41,12 +95,15 @@
                 </script>    
             @endif
 
-            {{-- END SWEATALERT --}}
-            
-            {{-- SEARCH AND FILTER SECTION --}}
+{{-- END SWEATALERT --}}
 
-            <div class="col-lg-12 grid-margin stretch-card">
-                <div class="card">
+<div class="row">
+    <div class="col-sm-12">
+
+        {{-- SEARCH AND FILTER SECTION --}}
+
+        <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card card-rounded">
                   <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
@@ -70,10 +127,10 @@
 
             {{-- END SEARCH PRODUCT BOX --}}
 
-            {{-- MAIN TABLE / PRODUCT LIST --}}
-            
-            <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
-                <div class="card">
+        {{-- MAIN TABLE / PRODUCT LIST --}}
+        
+        <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
+                <div class="card card-rounded">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Daftar Produk</h4>
@@ -88,8 +145,8 @@
                             @endif
                         </div> --}}
                     </div>
-                    <div class="table-responsive">
-                      <table class="table table-bordered table-hover">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-centered">
                         <thead>
                           <tr>
                             <th>No</th>
@@ -115,18 +172,11 @@
                                         Rp {{ number_format($product->stockBatches->last()->sell_price ?? 0, 0, ',', '.') }}
                                     </td> --}}
                                     <td>
-                                        
-                                            {{-- <button class="btn btn-warning btn-sm me-1 edit-product-btn"
-                                            data-productid = "{{ $product->id }}"
-                                            data-productname = "{{ $product->name }}"
-                                            data-categoryid = "{{ $product->category->id }}"
-                                            data-categoryname = "{{ $product->category->name }}">
-                                                <i class="mdi mdi-pencil"></i> Detail Stok
-                                            </button> --}}
-                                            <a href="{{ route('stock.detail', $product->id) }}" class="btn btn-warning btn-sm">
-                                                <i class="mdi mdi-information-outline"></i> Detail
+                                        <div class="action-btn-group" role="group" aria-label="Aksi stok">
+                                            <a href="{{ route('stock.detail', $product->id) }}" class="btn btn-primary btn-sm">
+                                                <i class="mdi mdi-information-outline"></i>
                                             </a>
-                                       
+                                        </div>
                                         {{-- <button class="btn btn-primary btn-add-to-cart btn-sm" data-id="{{ $product->id }}">
                                             <i class="mdi mdi-cart-plus"></i> Tambah
                                         </button> --}}
@@ -335,7 +385,10 @@
 
             
 
-            @endsection
+    </div>
+</div>
+
+@endsection
 
             
             @push('scripts')
@@ -468,12 +521,13 @@
                                     // 2. Buat struktur card dan tabel secara dinamis
                                     const resultsCard = document.createElement('div');
                                     resultsCard.className = 'card';
+                                    const stockDetailBase = @json(url('item-stock/detail'));
 
                                     let cardContent = `
                                         <div class="card-body">
                                             <h4 class="card-title mb-4">Hasil Pencarian untuk "${searchTerm}"</h4>
                                             <div class="table-responsive">
-                                                <table class="table table-hover">
+                                                <table class="table table-hover table-centered">
                                                     <thead>
                                                         <tr>
                                                             <th>No</th>
@@ -505,6 +559,7 @@
                                             // Buat URL untuk action edit dan delete
                                             const editUrl = `{{ url('product') }}/${product.id}/edit`;
                                             const deleteUrl = `{{ url('product') }}/${product.id}`;
+                                            const detailUrl = `${stockDetailBase}/${product.id}`;
 
                                             cardContent += `
                                                 <tr>
@@ -514,20 +569,18 @@
                                                     <td>${totalStock}</td>
                                                     <td>${formattedPrice}</td>
                                                     <td>
-                                                        <button class="btn btn-warning btn-sm me-1 edit-product-btn" 
-                                                        data-productid = "${product.id}"
-                                                        data-productname = "${product.name}"
-                                                        data-categoryid = "${product.category.id}"
-                                                        data-categoryname = "${product.category.name}">
-                                                            <i class="mdi mdi-pencil"></i> Edit / Lihat Batch
-                                                        </button>
-                                                        <form action="${deleteUrl}" method="POST" class="form-delete d-inline" onsubmit="handleDelete(event)">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm" data-name="${product.name}">
-                                                                <i class="mdi mdi-delete"></i> Delete
-                                                            </button>
-                                                        </form>
+                                                        <div class="action-btn-group" role="group" aria-label="Aksi stok">
+                                                            <a href="${detailUrl}" class="btn btn-primary btn-sm">
+                                                                <i class="mdi mdi-information-outline"></i>
+                                                            </a>
+                                                            <form action="${deleteUrl}" method="POST" class="form-delete d-inline-block" onsubmit="handleDelete(event)">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-primary btn-sm" data-name="${product.name}">
+                                                                    <i class="mdi mdi-delete"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             `;

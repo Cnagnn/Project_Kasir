@@ -68,32 +68,52 @@ class LoginController extends Controller
 
     public function loginProcess(Request $request)
     {
-        //
-        // dd('halo');
-        // 1. Validasi Input
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+        // 1. Validasi Input dengan pesan kustom
+        $request->validate([
+            'email' => [
+                'required',
+                'email',
+                'max:255'
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:6'
+            ],
+        ], [
+            'email.required' => 'Email harus diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.max' => 'Email terlalu panjang.',
+            'password.required' => 'Password harus diisi.',
+            'password.min' => 'Password minimal 6 karakter.',
         ]);
-        // dd($credentials);
-        //dd("halo");
-        // Menambahkan 'remember' ke credentials jika user mencentangnya
-        // $remember = $request->has('remember');
 
-        // 2. Coba Lakukan Autentikasi
-        if (Auth::attempt($credentials)) {
-            // Jika berhasil
-            $request->session()->regenerate(); // Regenerate session untuk keamanan
-            // $user = Auth::user();
-            // dd($user);
-            // Redirect ke halaman yang seharusnya dituju setelah login, atau ke dashboard
-            return redirect()->intended('/dashboard'); 
+        // 2. Cek apakah email terdaftar
+        $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return back()->withErrors([
+                'email' => 'Email tidak terdaftar dalam sistem.',
+            ])->onlyInput('email');
         }
 
-        // 3. Jika Gagal
-        // Kembali ke halaman login dengan pesan error
+        // 3. Coba Lakukan Autentikasi
+        $credentials = $request->only('email', 'password');
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
+            // Jika berhasil
+            $request->session()->regenerate();
+            
+            // Log aktivitas login (opsional)
+            // Log::info('User login successful', ['user_id' => Auth::id(), 'email' => $request->email]);
+            
+            return redirect()->intended('/dashboard')->with('success', 'Selamat datang kembali!'); 
+        }
+
+        // 4. Jika Gagal (password salah)
         return back()->withErrors([
-            'email' => 'Email atau password yang Anda masukkan salah.',
-        ])->onlyInput('email'); // Mengembalikan input email agar user tidak perlu mengetik ulang
+            'password' => 'Password yang Anda masukkan salah.',
+        ])->onlyInput('email');
     }
 }
