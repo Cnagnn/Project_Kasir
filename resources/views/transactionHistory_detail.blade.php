@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 
+@section('page-title', 'Detail Transaksi')
+@section('page-description', 'Lihat dan edit detail transaksi')
+
 @section('content')
 
 @if(session()->has('success'))
@@ -17,6 +20,15 @@
 @endif
 
 <style>
+    .card.card-rounded {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card.card-rounded:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
     .action-btn-group {
         display: inline-flex;
         align-items: stretch;
@@ -146,9 +158,13 @@
                                                 data-sell-price="{{ $detail->product_sell_price }}"> 
                                             <i class="mdi mdi-pencil"></i>
                                         </button>
-                                        <button type="button" class="btn btn-primary btn-sm">
-                                            <i class="mdi mdi-delete"></i>
-                                        </button>
+                                        <form action="" method="POST" class="form-delete">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <i class="mdi mdi-delete"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

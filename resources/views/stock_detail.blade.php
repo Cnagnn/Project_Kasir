@@ -1,5 +1,8 @@
 @extends('layouts.admin') 
 
+@section('page-title', 'Detail Stok Produk')
+@section('page-description', 'Lihat detail stok dan riwayat batch')
+
 @section('content')
 
 <style>

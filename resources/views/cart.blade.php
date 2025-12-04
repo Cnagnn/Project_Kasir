@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 
+@section('page-title', 'Keranjang Belanja')
+@section('page-description', 'Kelola item di keranjang belanja')
+
 @section('content')
 
 <style>

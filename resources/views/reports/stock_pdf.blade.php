@@ -14,6 +14,7 @@
 </head>
 <body>
     <h1>Laporan Stock Produk</h1>
+    <p style="margin:0;">Periode: {{ $rangeLabel }}</p>
     <p style="margin:0 0 10px 0;">Dihasilkan: {{ $generatedAt->format('d/m/Y H:i') }}</p>
     <table>
         <thead>

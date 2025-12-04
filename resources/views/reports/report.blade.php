@@ -34,7 +34,7 @@
   <div class="col-md-4">
     <div class="card card-rounded mb-4 h-100">
       <div class="card-body">
-        <a href="{{ route('reports.stock.print') }}" target="_blank" class="text-decoration-none">
+        <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalLaporanStock">
           <div class="card report-card-inner h-100 border-primary">
             <div class="card-body text-center">
               <i class="mdi mdi-package-variant text-primary" style="font-size: 3rem;"></i>
@@ -78,6 +78,48 @@
           </div>
         </a>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Rentang Tanggal - Laporan Stock -->
+<div class="modal fade" id="modalLaporanStock" tabindex="-1" aria-labelledby="modalLaporanStockLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLaporanStockLabel">
+          <i class="mdi mdi-package-variant text-primary me-2"></i>
+          Laporan Stock Produk
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="formLaporanStock" method="GET" action="{{ route('reports.stock.print') }}" target="_blank">
+        <div class="modal-body">
+          <p class="text-muted mb-3">Pilih rentang tanggal untuk melihat stok historis produk.</p>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="startDateStock" class="form-label">Tanggal Mulai</label>
+              <input type="date" class="form-control" id="startDateStock" name="start_date">
+            </div>
+            <div class="col-md-6">
+              <label for="endDateStock" class="form-label">Tanggal Selesai</label>
+              <input type="date" class="form-control" id="endDateStock" name="end_date">
+            </div>
+          </div>
+          <div class="alert alert-info mt-3 mb-0" role="alert">
+            <small>
+              <i class="mdi mdi-information"></i>
+              <strong>Info:</strong> Kosongkan tanggal untuk melihat stok terkini. Isi tanggal untuk melihat stok historis pada periode tertentu.
+            </small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="mdi mdi-file-pdf-box me-1"></i> Lihat Laporan PDF
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

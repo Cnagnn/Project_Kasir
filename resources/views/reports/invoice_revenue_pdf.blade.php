@@ -23,7 +23,8 @@
                 <th>Tanggal</th>
                 <th>Invoice</th>
                 <th>Operator</th>
-                <th class="text-end">Total Pembayaran</th>
+                <th class="text-end">Total Pendapatan</th>
+                <th class="text-end">Profit</th>
             </tr>
         </thead>
         <tbody>
@@ -34,10 +35,11 @@
                     <td>{{ $row['invoice'] }}</td>
                     <td>{{ $row['operator'] }}</td>
                     <td class="text-end">Rp {{ number_format($row['total'] ?? 0, 0, ',', '.') }}</td>
+                    <td class="text-end">Rp {{ number_format($row['profit'] ?? 0, 0, ',', '.') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" style="text-align:center; padding:14px; color:#666;">Tidak ada data pada rentang ini.</td>
+                    <td colspan="6" style="text-align:center; padding:14px; color:#666;">Tidak ada data pada rentang ini.</td>
                 </tr>
             @endforelse
         </tbody>
@@ -45,6 +47,7 @@
             <tr>
                 <th colspan="4" class="text-end">Grand Total</th>
                 <th class="text-end">Rp {{ number_format($grandTotal ?? 0, 0, ',', '.') }}</th>
+                <th class="text-end">Rp {{ number_format($grandProfit ?? 0, 0, ',', '.') }}</th>
             </tr>
         </tfoot>
     </table>

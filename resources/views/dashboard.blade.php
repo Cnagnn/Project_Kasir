@@ -235,7 +235,7 @@
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
-                                    <tr>
+                                    <tr class="text-center">
                                         <th>Waktu</th>
                                         <th>Invoice</th>
                                         <th>Operator</th>
@@ -244,7 +244,7 @@
                                 </thead>
                                 <tbody>
                                     @forelse ($transaksiTerbaru as $transaction)
-                                        <tr>
+                                        <tr class="text-center">
                                             <td>{{ $transaction->created_at->format('H:i') }}</td>
                                             <td class="fw-semibold">{{ $transaction['invoice'] ?? $transaction->invoice_number }}</td>
                                             <td>{{ $transaction->user->name ?? '-' }}</td>
@@ -460,6 +460,10 @@ $(document).ready(function() {
                             }
                             return label + ': Rp ' + item.parsed.y.toLocaleString('id-ID');
                         }
+                    },
+                    filter: function(tooltipItem) {
+                        // Hanya tampilkan jika nilai >= 1
+                        return tooltipItem.parsed.y >= 1;
                     }
                 }
             },

@@ -19,6 +19,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <title>@yield('page-title', 'Kasir') - Toko Kasir</title>
     <!--  plugins:css -->
     <link rel="stylesheet" href="{{ asset('admin/vendors/feather/feather.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/vendors/mdi/css/materialdesignicons.min.css') }}">

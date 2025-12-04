@@ -17,28 +17,67 @@ class ReportController extends Controller
 
     public function printStock(Request $request)
     {
-        // Ambil produk beserta stok dan kategori
-        $products = Product::with(['stock', 'category'])->get()->map(function ($product) {
-            $totalRemaining = $product->stock->sum('remaining_stock');
-            // Ambil harga jual terakhir dari record stok terbaru
-            $latestStock = $product->stock->sortByDesc('created_at')->first();
-            $sellPrice = $latestStock?->sell_price ?? 0;
-            return [
-                'name' => $product->name ?? 'Produk',
-                'category' => $product->category->name ?? '-',
-                'total_remaining' => $totalRemaining,
-                'sell_price' => $sellPrice,
-            ];
-        });
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+        
+        // Jika tidak ada filter tanggal, tampilkan stok terkini
+        if (!$startDate && !$endDate) {
+            $products = Product::with(['stock', 'category'])->get()->map(function ($product) {
+                $totalRemaining = $product->stock->sum('remaining_stock');
+                return [
+                    'name' => $product->name ?? 'Produk',
+                    'category' => $product->category->name ?? '-',
+                    'total_remaining' => $totalRemaining,
+                ];
+            });
+            
+            $rangeLabel = 'Stok Terkini';
+            $generatedAt = now();
+        } else {
+            // Hitung stok historis berdasarkan rentang tanggal
+            $start = $startDate ? \Carbon\Carbon::parse($startDate)->startOfDay() : null;
+            $end = $endDate ? \Carbon\Carbon::parse($endDate)->endOfDay() : now()->endOfDay();
+            
+            $products = Product::with(['stock', 'category'])->get()->map(function ($product) use ($start, $end) {
+                // Hitung total stok masuk sampai tanggal akhir
+                $stockInQuery = $product->stock();
+                if ($start) {
+                    $stockInQuery->where('created_at', '<=', $end);
+                } else {
+                    $stockInQuery->where('created_at', '<=', $end);
+                }
+                $totalStockIn = $stockInQuery->sum('initial_stock');
+                
+                // Hitung total stok keluar (penjualan) sampai tanggal akhir
+                $stockOutQuery = TransactionDetail::where('product_id', $product->id)
+                    ->whereHas('transaction', function($q) use ($end) {
+                        $q->where('created_at', '<=', $end);
+                    });
+                $totalStockOut = $stockOutQuery->sum('quantity');
+                
+                // Stok pada akhir periode = Total Masuk - Total Keluar
+                $stockAtEnd = $totalStockIn - $totalStockOut;
+                
+                return [
+                    'name' => $product->name ?? 'Produk',
+                    'category' => $product->category->name ?? '-',
+                    'total_remaining' => max(0, $stockAtEnd), // Pastikan tidak negatif
+                ];
+            });
+            
+            $rangeLabel = ($start ? $start->translatedFormat('d F Y') : 'Awal') . ' - ' . $end->translatedFormat('d F Y');
+            $generatedAt = now();
+        }
 
         // Render view untuk PDF
         $pdf = Pdf::loadView('reports.stock_pdf', [
             'rows' => $products,
-            'generatedAt' => now(),
+            'rangeLabel' => $rangeLabel,
+            'generatedAt' => $generatedAt,
         ])->setPaper('a4', 'portrait');
 
-        // Format nama file: Laporan Stock per 30 November 2025 - 14.30 WIB
-        $filename = 'Laporan Stock per ' . now()->translatedFormat('d F Y') . ' - ' . now()->format('H.i') . ' WIB.pdf';
+        // Format nama file
+        $filename = 'Laporan Stock ' . ($rangeLabel === 'Stok Terkini' ? 'Terkini' : $rangeLabel) . ' - ' . now()->format('H.i') . ' WIB.pdf';
 
         // Return dengan output() dan header inline untuk preview di browser
         return response($pdf->output(), 200, [
@@ -60,25 +99,37 @@ class ReportController extends Controller
         $startDate = \Carbon\Carbon::parse($start)->startOfDay();
         $endDate = \Carbon\Carbon::parse($end)->endOfDay();
 
-        // Ambil transaksi dalam rentang tanggal
-        $invoices = Transaction::with(['user'])
+        // Ambil transaksi dalam rentang tanggal dengan detail untuk menghitung profit
+        $invoices = Transaction::with(['user', 'details'])
             ->whereBetween('created_at', [$startDate, $endDate])
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($trx) {
+                // Hitung profit dari detail transaksi
+                $profit = 0;
+                foreach ($trx->details as $detail) {
+                    $sellPrice = $detail->product_sell_price ?? 0;
+                    $buyPrice = $detail->product_buy_price ?? 0;
+                    $quantity = $detail->quantity ?? 0;
+                    $profit += ($sellPrice - $buyPrice) * $quantity;
+                }
+                
                 return [
                     'invoice' => $trx->invoice_number ?? $trx->id,
                     'operator' => $trx->user->name ?? '-',
                     'total' => (int)($trx->total_payment ?? 0),
+                    'profit' => (int)$profit,
                     'date' => $trx->created_at,
                 ];
             });
 
         $grandTotal = $invoices->sum('total');
+        $grandProfit = $invoices->sum('profit');
 
         $pdf = Pdf::loadView('reports.invoice_revenue_pdf', [
             'rows' => $invoices,
             'grandTotal' => $grandTotal,
+            'grandProfit' => $grandProfit,
             'rangeLabel' => $startDate->translatedFormat('d F Y'). ' - ' . $endDate->translatedFormat('d F Y'),
             'generatedAt' => now(),
         ])->setPaper('a4', 'portrait');

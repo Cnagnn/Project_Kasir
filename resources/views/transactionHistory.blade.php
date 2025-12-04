@@ -20,6 +20,49 @@
     .card.card-rounded .card-body {
         padding: 1.25rem 1.25rem;
     }
+    .action-btn-group {
+        display: inline-flex;
+        align-items: stretch;
+        border-radius: 999px;
+        overflow: hidden;
+        background: var(--bs-primary);
+    }
+    .action-btn-group .btn {
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        color: #fff;
+        padding: 0.45rem 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .action-btn-group .btn + .btn {
+        border-left: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .action-btn-group .btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+    }
+    .action-btn-group a {
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        color: #fff;
+        padding: 0.45rem 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+    .action-btn-group a + .btn,
+    .action-btn-group .btn + a {
+        border-left: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .action-btn-group a:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+    }
 </style>
 
 <div class="row">
@@ -95,18 +138,6 @@
                 input.setAttribute('pattern', '\\d{2}/\\d{2}/\\d{4}');
             });
             
-            // Inject minimal pill button styles if not globally defined
-            if(!document.getElementById('transaction-history-pill-style')) {
-                const style = document.createElement('style');
-                style.id = 'transaction-history-pill-style';
-                style.textContent = `
-                    .action-pill { display:inline-flex; align-items:center; gap:10px; background:#1e3fae; padding:6px 14px; border-radius:40px; }
-                    .action-pill .pill-btn { background:transparent; border:none; color:#fff; display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; font-size:16px; cursor:pointer; text-decoration:none; }
-                    .action-pill .pill-btn:focus { outline:2px solid rgba(255,255,255,.4); outline-offset:2px; }
-                    .action-pill .pill-btn:hover { background:rgba(255,255,255,.15); }
-                `;
-                document.head.appendChild(style);
-            }
             $('#filterForm').on('submit', function(e) {
                 e.preventDefault(); // Mencegah reload halaman
 
@@ -168,9 +199,9 @@
                                         <td>${item.user ? item.user.name : '-'}</td>
                                         <td>${formattedPrice}</td>
                                         <td>
-                                                <div class="action-pill" aria-label="Aksi">
-                                                    <a href="${detailUrl}" class="pill-btn" title="Edit / Detail"><i class="mdi mdi-pencil"></i></a>
-                                                    <button type="button" class="pill-btn btn-print-invoice" data-transaction-id="${item.id}" title="Print Ulang"><i class="mdi mdi-printer"></i></button>
+                                                <div class="action-btn-group" role="group" aria-label="Aksi">
+                                                    <a href="${detailUrl}" class="btn btn-primary btn-sm" title="Edit / Detail"><i class="mdi mdi-pencil"></i></a>
+                                                    <button type="button" class="btn btn-primary btn-sm btn-print-invoice" data-transaction-id="${item.id}" title="Print Ulang"><i class="mdi mdi-printer"></i></button>
                                                 </div>
                                         </td>
                                     </tr>
