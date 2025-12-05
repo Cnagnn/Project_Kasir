@@ -264,10 +264,7 @@
                     alert('Popup terblokir. Izinkan popup untuk mencetak struk.');
                     return;
                 }
-                // Coba auto-print setelah load (fallback jika halaman print sendiri sudah mengatur print())
-                w.onload = function(){
-                    try { w.print(); } catch(e) { /* Diam */ }
-                };
+                // Halaman print sudah memiliki auto-print script, jadi tidak perlu trigger print() lagi di sini
             });
 
             // === HANDLE VIEW DETAIL BUTTON ===

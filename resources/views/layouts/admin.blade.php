@@ -30,6 +30,8 @@
     <link rel="stylesheet" href="{{ asset('admin/vendors/css/vendor.bundle.base.css') }}">
     {{-- <link rel="stylesheet" href="{{ asset('admin/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}"> --}}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Flatpickr Date Picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <!-- endinject -->
     <!-- Plugin css for this page -->
     <link rel="stylesheet" href="{{ asset('admin/vendors/datatables.net-bs4/dataTables.bootstrap4.css') }}">
@@ -438,11 +440,34 @@
     {{-- <script src="{{ asset('admin/js/settings.js') }}"></script> --}}
     <script src="{{ asset('admin/js/hoverable-collapse.js') }}"></script>
     {{-- <script src="{{ asset('admin/js/todolist.js') }}"></script> --}}
+    <!-- Flatpickr Date Picker -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
+        });
+        
+        // Initialize Flatpickr for all date inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr('input[type="date"]', {
+                dateFormat: 'Y-m-d', // Format untuk value yang dikirim ke server (yyyy-mm-dd)
+                altInput: true, // Gunakan input alternatif untuk display
+                altFormat: 'd/m/Y', // Format yang ditampilkan ke user (dd/mm/yyyy)
+                allowInput: true,
+                locale: {
+                    firstDayOfWeek: 1,
+                    weekdays: {
+                        shorthand: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                        longhand: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+                    },
+                    months: {
+                        shorthand: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Oct', 'Nov', 'Des'],
+                        longhand: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+                    }
+                }
+            });
         });
     </script>
     <!-- endinject -->

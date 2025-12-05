@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Struk #{{ $transaction->invoice_number }}</title>
     <style>
-        body { font-family: 'Courier New', monospace; width:57mm; padding:4mm 3mm 6mm; margin:0; box-sizing:border-box; font-size:11px; line-height:1.25; }
+        body { font-family: 'Courier New', monospace; width:57mm; padding:4mm 3mm 6px; margin:0 auto; box-sizing:border-box; font-size:11px; line-height:1.25; }
         h4 { margin:0 0 4px; font-size:14px; text-align:center; }
         .center { text-align:center; }
         .right { text-align:right; }
@@ -22,10 +22,14 @@
         .price, .subtotal { text-align:right; }
         .totals-row td { padding-top:4px; }
         .footer { text-align:center; margin-top:8px; font-size:10px; }
-        @media print { @page { size:57mm auto; margin:0; } body { width:57mm; } }
+        @media print { 
+            @page { size:57mm auto; margin:0; } 
+            body { width:57mm; } 
+        }
     </style>
 </head>
-<body onload="window.print(); setTimeout(()=>window.close(),600);">
+<body>
+    
     <div class="center mb-2">
         <h4 class="mb-0">TOKO KASIR</h4>
         <div style="font-size:10px;">Jl. Contoh No.123, Kota<br>Telp: 0812-3456-7890</div>
@@ -73,5 +77,22 @@
         Terima kasih atas kunjungan Anda!<br>
         Barang yang sudah dibeli tidak dapat ditukar/dikembalikan.
     </div>
+    
+    <script>
+        // Auto-print with delay to ensure page is fully loaded
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        });
+        
+        // Optional: close window after print
+        window.addEventListener('afterprint', function() {
+            setTimeout(function() { 
+                window.close(); 
+            }, 600);
+        });
+    </script>
+    
 </body>
 </html>
