@@ -164,7 +164,7 @@
                         <div class="btn-wrapper">
                             @if (Auth::user()->role->name != "Cashier")
                                 <button type="button" class="btn btn-primary align-items-center" data-toggle="modal" data-target="#addCategoryModal">
-                                    <i class="mdi mdi-tag-plus"></i> Kategori Baru
+                                    <i class="mdi mdi-tag-plus"></i> Tambah Kategori
                                 </button>
                             @endif
                         </div>
@@ -491,8 +491,8 @@
                                                     <thead>
                                                         <tr>
                                                             <th>No</th>
-                                                            <th>Name</th>
-                                                            <th>Action</th>
+                                                            <th>Nama</th>
+                                                            <th>Aksi</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>

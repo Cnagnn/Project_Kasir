@@ -1,34 +1,6 @@
-@extends('layouts.admin')
-
-@section('page-title', 'Detail Transaksi')
-@section('page-description', 'Lihat dan edit detail transaksi')
-
-@section('content')
-
-@if(session()->has('success'))
-    <script>
-        Swal.fire({
-            title: "BERHASIL",
-            text: "{{ session('success') }}",
-            icon: "success"
-        }).then((result) => {
-            @if(session('show_receipt'))
-                window.open('/transaction_history/print/{{ session('transaction_id') }}', '_blank');
-            @endif
-        });
-    </script>    
-@endif
+{{-- TRANSACTION DETAIL CONTENT (For AJAX Loading) --}}
 
 <style>
-    .card.card-rounded {
-        border-radius: 0.75rem;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
-    }
-    .card.card-rounded:hover {
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
-    }
     .action-btn-group {
         display: inline-flex;
         align-items: stretch;
@@ -74,8 +46,21 @@
     }
 </style>
 
-<div class="row">
-    <div class="col-sm-12" style="padding-left: 0; padding-right: 0;">
+@if(session()->has('success'))
+    <script>
+        Swal.fire({
+            title: "BERHASIL",
+            text: "{{ session('success') }}",
+            icon: "success"
+        }).then((result) => {
+            @if(session('show_receipt'))
+                window.open('/transaction_history/print/{{ session('transaction_id') }}', '_blank');
+            @endif
+        });
+    </script>    
+@endif
+
+<div class="col-sm-12" style="padding-left: 0; padding-right: 0;">
 
         <div class="col-lg-12 grid-margin stretch-card">
             <div class="card card-rounded">
@@ -158,7 +143,7 @@
                                                 data-sell-price="{{ $detail->product_sell_price }}"> 
                                             <i class="mdi mdi-pencil"></i>
                                         </button>
-                                        <form action="" method="POST" class="form-delete">
+                                        <form action="" method="POST" class="form-delete-detail">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-primary btn-sm">
@@ -188,10 +173,12 @@
 </div>
 
         <div class="col-lg-12 mb-3">
-            <a href="{{ route('transactionHistory.index') }}" class="btn btn-primary btn-back-to-history">
+            <button class="btn btn-primary btn-back-to-history">
                 <i class="mdi mdi-arrow-left"></i> Kembali
-            </a>
+            </button>
         </div>
+
+</div>
 
 {{-- MODAL EDIT DETAIL TRANSAKSI --}}
 <div class="modal fade" id="editDetailModal" tabindex="-1" role="dialog" aria-labelledby="editDetailModalLabel" aria-hidden="true">
@@ -238,12 +225,6 @@
     </div>
 </div>
 
-    </div>
-</div>
-
-@endsection
-
-@push('scripts')
 <script>
     $(document).ready(function() {
         // Fungsi fetch products
@@ -349,6 +330,25 @@
                 $('#edit_product_name').attr('aria-expanded', 'false');
             }
         });
+
+        // Handle delete confirmation
+        $('.form-delete-detail').on('submit', function(event) {
+            event.preventDefault();
+            const form = $(this);
+
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: 'Anda akan menghapus item dari transaksi ini.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.off('submit').submit(); 
+                }
+            });
+        });
     });
 </script>
-@endpush

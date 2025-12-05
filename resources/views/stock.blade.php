@@ -98,35 +98,39 @@
 {{-- END SWEATALERT --}}
 
 <div class="row">
-    <div class="col-sm-12">
+    <div class="col-sm-12" style="padding-left: 0; padding-right: 0;">
 
-        {{-- SEARCH AND FILTER SECTION --}}
+        {{-- MAIN CONTENT CONTAINER --}}
+        <div id="mainContentContainer">
+            
+            {{-- SEARCH AND FILTER SECTION --}}
 
-        <div class="col-lg-12 grid-margin stretch-card">
-                <div class="card card-rounded">
-                  <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="searchProduct">Cari Produk</label>
-                                <input type="text" class="form-control" id="searchProduct" placeholder="Nama Produk">
+            <div class="col-lg-12 grid-margin stretch-card" id="searchSection">
+                    <div class="card card-rounded">
+                      <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="searchProduct">Cari Produk</label>
+                                    <input type="text" class="form-control" id="searchProduct" placeholder="Nama Produk">
+                                </div>
                             </div>
                         </div>
+                      </div>
                     </div>
-                  </div>
                 </div>
-            </div>
 
-            {{-- END SEARCH AND FILTER SECTION --}}
+                {{-- END SEARCH AND FILTER SECTION --}}
 
-            {{-- SEARCH PRODUCT BOX --}}
+                {{-- SEARCH PRODUCT BOX --}}
 
-            <div class="col-lg-12" id="searchResultsContainer">
-                {{-- Search results will be displayed here by JavaScript --}}
-            </div>
+                <div class="col-lg-12" id="searchResultsContainer">
+                    {{-- Search results will be displayed here by JavaScript --}}
+                </div>
 
-            {{-- END SEARCH PRODUCT BOX --}}
+                {{-- END SEARCH PRODUCT BOX --}}
 
+        
         {{-- MAIN TABLE / PRODUCT LIST --}}
         
         <div class="col-lg-12 grid-margin stretch-card" id="mainProductTable">
@@ -173,9 +177,9 @@
                                     </td> --}}
                                     <td>
                                         <div class="action-btn-group" role="group" aria-label="Aksi stok">
-                                            <a href="{{ route('stock.detail', $product->id) }}" class="btn btn-primary btn-sm">
+                                            <button class="btn btn-primary btn-sm btn-view-detail" data-product-id="{{ $product->id }}">
                                                 <i class="mdi mdi-information-outline"></i>
-                                            </a>
+                                            </button>
                                         </div>
                                         {{-- <button class="btn btn-primary btn-add-to-cart btn-sm" data-id="{{ $product->id }}">
                                             <i class="mdi mdi-cart-plus"></i> Tambah
@@ -199,7 +203,14 @@
 
             {{-- MAIN TABLE / PRODUCT LIST --}}
 
+        </div>
+        {{-- END MAIN CONTENT CONTAINER --}}
 
+        {{-- DETAIL CONTENT CONTAINER (Hidden by default) --}}
+        <div id="detailContentContainer" style="display: none;">
+            {{-- Detail content will be loaded here via AJAX --}}
+        </div>
+        {{-- END DETAIL CONTENT CONTAINER --}}
             {{-- MODAL ADD PRODUCT --}}
             @if (Auth::user()->role->name != "Cashier")
                 <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
@@ -531,11 +542,11 @@
                                                     <thead>
                                                         <tr>
                                                             <th>No</th>
-                                                            <th>Name</th>
-                                                            <th>Category</th>
-                                                            <th>Stock</th>
-                                                            <th>Price</th>
-                                                            <th>Action</th>
+                                                            <th>Nama</th>
+                                                            <th>Kategori</th>
+                                                            <th>Stok</th>
+                                                            <th>Harga</th>
+                                                            <th>Aksi</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -570,16 +581,9 @@
                                                     <td>${formattedPrice}</td>
                                                     <td>
                                                         <div class="action-btn-group" role="group" aria-label="Aksi stok">
-                                                            <a href="${detailUrl}" class="btn btn-primary btn-sm">
+                                                            <button class="btn btn-primary btn-sm btn-view-detail" data-product-id="${product.id}">
                                                                 <i class="mdi mdi-information-outline"></i>
-                                                            </a>
-                                                            <form action="${deleteUrl}" method="POST" class="form-delete d-inline-block" onsubmit="handleDelete(event)">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-primary btn-sm" data-name="${product.name}">
-                                                                    <i class="mdi mdi-delete"></i>
-                                                                </button>
-                                                            </form>
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -700,6 +704,45 @@
 
                     });
 
+                });
+
+                // === HANDLE VIEW DETAIL BUTTON ===
+                $(document).on('click', '.btn-view-detail', function(e) {
+                    e.preventDefault();
+                    const productId = $(this).data('product-id');
+                    
+                    // Show loading state
+                    $('#detailContentContainer').html('<div class="text-center p-5"><i class="mdi mdi-loading mdi-spin" style="font-size: 48px;"></i><p>Memuat detail...</p></div>');
+                    $('#detailContentContainer').show();
+                    $('#mainContentContainer').hide();
+                    
+                    // Fetch detail content via AJAX
+                    $.ajax({
+                        url: `/item-stock/detail/${productId}`,
+                        method: 'GET',
+                        success: function(response) {
+                            $('#detailContentContainer').html(response);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error loading detail:', error);
+                            $('#detailContentContainer').html(`
+                                <div class="alert alert-danger m-3">
+                                    <h4>Error</h4>
+                                    <p>Gagal memuat detail produk. Silakan coba lagi.</p>
+                                    <button class="btn btn-primary btn-back-to-list">
+                                        <i class="mdi mdi-arrow-left"></i> Kembali
+                                    </button>
+                                </div>
+                            `);
+                        }
+                    });
+                });
+
+                // === HANDLE BACK TO LIST BUTTON ===
+                $(document).on('click', '.btn-back-to-stock-list', function(e) {
+                    e.preventDefault();
+                    $('#detailContentContainer').hide().html('');
+                    $('#mainContentContainer').show();
                 });
                 
 

@@ -50,7 +50,7 @@ class StockController extends Controller
             'sell_price' => 'required|numeric|min:0',
         ]);
 
-        ProductStockBatches::create([
+        Stock::create([
             'product_id' => $request->product_id,
             'initial_stock' => $request->initial_stock,
             'remaining_stock' => $request->remaining_stock,
@@ -116,7 +116,7 @@ class StockController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        $batch = ProductStockBatches::where('id',$id)->first();
+        $batch = Stock::where('id',$id)->first();
         // dd($batch);
         $batch->delete();
         
@@ -129,6 +129,16 @@ class StockController extends Controller
         // dd($product->category);
         $stocks = Product::with('category', 'stock')->where('id', $id)->first();
 
+        // Check if it's an AJAX request
+        if ($request->ajax()) {
+            return view('stock_detail_content', [
+                'product' => $product,
+                'categories' => $product->category,
+                'stocks' => $stocks
+            ]);
+        }
+
+        // Regular request (fallback)
         return view('stock_detail', [
             'product' => $product,
             'categories' => $product->category,

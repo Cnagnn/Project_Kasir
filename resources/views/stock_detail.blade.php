@@ -94,7 +94,7 @@
     @endif
    
 <div class="row">
-    <div class="col-sm-12">
+    <div class="col-sm-12" style="padding-left: 0; padding-right: 0;">
     
         <div class="col-lg-12 grid-margin stretch-card">
             <div class="card card-rounded">
@@ -198,6 +198,12 @@
             </div>
         </div>
     </div>
+
+        <div class="col-lg-12 mb-3">
+            <a href="{{ route('stock.index') }}" class="btn btn-primary btn-back-to-stock-list">
+                <i class="mdi mdi-arrow-left"></i> Kembali
+            </a>
+        </div>
 
 {{-- MODAL EDIT BATCH --}}
 <div class="modal fade" id="editBatchModal" tabindex="-1" role="dialog" aria-labelledby="editBatchModalLabel" aria-hidden="true">

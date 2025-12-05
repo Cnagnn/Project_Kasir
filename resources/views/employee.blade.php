@@ -550,8 +550,8 @@
                                             <thead>
                                                 <tr>
                                                     <th>No</th>
-                                                    <th>Name</th>
-                                                    <th>Role</th>
+                                                    <th>Nama</th>
+                                                    <th>Aksi</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>

@@ -48,9 +48,16 @@ class TransactionHistoryController extends Controller
 
     }
 
-    public function detail($id)
+    public function detail(Request $request, $id)
     {
         $transaction = Transaction::with(['user', 'details.product'])->findOrFail($id);
+        
+        // Check if it's an AJAX request
+        if ($request->ajax()) {
+            return view('transactionHistory_detail_content', compact('transaction'));
+        }
+
+        // Regular request (fallback)
         return view('transactionHistory_detail', compact('transaction'));
     }
 

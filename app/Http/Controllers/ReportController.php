@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Stock;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use Illuminate\Http\Request;
@@ -214,6 +215,52 @@ class ReportController extends Controller
         ])->setPaper('a4', 'portrait');
 
         $filename = 'Laporan Pendapatan per Produk ' . $startDate->translatedFormat('d F Y') . ' - ' . $endDate->translatedFormat('d F Y') . '.pdf';
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+        ]);
+    }
+
+    public function printPurchasing(Request $request)
+    {
+        $start = $request->query('start_date');
+        $end = $request->query('end_date');
+
+        // Validasi sederhana
+        if (!$start || !$end) {
+            return response('Tanggal mulai dan selesai wajib diisi.', 422);
+        }
+
+        $startDate = \Carbon\Carbon::parse($start)->startOfDay();
+        $endDate = \Carbon\Carbon::parse($end)->endOfDay();
+
+        // Ambil data stock (pembelian) dalam rentang tanggal dengan relasi produk
+        $stocks = Stock::with(['product'])
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($stock) {
+                return [
+                    'stock_id' => 'STK-' . str_pad($stock->id, 5, '0', STR_PAD_LEFT),
+                    'product_name' => $stock->product->name ?? 'Produk Terhapus',
+                    'qty' => $stock->initial_stock,
+                    'price' => $stock->buy_price,
+                    'subtotal' => $stock->initial_stock * $stock->buy_price,
+                    'date' => $stock->created_at,
+                ];
+            });
+
+        $grandTotal = $stocks->sum('subtotal');
+
+        $pdf = Pdf::loadView('reports.purchasing_pdf', [
+            'rows' => $stocks,
+            'grandTotal' => $grandTotal,
+            'rangeLabel' => $startDate->translatedFormat('d F Y'). ' - ' . $endDate->translatedFormat('d F Y'),
+            'generatedAt' => now(),
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'Laporan Pembelian ' . $startDate->translatedFormat('d F Y') . ' - ' . $endDate->translatedFormat('d F Y') . '.pdf';
 
         return response($pdf->output(), 200, [
             'Content-Type' => 'application/pdf',

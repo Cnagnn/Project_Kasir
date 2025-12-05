@@ -530,11 +530,11 @@
                                                     <thead>
                                                         <tr>
                                                             <th>No</th>
-                                                            <th>Name</th>
-                                                            <th>Category</th>
-                                                            <th>Stock</th>
-                                                            <th>Price</th>
-                                                            <th>Action</th>
+                                                            <th>Nama</th>
+                                                            <th>Kategori</th>
+                                                            <th>Stok</th>
+                                                            <th>Harga</th>
+                                                            <th>Aksi</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
