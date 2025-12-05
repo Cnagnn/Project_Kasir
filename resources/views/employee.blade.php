@@ -151,7 +151,9 @@
                 <th>No</th>
                 <th>Nama Karyawan</th>
                 <th>Peran</th>
-                <th class="text-center">Aksi</th>
+                @if (Auth::user()->role->name != "Cashier")
+                    <th class="text-center">Aksi</th>
+                @endif
                 </tr>
             </thead>
             <tbody>
@@ -564,7 +566,7 @@
                                                     <th>No</th>
                                                     <th>Nama Karyawan</th>
                                                     <th>Peran</th>
-                                                    <th class="text-center">Aksi</th>
+                                                    ${`{{ Auth::user()->role->name }}` !== 'Cashier' ? '<th class="text-center">Aksi</th>' : ''}
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -599,6 +601,7 @@
                                             <td>${index + 1}</td>
                                             <td>${employee.name}</td>
                                             <td>${employee.role.name}</td>
+                                            ${`{{ Auth::user()->role->name }}` !== 'Cashier' ? `
                                             <td>
                                                 <div class="action-btn-group" role="group" aria-label="Aksi karyawan">
                                                     <button class="btn btn-primary btn-sm edit-employee-btn" 
@@ -611,6 +614,7 @@
                                                     ${deleteButton}
                                                 </div>
                                             </td>
+                                            ` : ''}
                                         </tr>
                                     `;
                                 });

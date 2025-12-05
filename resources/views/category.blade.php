@@ -176,7 +176,9 @@
                             <th>No</th>
                             <th>Kategori</th>
                             <th>Status</th>
-                            <th class="text-center">Aksi</th>
+                            @if (Auth::user()->role->name != "Cashier")
+                                <th class="text-center">Aksi</th>
+                            @endif
                           </tr>
                         </thead>
                         <tbody>
@@ -189,17 +191,17 @@
                                     @else
                                         <td>Active</td>
                                     @endif
-                                    <td>
-                                        <div class="action-btn-group" role="group" aria-label="Aksi kategori">
-                                            <button 
-                                                type="button"
-                                                class="btn btn-primary btn-sm edit-category-btn"
-                                                data-name="{{ $category->name }}" 
-                                                data-id="{{ $category->id }}"
-                                                data-url="{{ route('category.update', $category->id) }}">
-                                                <i class="mdi mdi-pencil"></i>
-                                            </button>
-                                            @if (Auth::user()->role->name != "Cashier")
+                                    @if (Auth::user()->role->name != "Cashier")
+                                        <td>
+                                            <div class="action-btn-group" role="group" aria-label="Aksi kategori">
+                                                <button 
+                                                    type="button"
+                                                    class="btn btn-primary btn-sm edit-category-btn"
+                                                    data-name="{{ $category->name }}" 
+                                                    data-id="{{ $category->id }}"
+                                                    data-url="{{ route('category.update', $category->id) }}">
+                                                    <i class="mdi mdi-pencil"></i>
+                                                </button>
                                                 <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="form-delete d-inline-block">
                                                     @csrf
                                                     @method('DELETE')
@@ -207,15 +209,15 @@
                                                         <i class="mdi mdi-delete"></i>
                                                     </button>
                                                 </form>
-                                            @endif
-                                            <form action="{{ route('category.archive', $category->id) }}" method="POST" class="form-archive d-inline-block">
-                                                @csrf
-                                                <button type="submit" class="btn btn-primary btn-sm" data-name="{{ $category->name }}">
-                                                    <i class="mdi mdi-archive"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
+                                                <form action="{{ route('category.archive', $category->id) }}" method="POST" class="form-archive d-inline-block">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-primary btn-sm" data-name="{{ $category->name }}">
+                                                        <i class="mdi mdi-archive"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    @endif
                                 </tr>
                             @empty
                                 <tr>
@@ -502,7 +504,7 @@
                                                             <th>No</th>
                                                             <th>Kategori</th>
                                                             <th>Status</th>
-                                                            <th class="text-center">Aksi</th>
+                                                            ${`{{ Auth::user()->role->name }}` !== 'Cashier' ? '<th class="text-center">Aksi</th>' : ''}
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -521,15 +523,33 @@
                                             // Status kategori
                                             const status = category.is_archived === 'yes' ? 'Archived' : 'Active';
                                             
-                                            // Tombol delete hanya untuk non-Cashier
-                                            const deleteButton = `{{ Auth::user()->role->name }}` !== 'Cashier' ? `
-                                                <form action="${deleteUrl}" method="POST" class="form-delete d-inline-block">
-                                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                    <input type="hidden" name="_method" value="DELETE">
-                                                    <button type="submit" class="btn btn-primary btn-sm" data-name="${category.name}">
-                                                        <i class="mdi mdi-delete"></i>
-                                                    </button>
-                                                </form>
+                                            // Aksi untuk non-Cashier
+                                            const aksiColumn = `{{ Auth::user()->role->name }}` !== 'Cashier' ? `
+                                                <td>
+                                                    <div class="action-btn-group" role="group" aria-label="Aksi kategori">
+                                                        <button 
+                                                            type="button"
+                                                            class="btn btn-primary btn-sm edit-category-btn"
+                                                            data-name="${category.name}" 
+                                                            data-id="${category.id}"
+                                                            data-url="${updateUrl}">
+                                                            <i class="mdi mdi-pencil"></i>
+                                                        </button>
+                                                        <form action="${deleteUrl}" method="POST" class="form-delete d-inline-block">
+                                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                            <input type="hidden" name="_method" value="DELETE">
+                                                            <button type="submit" class="btn btn-primary btn-sm" data-name="${category.name}">
+                                                                <i class="mdi mdi-delete"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form action="${archiveUrl}" method="POST" class="form-archive d-inline-block">
+                                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                            <button type="submit" class="btn btn-primary btn-sm" data-name="${category.name}">
+                                                                <i class="mdi mdi-archive"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
                                             ` : '';
 
                                             cardContent += `
@@ -537,25 +557,7 @@
                                                     <td>${index + 1}</td>
                                                     <td class="category-name">${category.name}</td>
                                                     <td>${status}</td>
-                                                    <td>
-                                                        <div class="action-btn-group" role="group" aria-label="Aksi kategori">
-                                                            <button 
-                                                                type="button"
-                                                                class="btn btn-primary btn-sm edit-category-btn"
-                                                                data-name="${category.name}" 
-                                                                data-id="${category.id}"
-                                                                data-url="${updateUrl}">
-                                                                <i class="mdi mdi-pencil"></i>
-                                                            </button>
-                                                            ${deleteButton}
-                                                            <form action="${archiveUrl}" method="POST" class="form-archive d-inline-block">
-                                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                                <button type="submit" class="btn btn-primary btn-sm" data-name="${category.name}">
-                                                                    <i class="mdi mdi-archive"></i>
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    </td>
+                                                    ${aksiColumn}
                                                 </tr>
                                             `;
                                         });

@@ -99,8 +99,47 @@ class TransactionHistoryController extends Controller
         $transaction->total_payment = $transaction->details->sum('subtotal');
         $transaction->save();
 
+        // Jika AJAX request, return JSON dengan flag print
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Detail transaksi berhasil diupdate!',
+                'show_receipt' => true,
+                'transaction_id' => $transaction->id
+            ]);
+        }
+
         return redirect()->back()->with([
             'success' => 'Detail transaksi berhasil diupdate!',
+            'show_receipt' => true,
+            'transaction_id' => $transaction->id
+        ]);
+    }
+
+    public function deleteDetail($id)
+    {
+        $detail = \App\Models\TransactionDetail::findOrFail($id);
+        $transaction = $detail->transaction;
+        
+        // Hapus detail
+        $detail->delete();
+        
+        // Update total transaksi
+        $transaction->total_payment = $transaction->details->sum('subtotal');
+        $transaction->save();
+        
+        // Jika AJAX request, return JSON dengan flag print
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Item transaksi berhasil dihapus!',
+                'show_receipt' => true,
+                'transaction_id' => $transaction->id
+            ]);
+        }
+        
+        return redirect()->back()->with([
+            'success' => 'Item transaksi berhasil dihapus!',
             'show_receipt' => true,
             'transaction_id' => $transaction->id
         ]);

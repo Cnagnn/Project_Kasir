@@ -1,12 +1,14 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
   <ul class="nav">
+    @if(Auth::user()->role->name == 'Manager')
     <li class="nav-item mt-3">
       <a class="nav-link" href="{{ route('reports.index') }}">
         <i class="menu-icon mdi mdi-file-chart"></i>
         <span class="menu-title">Laporan</span>
       </a>
     </li>
-    <li class="nav-item">
+    @endif
+    <li class="nav-item {{ Auth::user()->role->name == 'Kasir' ? 'mt-3' : '' }}">
       <a class="nav-link" href="{{ route('dashboard.index') }}">
         <i class="mdi mdi-view-dashboard menu-icon"></i>
         <span class="menu-title">Dashboard</span>
@@ -26,6 +28,7 @@
         </ul>
       </div>
     </li>
+    @if(Auth::user()->role->name == 'Manager')
     <li class="nav-item">
       <a class="nav-link" data-bs-toggle="collapse" href="#employees" aria-expanded="false" aria-controls="ui-basic">
         <i class="menu-icon mdi mdi-account-group"></i>
@@ -39,6 +42,7 @@
         </ul>
       </div>
     </li>
+    @endif
     <li class="nav-item nav-category">Product Stock</li>
     <li class="nav-item">
       <a class="nav-link" data-bs-toggle="collapse" href="#stock" aria-expanded="false" aria-controls="ui-basic">
@@ -49,7 +53,9 @@
       <div class="collapse" id="stock">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="{{ route('stock.index') }}">Stock</a></li>
+          @if(Auth::user()->role->name == 'Manager')
           <li class="nav-item"> <a class="nav-link" href="{{ route('purchasing.index') }}">Purchasing</a></li>
+          @endif
         </ul>
       </div>
     </li>
