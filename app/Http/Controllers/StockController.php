@@ -40,14 +40,29 @@ class StockController extends Controller
     public function store(Request $request)
     {
         //
-        // Validasi input dari modal 'Tambah Batch'
+        // Validasi input dari modal 'Tambah Batch' dengan pesan Indonesian
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'initial_stock' => 'required|integer|min:0',
-            // Pastikan stok tersisa tidak lebih besar dari stok awal
             'remaining_stock' => 'required|integer|min:0|lte:initial_stock', 
             'buy_price' => 'required|numeric|min:0',
             'sell_price' => 'required|numeric|min:0',
+        ], [
+            'product_id.required' => 'Produk harus dipilih.',
+            'product_id.exists' => 'Produk tidak valid.',
+            'initial_stock.required' => 'Stok awal harus diisi.',
+            'initial_stock.integer' => 'Stok awal harus berupa angka bulat.',
+            'initial_stock.min' => 'Stok awal tidak boleh negatif.',
+            'remaining_stock.required' => 'Stok tersisa harus diisi.',
+            'remaining_stock.integer' => 'Stok tersisa harus berupa angka bulat.',
+            'remaining_stock.min' => 'Stok tersisa tidak boleh negatif.',
+            'remaining_stock.lte' => 'Stok tersisa tidak boleh lebih dari stok awal.',
+            'buy_price.required' => 'Harga beli harus diisi.',
+            'buy_price.numeric' => 'Harga beli harus berupa angka.',
+            'buy_price.min' => 'Harga beli tidak boleh negatif.',
+            'sell_price.required' => 'Harga jual harus diisi.',
+            'sell_price.numeric' => 'Harga jual harus berupa angka.',
+            'sell_price.min' => 'Harga jual tidak boleh negatif.',
         ]);
 
         Stock::create([
@@ -85,6 +100,20 @@ class StockController extends Controller
             'remaining_stock' => 'required|integer|min:0|lte:initial_stock',
             'buy_price' => 'required|numeric|min:0',
             'sell_price' => 'required|numeric|min:0',
+        ], [
+            'initial_stock.required' => 'Stok awal harus diisi.',
+            'initial_stock.integer' => 'Stok awal harus berupa angka bulat.',
+            'initial_stock.min' => 'Stok awal tidak boleh negatif.',
+            'remaining_stock.required' => 'Stok tersisa harus diisi.',
+            'remaining_stock.integer' => 'Stok tersisa harus berupa angka bulat.',
+            'remaining_stock.min' => 'Stok tersisa tidak boleh negatif.',
+            'remaining_stock.lte' => 'Stok tersisa tidak boleh lebih dari stok awal.',
+            'buy_price.required' => 'Harga beli harus diisi.',
+            'buy_price.numeric' => 'Harga beli harus berupa angka.',
+            'buy_price.min' => 'Harga beli tidak boleh negatif.',
+            'sell_price.required' => 'Harga jual harus diisi.',
+            'sell_price.numeric' => 'Harga jual harus berupa angka.',
+            'sell_price.min' => 'Harga jual tidak boleh negatif.',
         ]);
 
         $batch = Stock::findOrFail($id);

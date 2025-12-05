@@ -49,14 +49,19 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request);
-        //validate form
+        // Validasi form dengan pesan dalam Bahasa Indonesia
         $validated = $request->validate([
-            'name' => 'required',
-            'category_id' => 'required',
-            // 'stock' => 'required',
-            // 'buy_price' => 'required',
-            'sell_price' => 'required',
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'sell_price' => 'required|numeric|min:0',
+        ], [
+            'name.required' => 'Nama produk harus diisi.',
+            'name.max' => 'Nama produk maksimal 255 karakter.',
+            'category_id.required' => 'Kategori harus dipilih.',
+            'category_id.exists' => 'Kategori tidak valid.',
+            'sell_price.required' => 'Harga jual harus diisi.',
+            'sell_price.numeric' => 'Harga jual harus berupa angka.',
+            'sell_price.min' => 'Harga jual tidak boleh negatif.',
         ]);
 
         // Cek apakah ada produk LAIN yang namanya sama (case-insensitive)
@@ -104,8 +109,8 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        // Cari data produk berdasarkan id
-        $product = Product::findOrFail($id); 
+        // Cari data produk berdasarkan id dengan eager loading
+        $product = Product::with(['category'])->findOrFail($id); 
 
         // Menggabung tabel product dengan tabel stockBatches untuk merelasi semua batch yang dimiliki oleh produk
         $product->load(['stock' => function ($query) {
@@ -127,11 +132,17 @@ class ProductController extends Controller
      */
     public function update(Request $request)
     {
-        // 1. Validasi semua data yang masuk dari form
+        // Validasi semua data yang masuk dari form dengan pesan Indonesian
         $request->validate([
             'product_id' => 'required|string|max:255',
             'product_name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
+        ], [
+            'product_id.required' => 'ID produk harus ada.',
+            'product_name.required' => 'Nama produk harus diisi.',
+            'product_name.max' => 'Nama produk maksimal 255 karakter.',
+            'category_id.required' => 'Kategori harus dipilih.',
+            'category_id.exists' => 'Kategori tidak valid.',
         ]);
 
         // Cek apakah ada produk LAIN yang namanya sama (case-insensitive)
@@ -170,13 +181,23 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        $product = Product::findOrFail($id);
+        // Eager loading untuk menghindari N+1 query
+        $product = Product::with(['stock'])->findOrFail($id);
         $productName = $product->name;
+        
+        // Hitung total stok yang tersisa
+        $totalStock = $product->stock()->sum('remaining_stock');
+        
+        // Validasi: cek apakah produk masih memiliki stok
+        if ($totalStock > 0) {
+            return back()->with('failed', 'Produk ' . $productName . ' tidak dapat dihapus karena masih memiliki stok sebanyak ' . $totalStock . ' unit. Harap kosongkan stok terlebih dahulu.');
+        }
+        
         $product->delete(); // Ini menjalankan Soft Delete
 
         // Controller mengirim redirect biasa, halaman akan refresh
         // dan menampilkan pesan sukses ini.
-        return back()->with('success', 'Produk '. $productName .' berhasil dihapus!.');
+        return back()->with('success', 'Produk "'. $productName .'" berhasil dihapus!');
     }
 
     public function search(Request $request)
@@ -184,9 +205,9 @@ class ProductController extends Controller
         // Ambil keyword pencarian dari query string (?query=...)
         $query = $request->input('query');
 
-        // Lakukan pencarian di database
+        // Lakukan pencarian di database dengan eager loading
         $products = Product::where('name', 'LIKE', "%{$query}%")
-            ->with('category', 'stock') // Eager load category untuk efisiensi
+            ->with(['category', 'stock']) // Eager load untuk menghindari N+1 query
             ->take(10) // Batasi hasil agar tidak terlalu banyak
             ->get();
 

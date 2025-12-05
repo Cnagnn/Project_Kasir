@@ -366,9 +366,17 @@
             <h4 class="mb-1">@yield('page-title', 'Dashboard Kasir')</h4>
             <p class="text-muted mb-0 small">@yield('page-description', 'Ringkasan singkat operasional hari ini.')</p>
           </div>
-          <div class="text-end">
-            <h4 class="mb-1">Good {{ $time }}, <span class="text-black fw-bold">{{ Auth::user()->name }}</span></h4>
-            <p class="text-muted mb-0 small">{{ Auth::user()->role->name }}</p>
+          <div class="text-end d-flex align-items-center gap-3">
+            <div>
+              <h4 class="mb-1">Good {{ $time }}, <span class="text-black fw-bold">{{ Auth::user()->name }}</span></h4>
+              <p class="text-muted mb-0 small">{{ Auth::user()->role->name }}</p>
+            </div>
+            <form action="{{ route('logout') }}" method="POST" id="logout-form" class="d-inline">
+              @csrf
+              <button type="submit" class="btn btn-link text-danger p-0" title="Logout" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                <i class="mdi mdi-logout" style="font-size: 1.3rem;"></i>
+              </button>
+            </form>
           </div>
           <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="offcanvas">
             <span class="mdi mdi-menu"></span>

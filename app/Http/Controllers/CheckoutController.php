@@ -20,6 +20,12 @@ class CheckoutController extends Controller
         $request->validate([
             'amount_paid'       => 'required|numeric|min:0',
             'payment_method'    => 'required|string|in:Tunai,QRIS',
+        ], [
+            'amount_paid.required' => 'Jumlah bayar harus diisi.',
+            'amount_paid.numeric' => 'Jumlah bayar harus berupa angka.',
+            'amount_paid.min' => 'Jumlah bayar tidak boleh negatif.',
+            'payment_method.required' => 'Metode pembayaran harus dipilih.',
+            'payment_method.in' => 'Metode pembayaran tidak valid.',
         ]);
 
         $cart = session('cart', []);
@@ -212,12 +218,14 @@ class CheckoutController extends Controller
      */
     public function receipt($id)
     {
-        $transaction = Transaction::with(['user', 'details.product'])->findOrFail($id);
+        $transaction = Transaction::with(['user', 'details.product' => function($query) {
+            $query->withTrashed();
+        }])->findOrFail($id);
 
         // Hitung subtotal tiap detail & total akhir
         $items = $transaction->details->map(function ($d) {
             return [
-                'name' => optional($d->product)->name ?? '-',
+                'name' => optional($d->product)->name ?? 'Produk Terhapus',
                 'qty' => $d->quantity,
                 'price' => $d->product_sell_price,
                 'subtotal' => $d->subtotal,

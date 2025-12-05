@@ -50,7 +50,9 @@ class TransactionHistoryController extends Controller
 
     public function detail(Request $request, $id)
     {
-        $transaction = Transaction::with(['user', 'details.product'])->findOrFail($id);
+        $transaction = Transaction::with(['user', 'details.product' => function($query) {
+            $query->withTrashed();
+        }])->findOrFail($id);
         
         // Check if it's an AJAX request
         if ($request->ajax()) {
@@ -68,6 +70,18 @@ class TransactionHistoryController extends Controller
             'quantity' => 'required|integer|min:1',
             'product_buy_price' => 'required|numeric|min:0',
             'product_sell_price' => 'required|numeric|min:0',
+        ], [
+            'product_id.required' => 'Produk harus dipilih.',
+            'product_id.exists' => 'Produk tidak valid.',
+            'quantity.required' => 'Jumlah harus diisi.',
+            'quantity.integer' => 'Jumlah harus berupa angka bulat.',
+            'quantity.min' => 'Jumlah minimal 1.',
+            'product_buy_price.required' => 'Harga beli harus diisi.',
+            'product_buy_price.numeric' => 'Harga beli harus berupa angka.',
+            'product_buy_price.min' => 'Harga beli tidak boleh negatif.',
+            'product_sell_price.required' => 'Harga jual harus diisi.',
+            'product_sell_price.numeric' => 'Harga jual harus berupa angka.',
+            'product_sell_price.min' => 'Harga jual tidak boleh negatif.',
         ]);
 
         $detail = \App\Models\TransactionDetail::findOrFail($id);
@@ -94,12 +108,14 @@ class TransactionHistoryController extends Controller
 
     public function print($id)
     {
-        $transaction = Transaction::with(['user', 'details.product'])->findOrFail($id);
+        $transaction = Transaction::with(['user', 'details.product' => function($query) {
+            $query->withTrashed();
+        }])->findOrFail($id);
 
         // Hitung subtotal tiap detail & total akhir
         $items = $transaction->details->map(function ($d) {
             return [
-                'name' => optional($d->product)->name ?? '-',
+                'name' => optional($d->product)->name ?? 'Produk Terhapus',
                 'qty' => $d->quantity,
                 'price' => $d->product_sell_price,
                 'subtotal' => $d->subtotal,

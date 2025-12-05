@@ -42,7 +42,10 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:255',
+        ], [
+            'name.required' => 'Nama kategori harus diisi.',
+            'name.max' => 'Nama kategori maksimal 255 karakter.',
         ]);
 
         // 1. Cek apakah ada kategori LAIN yang namanya sama (case-insensitive)
@@ -146,15 +149,17 @@ class CategoryController extends Controller
         $category = Category::where('id', $id)->first();
         // dd($category);
 
-        $products = Product::where('category_id', $id)->get();
+        // Hitung jumlah produk yang menggunakan kategori ini
+        $productCount = Product::where('category_id', $id)->count();
         // dd($products);
 
-        if($products->isNotEmpty()){
-            return redirect()->back()->with('category_destroy_failed', 'Masih Terdapat Produk Di Category Ini !');
+        if($productCount > 0){
+            $categoryName = $category->name;
+            return redirect()->back()->with('failed', 'Kategori ' . $categoryName . ' tidak dapat dihapus karena masih digunakan oleh ' . $productCount . ' produk.');
         }
         else{
             $category->delete();
-            return redirect()->back()->with('category_destroy_success', 'Data Category Berhasil Dihapus.');
+            return redirect()->back()->with('success', 'Kategori ' . $category->name . ' berhasil dihapus.');
         }
     }
 
@@ -208,11 +213,12 @@ class CategoryController extends Controller
     public function productsByCategory(string $id)
     {
         
+        // Eager loading untuk menghindari N+1 query problem
         $products = Product::where('category_id', '=', $id)
-                            ->with('stock')
+                            ->with(['stock', 'category'])
                             ->get(); 
-        // dd($products);
-        $category = Category::where('id', '=', $id)->first();
+        
+        $category = Category::findOrFail($id);
         // dd($categoryName->name);
         $categories = Category::all();
 

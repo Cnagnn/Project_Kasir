@@ -98,6 +98,9 @@ class CartController extends Controller
         // 1. Validasi request
         $request->validate([
             'product_id' => 'required|exists:products,id'
+        ], [
+            'product_id.required' => 'Produk harus dipilih.',
+            'product_id.exists' => 'Produk tidak valid.',
         ]);
 
         try {
@@ -533,6 +536,9 @@ class CartController extends Controller
         // 1. Validasi request, pastikan product_id ada
         $request->validate([
             'product_id' => 'required|integer'
+        ], [
+            'product_id.required' => 'ID produk harus ada.',
+            'product_id.integer' => 'ID produk harus berupa angka.',
         ]);
 
         // 2. Ambil keranjang dari session

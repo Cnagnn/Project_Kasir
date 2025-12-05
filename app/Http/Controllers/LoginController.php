@@ -88,8 +88,8 @@ class LoginController extends Controller
             'password.min' => 'Password minimal 6 karakter.',
         ]);
 
-        // 2. Cek apakah email terdaftar
-        $user = User::where('email', $request->email)->first();
+        // 2. Cek apakah email terdaftar dengan eager loading
+        $user = User::with(['role'])->where('email', $request->email)->first();
         
         if (!$user) {
             return back()->withErrors([
@@ -115,5 +115,15 @@ class LoginController extends Controller
         return back()->withErrors([
             'password' => 'Password yang Anda masukkan salah.',
         ])->onlyInput('email');
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect('/')->with('success', 'Anda telah berhasil logout.');
     }
 }

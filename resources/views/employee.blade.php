@@ -136,10 +136,10 @@
             <div class="btn-wrapper">
                 @if (Auth::user()->role->name != "Cashier")
                     <button type="button" class="btn btn-primary me-0" data-toggle="modal" data-target="#addRoleModal">
-                        <i class="mdi mdi-plus"></i> Tambah Peran
+                        + Tambah Peran
                     </button>
                     <button type="button" class="btn btn-primary me-0" data-toggle="modal" data-target="#addEmployeeModal">
-                        <i class="mdi mdi-plus"></i> Tambah Pegawai
+                        + Tambah Pegawai
                     </button>
                 @endif
             </div>
@@ -476,24 +476,24 @@
         // Pastikan CDN SweetAlert sudah dimuat
         document.addEventListener('DOMContentLoaded', function () {
             
-            // Cari SEMUA form yang punya class .form-delete
-            const deleteForms = document.querySelectorAll('.form-delete');
-            
-            deleteForms.forEach(form => {
-                // Kita "dengarkan" saat form ini akan di-submit
-                form.addEventListener('submit', function (event) {
+            // Gunakan event delegation pada document untuk menangani form delete yang dinamis
+            document.addEventListener('submit', function (event) {
+                // Cek apakah form yang di-submit memiliki class .form-delete
+                if (event.target && event.target.classList.contains('form-delete')) {
                     
                     // 1. HENTIKAN PENGIRIMAN FORM (JANGAN RELOAD DULU)
                     event.preventDefault(); 
                     
+                    const form = event.target;
+                    
                     // Ambil nama dari tombol di dalam form ini
                     const button = form.querySelector('button[type="submit"]');
-                    const productName = button.dataset.name;
+                    const employeeName = button.dataset.name;
 
                     // 2. Tampilkan Pop-up Konfirmasi
                     Swal.fire({
                         title: 'Apakah Anda yakin?',
-                        text: `Anda akan menghapus "${productName}".`,
+                        text: `Anda akan menghapus pegawai "${employeeName}".`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#d33',
@@ -506,7 +506,7 @@
                             form.submit(); 
                         }
                     });
-                });
+                }
             });
         });
 
@@ -538,21 +538,33 @@
                         dataType: 'json',
                         success: function(data) {
                             resultsContainer.html(''); 
-                            const resultsCard = $('<div class="card"></div>');
+                            const resultsCard = $('<div class="card card-rounded"></div>');
                         
                             // console.log(data);
                             
                             let cardContent = `
                                 <div class="card-body">
-                                    <h4 class="card-title mb-4">Hasil Pencarian untuk "${searchTerm}"</h4>
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h4 class="card-title mb-0">Hasil Pencarian untuk "${searchTerm}"</h4>
+                                        <div class="btn-wrapper">
+                                            ${`{{ Auth::user()->role->name }}` !== 'Cashier' ? `
+                                                <button type="button" class="btn btn-primary me-0" data-toggle="modal" data-target="#addRoleModal">
+                                                    + Tambah Peran
+                                                </button>
+                                                <button type="button" class="btn btn-primary me-0" data-toggle="modal" data-target="#addEmployeeModal">
+                                                    + Tambah Pegawai
+                                                </button>
+                                            ` : ''}
+                                        </div>
+                                    </div>
                                     <div class="table-responsive">
                                         <table class="table table-hover table-centered">
                                             <thead>
                                                 <tr>
                                                     <th>No</th>
-                                                    <th>Nama</th>
-                                                    <th>Aksi</th>
-                                                    <th>Action</th>
+                                                    <th>Nama Karyawan</th>
+                                                    <th>Peran</th>
+                                                    <th class="text-center">Aksi</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -603,7 +615,7 @@
                                     `;
                                 });
                             } else {
-                                cardContent += `<tr><td colspan="6" class="text-center">Produk tidak ditemukan.</td></tr>`;
+                                cardContent += `<tr><td colspan="4" class="text-center">Pegawai tidak ditemukan.</td></tr>`;
                             }
 
                             cardContent += `</tbody></table></div></div>`;

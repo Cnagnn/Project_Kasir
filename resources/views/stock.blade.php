@@ -137,7 +137,7 @@
                 <div class="card card-rounded">
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">Daftar Produk</h4>
+                        <h4 class="card-title mb-0">Daftar Stok Produk</h4>
                         {{-- <div class="btn-wrapper">
                             @if (Auth::user()->role->name != "Cashier")
                                 <button type="button" class="btn btn-outline-primary me-0" data-toggle="modal" data-target="#addCategoryModal">
@@ -154,44 +154,33 @@
                         <thead>
                           <tr>
                             <th>No</th>
-                            <th>Produk</th>
+                            <th>Nama</th>
                             <th>Kategori</th>
-                            {{-- <th>Stok</th>
-                            <th>Harga</th> --}}
-                            <th class="text-center">Aksi</th>
+                            <th>Stok</th>
+                            <th>Aksi</th>
                           </tr>
                         </thead>
                         <tbody>
                             @forelse ($products as $product)
+                                @php
+                                    $totalStock = $product->stock->sum('remaining_stock');
+                                @endphp
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $product->name }}</td>
-                                    <td>
-                                        {{ $product->category->name ?? 'Tidak ada kategori' }}
-                                    </td>
-                                    {{-- <td>
-                                        {{ $product->stockBatches->sum('remaining_stock') }}
-                                    </td>
-                                    <td>
-                                        Rp {{ number_format($product->stockBatches->last()->sell_price ?? 0, 0, ',', '.') }}
-                                    </td> --}}
+                                    <td>{{ $product->category->name ?? 'Tidak ada kategori' }}</td>
+                                    <td>{{ $totalStock }}</td>
                                     <td>
                                         <div class="action-btn-group" role="group" aria-label="Aksi stok">
                                             <button class="btn btn-primary btn-sm btn-view-detail" data-product-id="{{ $product->id }}">
                                                 <i class="mdi mdi-information-outline"></i>
                                             </button>
                                         </div>
-                                        {{-- <button class="btn btn-primary btn-add-to-cart btn-sm" data-id="{{ $product->id }}">
-                                            <i class="mdi mdi-cart-plus"></i> Tambah
-                                        </button> --}}
-                                        {{-- <a href="{{ route('product.addToCart', $product->id) }}" class="btn btn-warning btn-sm me-1">
-                                            <i class="mdi mdi-pencil"></i> Tambah Ke Keranjang
-                                        </a> --}}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">Belum ada data produk.</td>
+                                    <td colspan="5" class="text-center">Belum ada data produk.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -531,7 +520,7 @@
 
                                     // 2. Buat struktur card dan tabel secara dinamis
                                     const resultsCard = document.createElement('div');
-                                    resultsCard.className = 'card';
+                                    resultsCard.className = 'card card-rounded';
                                     const stockDetailBase = @json(url('item-stock/detail'));
 
                                     let cardContent = `
@@ -545,7 +534,6 @@
                                                             <th>Nama</th>
                                                             <th>Kategori</th>
                                                             <th>Stok</th>
-                                                            <th>Harga</th>
                                                             <th>Aksi</th>
                                                         </tr>
                                                     </thead>
@@ -558,19 +546,6 @@
                                         data.forEach((product, index) => {
                                             const categoryName = product.category ? product.category.name : 'Tidak ada kategori';
                                             const totalStock = product.stock.reduce((sum, batch) => sum + batch.remaining_stock, 0);
-                                            const sellPrice = product.sell_price ? product.sell_price : 0;
-                                            
-                                            // Format harga ke Rupiah
-                                            const formattedPrice = new Intl.NumberFormat('id-ID', {
-                                                style: 'currency',
-                                                currency: 'IDR',
-                                                minimumFractionDigits: 0
-                                            }).format(sellPrice);
-
-                                            // Buat URL untuk action edit dan delete
-                                            const editUrl = `{{ url('product') }}/${product.id}/edit`;
-                                            const deleteUrl = `{{ url('product') }}/${product.id}`;
-                                            const detailUrl = `${stockDetailBase}/${product.id}`;
 
                                             cardContent += `
                                                 <tr>
@@ -578,7 +553,6 @@
                                                     <td>${product.name}</td>
                                                     <td>${categoryName}</td>
                                                     <td>${totalStock}</td>
-                                                    <td>${formattedPrice}</td>
                                                     <td>
                                                         <div class="action-btn-group" role="group" aria-label="Aksi stok">
                                                             <button class="btn btn-primary btn-sm btn-view-detail" data-product-id="${product.id}">
@@ -593,7 +567,7 @@
                                         // Jika tidak ada hasil
                                         cardContent += `
                                             <tr>
-                                                <td colspan="6" class="text-center">Produk tidak ditemukan.</td>
+                                                <td colspan="5" class="text-center">Produk tidak ditemukan.</td>
                                             </tr>
                                         `;
                                     }

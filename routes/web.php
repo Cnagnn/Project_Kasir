@@ -21,6 +21,7 @@ Route::get('/dashboard', [DashboardController::class, "index"])->name('dashboard
 
 Route::get('/', [loginController::class, "showLoginForm"])->name('login');
 Route::post('/', [loginController::class, "loginProcess"])->name('login.process');
+Route::post('/logout', [loginController::class, "logout"])->name('logout');
 
 // Route::resource('/dashboard', ProductController::class);
 

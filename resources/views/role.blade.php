@@ -326,24 +326,24 @@
                 // Pastikan CDN SweetAlert sudah dimuat
                 document.addEventListener('DOMContentLoaded', function () {
                     
-                    // Cari SEMUA form yang punya class .form-delete
-                    const deleteForms = document.querySelectorAll('.form-delete');
-                    
-                    deleteForms.forEach(form => {
-                        // Kita "dengarkan" saat form ini akan di-submit
-                        form.addEventListener('submit', function (event) {
+                    // Gunakan event delegation pada document untuk menangani form delete yang dinamis
+                    document.addEventListener('submit', function (event) {
+                        // Cek apakah form yang di-submit memiliki class .form-delete
+                        if (event.target && event.target.classList.contains('form-delete')) {
                             
                             // 1. HENTIKAN PENGIRIMAN FORM (JANGAN RELOAD DULU)
                             event.preventDefault(); 
                             
+                            const form = event.target;
+                            
                             // Ambil nama dari tombol di dalam form ini
                             const button = form.querySelector('button[type="submit"]');
-                            const productName = button.dataset.name;
+                            const roleName = button.dataset.name;
 
                             // 2. Tampilkan Pop-up Konfirmasi
                             Swal.fire({
                                 title: 'Apakah Anda yakin?',
-                                text: `Anda akan menghapus "${productName}".`,
+                                text: `Anda akan menghapus role "${roleName}".`,
                                 icon: 'warning',
                                 showCancelButton: true,
                                 confirmButtonColor: '#d33',
@@ -356,7 +356,7 @@
                                     form.submit(); 
                                 }
                             });
-                        });
+                        }
                     });
                 });
 

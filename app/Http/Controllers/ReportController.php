@@ -23,10 +23,10 @@ class ReportController extends Controller
         
         // Jika tidak ada filter tanggal, tampilkan stok terkini
         if (!$startDate && !$endDate) {
-            $products = Product::with(['stock', 'category'])->get()->map(function ($product) {
+            $products = Product::withTrashed()->with(['stock', 'category'])->get()->map(function ($product) {
                 $totalRemaining = $product->stock->sum('remaining_stock');
                 return [
-                    'name' => $product->name ?? 'Produk',
+                    'name' => $product->name ?? 'Produk Terhapus',
                     'category' => $product->category->name ?? '-',
                     'total_remaining' => $totalRemaining,
                 ];
@@ -39,7 +39,7 @@ class ReportController extends Controller
             $start = $startDate ? \Carbon\Carbon::parse($startDate)->startOfDay() : null;
             $end = $endDate ? \Carbon\Carbon::parse($endDate)->endOfDay() : now()->endOfDay();
             
-            $products = Product::with(['stock', 'category'])->get()->map(function ($product) use ($start, $end) {
+            $products = Product::withTrashed()->with(['stock', 'category'])->get()->map(function ($product) use ($start, $end) {
                 // Hitung total stok masuk sampai tanggal akhir
                 $stockInQuery = $product->stock();
                 if ($start) {
@@ -60,7 +60,7 @@ class ReportController extends Controller
                 $stockAtEnd = $totalStockIn - $totalStockOut;
                 
                 return [
-                    'name' => $product->name ?? 'Produk',
+                    'name' => $product->name ?? 'Produk Terhapus',
                     'category' => $product->category->name ?? '-',
                     'total_remaining' => max(0, $stockAtEnd), // Pastikan tidak negatif
                 ];
@@ -156,7 +156,9 @@ class ReportController extends Controller
         $endDate = \Carbon\Carbon::parse($end)->endOfDay();
 
         // Ambil detail transaksi dalam rentang + relasi produk & kategori
-        $details = TransactionDetail::with(['product.category', 'transaction'])
+        $details = TransactionDetail::with(['product' => function($query) {
+                $query->withTrashed();
+            }, 'product.category', 'transaction'])
             ->whereHas('transaction', function($q) use ($startDate, $endDate) {
                 $q->whereBetween('created_at', [$startDate, $endDate]);
             })
@@ -165,7 +167,7 @@ class ReportController extends Controller
         // Agregasi per produk: qty total, rata-rata HPP (buy price), rata-rata harga jual, total profit
         $perProduct = $details->groupBy('product_id')->map(function($rows){
             $first = $rows->first();
-            $name = optional($first->product)->name ?? 'Produk';
+            $name = optional($first->product)->name ?? 'Produk Terhapus';
             $category = optional($first->product?->category)->name ?? '-';
             $qty = (int)$rows->sum('quantity');
             // Total cost (HPP agregat) = sum(product_buy_price * quantity)
@@ -236,7 +238,9 @@ class ReportController extends Controller
         $endDate = \Carbon\Carbon::parse($end)->endOfDay();
 
         // Ambil data stock (pembelian) dalam rentang tanggal dengan relasi produk
-        $stocks = Stock::with(['product'])
+        $stocks = Stock::with(['product' => function($query) {
+                $query->withTrashed();
+            }])
             ->whereBetween('created_at', [$startDate, $endDate])
             ->orderBy('created_at', 'asc')
             ->get()

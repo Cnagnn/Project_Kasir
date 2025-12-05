@@ -38,7 +38,10 @@ class RoleController extends Controller
     {
         //
         $validated = $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:255',
+        ], [
+            'name.required' => 'Nama role harus diisi.',
+            'name.max' => 'Nama role maksimal 255 karakter.',
         ]);
 
         $role = Role::withTrashed()->where('name', $request->name)->first();
@@ -120,7 +123,8 @@ class RoleController extends Controller
         $role = Role::where('id', $id)->first();
         // dd($role);
 
-        $employee = User::where('role_id', $id)->get();
+        // Eager loading untuk menghindari N+1 query
+        $employee = User::with(['role'])->where('role_id', $id)->get();
         // dd($employee);
 
         if($employee->isNotEmpty()){
