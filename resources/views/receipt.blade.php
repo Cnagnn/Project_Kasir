@@ -163,7 +163,7 @@
         }
     </style>
 </head>
-<body onload="window.print();">
+<body>
     
     <!-- Store Header -->
     <div class="store-header">
@@ -240,6 +240,22 @@
         Barang yang sudah dibeli<br>
         tidak dapat ditukar/dikembalikan
     </div>
+
+    <script>
+        // Auto-print with delay to ensure page is fully loaded
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        });
+        
+        // Close window after print dialog is closed
+        window.addEventListener('afterprint', function() {
+            // Optional: close window after print
+            // Uncomment if you want auto-close after print
+            // setTimeout(function() { window.close(); }, 1000);
+        });
+    </script>
 
 </body>
 </html>

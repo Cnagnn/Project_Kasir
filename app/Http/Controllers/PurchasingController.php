@@ -94,7 +94,10 @@ class PurchasingController extends Controller
     public function findByName(Request $request)
     {
         // Validasi input nama harus ada
-        $request->validate(['name' => 'required|string']);
+        $request->validate(['name' => 'required|string'], [
+            'name.required' => 'Nama produk harus diisi.',
+            'name.string' => 'Nama produk harus berupa teks.',
+        ]);
 
         $productName = $request->input('name');
 
@@ -125,6 +128,15 @@ class PurchasingController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
             'purchase_price' => 'required|numeric|min:0',
+        ], [
+            'product_id.required' => 'Produk harus dipilih.',
+            'product_id.exists' => 'Produk tidak valid.',
+            'quantity.required' => 'Jumlah harus diisi.',
+            'quantity.integer' => 'Jumlah harus berupa angka bulat.',
+            'quantity.min' => 'Jumlah minimal 1.',
+            'purchase_price.required' => 'Harga beli harus diisi.',
+            'purchase_price.numeric' => 'Harga beli harus berupa angka.',
+            'purchase_price.min' => 'Harga beli tidak boleh negatif.',
         ]);
 
         $product = Product::with('category')->find($request->product_id);

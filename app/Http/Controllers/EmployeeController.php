@@ -14,7 +14,8 @@ class EmployeeController extends Controller
     public function index()
     {
         //
-        $employee = User::with('role')->get();
+        // Eager loading untuk menghindari N+1 query
+        $employee = User::with(['role'])->get();
         $role = Role::all();
         // dd($employee);
 
@@ -134,7 +135,8 @@ class EmployeeController extends Controller
     public function destroy(string $id)
     {
         try {
-            $user = User::findOrFail($id);
+            // Eager loading untuk menghindari N+1 query
+            $user = User::with(['role'])->findOrFail($id);
             $userName = $user->name;
             
             // Cek apakah user adalah Manager
@@ -177,7 +179,8 @@ class EmployeeController extends Controller
     public function detail(string $id)
     {
         //
-        $user = User::where('id', $id)->first();
+        // Eager loading untuk menghindari N+1 query
+        $user = User::with(['role'])->where('id', $id)->first();
         $role = Role::all();
         // dd($user);
         return view('employee_detail', [

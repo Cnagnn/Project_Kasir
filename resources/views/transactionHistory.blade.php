@@ -66,7 +66,10 @@
 </style>
 
 <div class="row">
-    <div class="col-sm-12">
+    <div class="col-sm-12" style="padding-left: 0; padding-right: 0;">
+
+        {{-- MAIN CONTENT CONTAINER --}}
+        <div id="mainContentContainer">
 
         <div class="col-lg-12 grid-margin stretch-card">
             <div class="card card-rounded">
@@ -122,6 +125,15 @@
             </div>
         </div>
         </div>
+
+        </div>
+        {{-- END MAIN CONTENT CONTAINER --}}
+
+        {{-- DETAIL CONTENT CONTAINER (Hidden by default) --}}
+        <div id="detailContentContainer" style="display: none;">
+            {{-- Detail content will be loaded here via AJAX --}}
+        </div>
+        {{-- END DETAIL CONTENT CONTAINER --}}
 
     </div>
 </div>
@@ -200,7 +212,7 @@
                                         <td>${formattedPrice}</td>
                                         <td>
                                                 <div class="action-btn-group" role="group" aria-label="Aksi">
-                                                    <a href="${detailUrl}" class="btn btn-primary btn-sm" title="Edit / Detail"><i class="mdi mdi-pencil"></i></a>
+                                                    <button class="btn btn-primary btn-sm btn-view-detail" data-transaction-id="${item.id}" title="Edit / Detail"><i class="mdi mdi-pencil"></i></button>
                                                     <button type="button" class="btn btn-primary btn-sm btn-print-invoice" data-transaction-id="${item.id}" title="Print Ulang"><i class="mdi mdi-printer"></i></button>
                                                 </div>
                                         </td>
@@ -252,10 +264,46 @@
                     alert('Popup terblokir. Izinkan popup untuk mencetak struk.');
                     return;
                 }
-                // Coba auto-print setelah load (fallback jika halaman print sendiri sudah mengatur print())
-                w.onload = function(){
-                    try { w.print(); } catch(e) { /* Diam */ }
-                };
+                // Halaman print sudah memiliki auto-print script, jadi tidak perlu trigger print() lagi di sini
+            });
+
+            // === HANDLE VIEW DETAIL BUTTON ===
+            $(document).on('click', '.btn-view-detail', function(e) {
+                e.preventDefault();
+                const transactionId = $(this).data('transaction-id');
+                
+                // Show loading state
+                $('#detailContentContainer').html('<div class="text-center p-5"><i class="mdi mdi-loading mdi-spin" style="font-size: 48px;"></i><p>Memuat detail...</p></div>');
+                $('#detailContentContainer').show();
+                $('#mainContentContainer').hide();
+                
+                // Fetch detail content via AJAX
+                $.ajax({
+                    url: `/transaction_history/detail/${transactionId}`,
+                    method: 'GET',
+                    success: function(response) {
+                        $('#detailContentContainer').html(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading detail:', error);
+                        $('#detailContentContainer').html(`
+                            <div class="alert alert-danger m-3">
+                                <h4>Error</h4>
+                                <p>Gagal memuat detail transaksi. Silakan coba lagi.</p>
+                                <button class="btn btn-primary btn-back-to-history">
+                                    <i class="mdi mdi-arrow-left"></i> Kembali
+                                </button>
+                            </div>
+                        `);
+                    }
+                });
+            });
+
+            // === HANDLE BACK TO LIST BUTTON ===
+            $(document).on('click', '.btn-back-to-history', function(e) {
+                e.preventDefault();
+                $('#detailContentContainer').hide().html('');
+                $('#mainContentContainer').show();
             });
         });
         </script>

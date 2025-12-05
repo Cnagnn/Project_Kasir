@@ -164,7 +164,7 @@
                         <div class="btn-wrapper">
                             @if (Auth::user()->role->name != "Cashier")
                                 <button type="button" class="btn btn-primary align-items-center" data-toggle="modal" data-target="#addCategoryModal">
-                                    <i class="mdi mdi-tag-plus"></i> Kategori Baru
+                                    + Tambah Kategori
                                 </button>
                             @endif
                         </div>
@@ -377,24 +377,24 @@
                 // Pastikan CDN SweetAlert sudah dimuat
                 document.addEventListener('DOMContentLoaded', function () {
                     
-                    // Cari SEMUA form yang punya class .form-delete
-                    const deleteForms = document.querySelectorAll('.form-delete');
-                    
-                    deleteForms.forEach(form => {
-                        // Kita "dengarkan" saat form ini akan di-submit
-                        form.addEventListener('submit', function (event) {
+                    // Gunakan event delegation pada document untuk menangani form delete yang dinamis
+                    document.addEventListener('submit', function (event) {
+                        // Cek apakah form yang di-submit memiliki class .form-delete
+                        if (event.target && event.target.classList.contains('form-delete')) {
                             
                             // 1. HENTIKAN PENGIRIMAN FORM (JANGAN RELOAD DULU)
                             event.preventDefault(); 
                             
+                            const form = event.target;
+                            
                             // Ambil nama dari tombol di dalam form ini
                             const button = form.querySelector('button[type="submit"]');
-                            const productName = button.dataset.name;
+                            const categoryName = button.dataset.name;
 
                             // 2. Tampilkan Pop-up Konfirmasi
                             Swal.fire({
                                 title: 'Apakah Anda yakin?',
-                                text: `Anda akan menghapus "${productName}".`,
+                                text: `Anda akan menghapus kategori "${categoryName}".`,
                                 icon: 'warning',
                                 showCancelButton: true,
                                 confirmButtonColor: '#d33',
@@ -407,7 +407,7 @@
                                     form.submit(); 
                                 }
                             });
-                        });
+                        }
                     });
                 });
 
@@ -481,18 +481,28 @@
 
                                     // 2. Buat struktur card dan tabel secara dinamis
                                     const resultsCard = document.createElement('div');
-                                    resultsCard.className = 'card';
+                                    resultsCard.className = 'card card-rounded';
 
                                     let cardContent = `
                                         <div class="card-body">
-                                            <h4 class="card-title mb-4">Hasil Pencarian untuk "${searchTerm}"</h4>
+                                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                                <h4 class="card-title mb-0">Hasil Pencarian untuk "${searchTerm}"</h4>
+                                                <div class="btn-wrapper">
+                                                    ${`{{ Auth::user()->role->name }}` !== 'Cashier' ? `
+                                                        <button type="button" class="btn btn-primary align-items-center" data-toggle="modal" data-target="#addCategoryModal">
+                                                            + Tambah Kategori
+                                                        </button>
+                                                    ` : ''}
+                                                </div>
+                                            </div>
                                             <div class="table-responsive">
-                                                <table class="table table-hover">
+                                                <table class="table table-hover table-centered">
                                                     <thead>
                                                         <tr>
                                                             <th>No</th>
-                                                            <th>Name</th>
-                                                            <th>Action</th>
+                                                            <th>Kategori</th>
+                                                            <th>Status</th>
+                                                            <th class="text-center">Aksi</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -500,30 +510,51 @@
 
                                     // 3. Cek jika ada hasil
                                     if (data.length > 0) {
-                                        // 4. Loop setiap produk dan buat baris tabel (<tr>)
+                                        // 4. Loop setiap kategori dan buat baris tabel (<tr>)
                                         data.forEach((category, index) => {
 
-                                            // Buat URL untuk action edit dan delete
-                                            const editUrl = `{{ url('product') }}/${category.id}/edit`;
-                                            const deleteUrl = `{{ url('product') }}/${category.id}`;
+                                            // Buat URL untuk action delete dan archive
+                                            const deleteUrl = `{{ url('category') }}/${category.id}`;
+                                            const archiveUrl = `{{ url('category') }}/${category.id}/archive`;
+                                            const updateUrl = `{{ url('category/update') }}`;
+                                            
+                                            // Status kategori
+                                            const status = category.is_archived === 'yes' ? 'Archived' : 'Active';
+                                            
+                                            // Tombol delete hanya untuk non-Cashier
+                                            const deleteButton = `{{ Auth::user()->role->name }}` !== 'Cashier' ? `
+                                                <form action="${deleteUrl}" method="POST" class="form-delete d-inline-block">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                    <input type="hidden" name="_method" value="DELETE">
+                                                    <button type="submit" class="btn btn-primary btn-sm" data-name="${category.name}">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </button>
+                                                </form>
+                                            ` : '';
 
                                             cardContent += `
-                                                <tr>
+                                                <tr id="category-row-${category.id}">
                                                     <td>${index + 1}</td>
-                                                    <td>${category.name}</td>
+                                                    <td class="category-name">${category.name}</td>
+                                                    <td>${status}</td>
                                                     <td>
-                                                        <button class="btn btn-warning btn-sm me-1 edit-category-btn"
-                                                        data-name="${category.name}" 
-                                                        data-id="${category.id}"
-                                                            <i class="mdi mdi-pencil"></i> Edit Kategori
-                                                        </button>
-                                                        <form action="${deleteUrl}" method="POST" class="form-delete d-inline" onsubmit="handleDelete(event)">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm" data-name="${category.name}">
-                                                                <i class="mdi mdi-delete"></i> Delete
+                                                        <div class="action-btn-group" role="group" aria-label="Aksi kategori">
+                                                            <button 
+                                                                type="button"
+                                                                class="btn btn-primary btn-sm edit-category-btn"
+                                                                data-name="${category.name}" 
+                                                                data-id="${category.id}"
+                                                                data-url="${updateUrl}">
+                                                                <i class="mdi mdi-pencil"></i>
                                                             </button>
-                                                        </form>
+                                                            ${deleteButton}
+                                                            <form action="${archiveUrl}" method="POST" class="form-archive d-inline-block">
+                                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                                <button type="submit" class="btn btn-primary btn-sm" data-name="${category.name}">
+                                                                    <i class="mdi mdi-archive"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             `;
@@ -532,7 +563,7 @@
                                         // Jika tidak ada hasil
                                         cardContent += `
                                             <tr>
-                                                <td colspan="6" class="text-center">Produk tidak ditemukan.</td>
+                                                <td colspan="4" class="text-center">Kategori tidak ditemukan.</td>
                                             </tr>
                                         `;
                                     }
