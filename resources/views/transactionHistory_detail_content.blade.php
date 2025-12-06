@@ -143,7 +143,7 @@
                                                 data-sell-price="{{ $detail->product_sell_price }}"> 
                                             <i class="mdi mdi-pencil"></i>
                                         </button>
-                                        <form action="" method="POST" class="form-delete-detail">
+                                        <form action="{{ route('transactionHistory.deleteDetail', $detail->id) }}" method="POST" class="form-delete-detail">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-primary btn-sm">
@@ -331,6 +331,49 @@
             }
         });
 
+        // Handle edit form submit
+        $('#editDetailForm').on('submit', function(event) {
+            event.preventDefault();
+            const form = $(this);
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Close modal
+                        $('#editDetailModal').modal('hide');
+                        
+                        // Auto-print struk jika ada flag
+                        if (response.show_receipt && response.transaction_id) {
+                            window.open('/transaction_history/print/' + response.transaction_id, '_blank');
+                        }
+                        
+                        // Reload detail content
+                        location.reload();
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = 'Terjadi kesalahan saat mengupdate detail.';
+                    
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        const errors = xhr.responseJSON.errors;
+                        errorMessage = Object.values(errors).flat().join('<br>');
+                    }
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        html: errorMessage,
+                    });
+                }
+            });
+        });
+
         // Handle delete confirmation
         $('.form-delete-detail').on('submit', function(event) {
             event.preventDefault();
@@ -346,7 +389,33 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    form.off('submit').submit(); 
+                    // Submit via AJAX
+                    $.ajax({
+                        url: form.attr('action'),
+                        type: 'POST',
+                        data: form.serialize(),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Auto-print struk jika ada flag
+                                if (response.show_receipt && response.transaction_id) {
+                                    window.open('/transaction_history/print/' + response.transaction_id, '_blank');
+                                }
+                                
+                                // Reload detail content
+                                location.reload();
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: 'Terjadi kesalahan saat menghapus item.',
+                            });
+                        }
+                    });
                 }
             });
         });

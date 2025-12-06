@@ -139,7 +139,9 @@
                           <tr>
                             <th>No</th>
                             <th>Role</th>
-                            <th class="text-center">Aksi</th>
+                            @if (Auth::user()->role->name != "Cashier")
+                                <th class="text-center">Aksi</th>
+                            @endif
                           </tr>
                         </thead>
                         <tbody>
@@ -147,24 +149,24 @@
                                 <tr id="category-row-{{ $role->id }}">
                                     <td>{{ $loop->iteration }}</td>
                                     <td class="category-name">{{ $role->name }}</td>
-                                    <td>
+                                    @if (Auth::user()->role->name != "Cashier")
+                                        <td>
                                         <button class="btn btn-warning btn-sm me-1 edit-role-btn"
                                         data-name="{{ $role->name }}" 
                                         data-id="{{ $role->id }}"
                                         data-url="{{ route('role.update', $role->id) }}">
                                             <i class="mdi mdi-pencil"></i> Edit Role
                                         </button>
-                                        @if (Auth::user()->role->name != "Cashier")
-                                            <form action="{{ route('role.destroy', $role->id) }}" method="POST" class="form-delete d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                
-                                                <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $role->name }}">
-                                                    <i class="mdi mdi-delete"></i> Delete
-                                                </button>
-                                            </form>
-                                        @endif
+                                        <form action="{{ route('role.destroy', $role->id) }}" method="POST" class="form-delete d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            
+                                            <button type="submit" class="btn btn-danger btn-sm" data-name="{{ $role->name }}">
+                                                <i class="mdi mdi-delete"></i> Delete
+                                            </button>
+                                        </form>
                                     </td>
+                                    @endif
                                 </tr>
                             @empty
                                 <tr>

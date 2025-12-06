@@ -540,7 +540,7 @@
                                                             <th>Kategori</th>
                                                             <th>Stok</th>
                                                             <th>Harga</th>
-                                                            <th>Aksi</th>
+                                                            ${`{{ Auth::user()->role->name }}` !== 'Cashier' ? '<th>Aksi</th>' : ''}
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -570,6 +570,7 @@
                                                     <td>${categoryName}</td>
                                                     <td>${totalStock}</td>
                                                     <td>${formattedPrice}</td>
+                                                    ${`{{ Auth::user()->role->name }}` !== 'Cashier' ? `
                                                     <td>
                                                         <div class="action-btn-group" role="group" aria-label="Aksi produk">
                                                             <button class="btn btn-primary btn-sm edit-product-btn" 
@@ -589,6 +590,7 @@
                                                             </form>
                                                         </div>
                                                     </td>
+                                                    ` : ''}
                                                 </tr>
                                             `;
                                         });
